@@ -18,10 +18,10 @@ WORKDIR /tmp/asterisk
 RUN ./configure --libdir=/usr/lib64
 RUN make
 RUN make install
-
+RUN make samples
 WORKDIR /
 
 RUN mkdir -p /etc/asterisk
-ADD modules.conf /etc/asterisk/
+# ADD modules.conf /etc/asterisk/
 ADD iax.conf /etc/asterisk/
 ADD extensions.conf /etc/asterisk/
