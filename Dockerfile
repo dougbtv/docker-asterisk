@@ -6,6 +6,7 @@ RUN yum update -y
 RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar -y
 
 # Download asterisk.
+# Currently Certified Asterisk 11.6 cert 6.
 RUN curl -sf -o /tmp/asterisk.tar.gz -L http://downloads.asterisk.org/pub/telephony/certified-asterisk/certified-asterisk-11.6-current.tar.gz
 
 # gunzip asterisk
@@ -19,3 +20,6 @@ RUN make
 RUN make install
 
 WORKDIR /
+
+ADD iax.conf /etc/asterisk
+ADD extensions.conf /etc/asterisk
