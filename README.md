@@ -2,7 +2,7 @@
 
 A set of Dockerfiles for running asterisk (and eventually, FastAGI)
 
-Also checkout my blog article @ PLACEHOLDER.
+Also checkout my blog article @ [dougbtv.com](http://dougbtv.com/2014/09/06/docker-and-asterisk/).
 
 You can [pull the image from dockerhub](https://registry.hub.docker.com/u/dougbtv/asterisk/).
 
