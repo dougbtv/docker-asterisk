@@ -25,3 +25,5 @@ RUN mkdir -p /etc/asterisk
 # ADD modules.conf /etc/asterisk/
 ADD iax.conf /etc/asterisk/
 ADD extensions.conf /etc/asterisk/
+
+CMD asterisk -f
