@@ -15,6 +15,7 @@ RUN tar -xzf /tmp/asterisk.tar.gz -C /tmp/asterisk --strip-components=1
 WORKDIR /tmp/asterisk
 
 # make asterisk.
+ENV rebuild_date 2014-10-03
 RUN ./configure --libdir=/usr/lib64
 RUN make
 RUN make install
