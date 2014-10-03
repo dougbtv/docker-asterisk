@@ -1,3 +1,7 @@
 #!/bin/bash
 BOX_NAME=asterisk
-docker run --name $BOX_NAME --net=host -i -t asterisk/base bin/bash
+
+# For testing use:
+# docker run --name $BOX_NAME --net=host -i -t dougbtv/asterisk bin/bash
+
+docker run --name $BOX_NAME --net=host -d -t dougbtv/asterisk
