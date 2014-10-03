@@ -1,0 +1,15 @@
+# description: agi service for PHP fastagi interaction
+service agi
+{
+        socket_type  = stream
+        user         = root
+        group        = nobody
+        server       = /agi/agiLaunch.sh
+        wait         = no
+        protocol     = tcp
+        bind         = 0.0.0.0
+        disable      = no
+        per_source   = UNLIMITED
+        instances    = UNLIMITED
+        cps          = 1000 0
+}
