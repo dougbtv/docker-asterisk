@@ -10,5 +10,8 @@ RUN echo "agi             4573/tcp                        # FAST AGI entry" >> /
 RUN mkdir /agi
 ADD agiLaunch.sh /agi/
 ADD agi.php /agi/
+ADD xinetd_agi /etc/xinetd.d/agi
 
 EXPOSE 4573
+
+CMD xinetd -stayalive -dontfork -pidfile /var/run/xinetd.pid

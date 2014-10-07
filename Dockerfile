@@ -27,4 +27,6 @@ RUN mkdir -p /etc/asterisk
 ADD iax.conf /etc/asterisk/
 ADD extensions.conf /etc/asterisk/
 
+RUN yum install -y telnet
+
 CMD asterisk -f

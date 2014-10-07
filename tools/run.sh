@@ -10,27 +10,20 @@ docker kill $(docker ps -a -q)
 echo "Removing all containers"
 docker rm $(docker ps -a -q)
 
-# Now let's actually run the containers.
-
-docker run --name $NAME_ASTERISK --net=host -d -t dougbtv/asterisk
-
-# For testing use:
-# docker run --name $NAME_ASTERISK --net=host -i -t dougbtv/asterisk bin/bash
-
-exit 0;
-
-# The rest is for later use... I'm testing still.
-
+# Run the fastagi container.
 docker run \
-    --name $NAME_FASTAGI \
-    -h $NAME_FASTAGI \
-    -d -t dougbtv/fastagi
+	-p 4573:4573 \
+	--name $NAME_FASTAGI
+	-d -t dougbtv/fastagi
 
+# Run the main asterisk container.
 docker run \
-    --link $NAME_FASTAGI:fastagi \
     --name $NAME_ASTERISK \
     --net=host \
-    -i -t dougbtv/asterisk bin/bash
+    -d -t dougbtv/asterisk
 
-
-# --volumes-from $NAME_API
+# -----------------------------
+# Some helpful debug stuff...
+# docker run --name $NAME_ASTERISK --net=host -d -t dougbtv/asterisk
+# For testing use:
+# docker run --name $NAME_ASTERISK --net=host -i -t dougbtv/asterisk bin/bash
