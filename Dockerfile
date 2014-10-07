@@ -15,8 +15,13 @@ RUN tar -xzf /tmp/asterisk.tar.gz -C /tmp/asterisk --strip-components=1
 WORKDIR /tmp/asterisk
 
 # make asterisk.
-ENV rebuild_date 2014-10-03
+ENV rebuild_date 2014-10-07
+# Configure
 RUN ./configure --libdir=/usr/lib64
+# Remove the native build option
+RUN make menuselect.makeopts
+RUN sed -i "s/BUILD_NATIVE//" menuselect.makeopts
+# Continue with a standard make.
 RUN make
 RUN make install
 RUN make samples
@@ -26,7 +31,5 @@ RUN mkdir -p /etc/asterisk
 # ADD modules.conf /etc/asterisk/
 ADD iax.conf /etc/asterisk/
 ADD extensions.conf /etc/asterisk/
-
-RUN yum install -y telnet
 
 CMD asterisk -f

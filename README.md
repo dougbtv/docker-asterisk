@@ -84,3 +84,9 @@ In the `tools/` dir are some utilities I find myself using over and over:
 * `asterisk-cli.sh` runs the `nsenter` command (note: image name must contain "asterisk" for it to detect it, easy enough to modify to fit your needs)
 * `clean.sh` kills all containers, and removes them.
 * `run.sh` a suggested way to run the Docker container.
+
+## Lessons Learned
+
+* I needed to disable the `BUILD_NATIVE` compiler flag. Without asterisk would throw an `illegal instruction` when run in a new place.
+  * [This stackexchange answer helped](http://stackoverflow.com/questions/19607378/illegal-instruction-error-comes-when-i-start-asterisk-1-8-22). Thanks arheops
+  * Also this note [about Asterisk 11 release](https://wiki.asterisk.org/wiki/display/AST/New+in+11) provides some reference, too.
