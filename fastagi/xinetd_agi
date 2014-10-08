@@ -4,7 +4,8 @@ service agi
         socket_type  = stream
         user         = root
         group        = nobody
-        server       = /agi/agiLaunch.sh
+        log_type     = FILE /var/log/xinetd.log
+        server       = bash /agi/agiLaunch.sh
         wait         = no
         protocol     = tcp
         bind         = 0.0.0.0
