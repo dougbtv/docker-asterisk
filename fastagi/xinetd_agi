@@ -5,7 +5,7 @@ service agi
         user         = root
         group        = nobody
         log_type     = FILE /var/log/xinetd.log
-        server       = bash /agi/agiLaunch.sh
+        server       = /agiLaunch.sh
         wait         = no
         protocol     = tcp
         bind         = 0.0.0.0

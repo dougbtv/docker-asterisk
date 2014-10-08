@@ -8,7 +8,7 @@ RUN yum install -y php php-mysql php-process git php-devel php-pear gcc tar wget
 RUN echo "agi             4573/tcp                        # FAST AGI entry" >> /etc/services
 
 RUN mkdir /agi
-ADD agiLaunch.sh /agi/
+ADD agiLaunch.sh /
 ADD agi.php /agi/
 ADD xinetd_agi /etc/xinetd.d/agi
 
