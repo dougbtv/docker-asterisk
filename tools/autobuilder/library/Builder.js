@@ -3,6 +3,9 @@ module.exports = function() {
 	// Constants.
 	var ASTERISK_HOST = "downloads.asterisk.org";
 	var ASTERISK_URL = "/pub/telephony/certified-asterisk/certified-asterisk-11.6-current.tar.gz";
+	var GITHUB_REPO = "dougbtv/docker-asterisk.git";
+	var CLONE_PATH = "/tmp/docker-asterisk/";
+	var BRANCH_NAME = "autobuild";
 
 	// Our requirements.
 	var http = require('http');
@@ -10,8 +13,15 @@ module.exports = function() {
 	var async = require('async');
 	var schedule = require('node-schedule');
 
+	var exec = require('child_process').exec;
+
+	exec("ls -la", function(error, stdout, stderr) {
+		console.log(stdout);
+	});
+
 	// Our properties
-	this.last_modified = new moment();
+	this.last_modified = new moment();	// When was the file on server last updated?
+	this.opts;						    // These are our command line options.
 
 	// Our virtual constructor.
 	this.instantiate = function() {
@@ -22,26 +32,137 @@ module.exports = function() {
 		this.parseOptions();
 
 		// Check for update once, then, once it's updated, schedule the job to recur.
-		this.checkForUpdate(function(){
+		this.checkForUpdate(function(initialupdate){
 
-			console.log("did initial update.");
+			console.log("did initial update? ",initialupdate);
+			if (initialupdate) {
+				this.performUpdate();
+			}
 
-		}.bind(this));
-
-		var rule = new schedule.RecurrenceRule();
-		rule.minute = [56,57];
-
-		var j = schedule.scheduleJob(rule, function(){
-			this.checkForUpdate(function(updated){
-
-				if (updated) {
-					console.log("!trace we're about to update!");
+			// Create a range
+			// that runs every other unit.
+			var rule = new schedule.RecurrenceRule();
+			rule.minute = [];
+			for (var i = 0; i < 60; i++) { 
+				if (i % 2 == 0) {
+					rule.minute.push(i);
 				}
+			}
 
+			var j = schedule.scheduleJob(rule, function(){
+				this.checkForUpdate(function(updated){
+
+					if (updated) {
+						// Ok, kick it off!
+						this.performUpdate();
+					}
+
+				}.bind(this));
 			}.bind(this));
+
+		}.bind(this));
+		
+	}
+
+	this.performUpdate = function() {
+
+		// Ok, let's handle a new build.
+		// Steps:
+		// update the git repo
+		// pull the dockers
+		// build the docker image
+		// push the docker image
+		this.logit("Beginning update");
+
+		async.series([
+			function(callback){
+				// Let's update our git repository.
+				this.gitCloneAndUpdate(function(err){
+					callback(err);
+				});
+			}.bind(this),
+			function(callback){
+				// do some more stuff ...
+				callback(null, 'two');
+				
+			}.bind(this)
+		],function(err,result){
+			if (!err) {
+				console.log("!trace all done series.");
+			} else {
+				this.logit("ERROR: Failed to performUpdate -- ",err);
+			}
 		}.bind(this));
 
+	}
+
+	this.gitCloneAndUpdate = function(callback) {
+
+		// Ok, let's clone the repo, and update it.
 		
+		async.series([
+			// Remove the tempdir if necessary
+			function(callback){
+				exec("rm -Rf " + CLONE_PATH,function(err){
+					callback(err);
+				});
+			}.bind(this),
+
+			// Clone with git.
+			function(callback){
+				this.logit("Beginning git clone.");
+				var cmd_gitclone = 'git clone https://' + this.opts.gituser + ':' + this.opts.gitpassword + '@github.com/' + this.opts.gitrepo + " " + CLONE_PATH;
+				console.log("!trace cmd_gitclone: ",cmd_gitclone);
+				exec(cmd_gitclone,function(err,stdout,stderr){
+					
+					callback(err);
+				});
+			}.bind(this),
+
+			// 1. Branch from master
+			function(callback){
+				exec('git checkout -b autobuild', {cwd: CLONE_PATH}, function(err,stdout){
+					console.log("!trace branch stdout: ",stdout);
+					callback(err);
+				});
+			},
+
+			function(callback){
+				exec('git branch -v', {cwd: CLONE_PATH}, function(err,stdout){
+					console.log("!trace branch -v stdout: ",stdout);
+					callback(err);
+				});
+			},
+
+			function(callback){
+				exec('git branch -v', {cwd: CLONE_PATH}, function(err,stdout){
+					console.log("!trace branch -v stdout: ",stdout);
+					callback(err);
+				});
+			},
+
+			// Alright, that's great, all we need to do is simply.
+			
+			// 2. Edit the file.
+			// 3. Stage changes.
+			// 4. commit
+			// 5. Push.
+
+
+		],function(err,result){
+			if (!err) {
+				this.logit("Successfully cloned and updated");
+				callback(null);
+			} else {
+				var errtxt = "ERROR with the gitCloneAndUpdate: " + err
+				this.logit(errtxt);
+				callback(errtxt);
+			}
+		}.bind(this));
+
+
+		callback();
+
 	}
 
 	this.checkForUpdate = function(callback) {
@@ -94,25 +215,39 @@ module.exports = function() {
 
 	this.parseOptions = function(callback) {
 
-		var opts = require("nomnom")
-			/* .option('config', {
-				abbr: 'c',
-				default: 'config.json',
-				help: 'JSON file with tests to run'
-			}) */
+		this.opts = require("nomnom")
+			.option('gitrepo', {
+				abbr: 'r',
+				default: GITHUB_REPO,
+				help: 'Github repo url in format: user/project.git'
+			})
+			.option('gituser', {
+				abbr: 'u',
+				help: 'Github user',
+				required: true
+			})
+			.option('gitpassword', {
+				abbr: 'p',
+				help: 'Github password',
+				required: true
+			})
 			.option('forceupdate', {
 				flag: true,
 				help: 'Force an update automatically.'
 			})
 			.parse();
 
-		if (opts.forceupdate) {
+		if (this.opts.forceupdate) {
 			this.last_modified = new moment().subtract(20, "years");
 			console.log("Forcing an update on start, set date to: ",this.last_modified.toDate());
 		}
 
 
 	}.bind(this);
+
+	this.logit = function(message) {
+		console.log("[log message] " + message);
+	}
 
 	this.instantiate();
 
