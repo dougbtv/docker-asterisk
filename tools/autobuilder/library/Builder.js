@@ -15,9 +15,11 @@ module.exports = function() {
 
 	var exec = require('child_process').exec;
 
-	exec("ls -la", function(error, stdout, stderr) {
-		console.log(stdout);
-	});
+	/*
+		exec("ls -la", function(error, stdout, stderr) {
+			console.log(stdout);
+		});
+	*/
 
 	// Our properties
 	this.last_modified = new moment();	// When was the file on server last updated?
@@ -26,42 +28,42 @@ module.exports = function() {
 	// Our virtual constructor.
 	this.instantiate = function() {
 
-		console.log("!trace here we begin.");
-
 		// Ok, parse the options
-		this.parseOptions();
+		this.parseOptions(function(){
 
-		// Check for update once, then, once it's updated, schedule the job to recur.
-		this.checkForUpdate(function(initialupdate){
+			// Check for update once, then, once it's updated, schedule the job to recur.
+			this.checkForUpdate(function(initialupdate){
 
-			console.log("did initial update? ",initialupdate);
-			if (initialupdate) {
-				this.performUpdate();
-			}
-
-			// Create a range
-			// that runs every other unit.
-			var rule = new schedule.RecurrenceRule();
-			rule.minute = [];
-			for (var i = 0; i < 60; i++) { 
-				if (i % 2 == 0) {
-					rule.minute.push(i);
+				console.log("did initial update? ",initialupdate);
+				if (initialupdate) {
+					this.performUpdate();
 				}
-			}
 
-			var j = schedule.scheduleJob(rule, function(){
-				this.checkForUpdate(function(updated){
-
-					if (updated) {
-						// Ok, kick it off!
-						this.performUpdate();
+				// Create a range
+				// that runs every other unit.
+				var rule = new schedule.RecurrenceRule();
+				rule.minute = [];
+				for (var i = 0; i < 60; i++) { 
+					if (i % 2 == 0) {
+						rule.minute.push(i);
 					}
+				}
 
+				var j = schedule.scheduleJob(rule, function(){
+					this.checkForUpdate(function(updated){
+
+						if (updated) {
+							// Ok, kick it off!
+							this.performUpdate();
+						}
+
+					}.bind(this));
 				}.bind(this));
+
 			}.bind(this));
 
 		}.bind(this));
-		
+
 	}
 
 	this.performUpdate = function() {
@@ -74,10 +76,13 @@ module.exports = function() {
 		// push the docker image
 		this.logit("Beginning update");
 
+		// Let's make a build time for this.
+		var buildstamp = new moment().unix();
+
 		async.series([
 			function(callback){
 				// Let's update our git repository.
-				this.gitCloneAndUpdate(function(err){
+				this.gitCloneAndUpdate(buildstamp,function(err){
 					callback(err);
 				});
 			}.bind(this),
@@ -172,7 +177,7 @@ module.exports = function() {
 
 			// console.log(JSON.stringify(res.headers));
 			var raw_modified = res.headers['last-modified'];
-			// console.log("!trace raw_modified: ",raw_modified);
+			console.log("!trace raw_modified: ",raw_modified);
 
 			// Ok, let's parse that date.
 			// Thu, 18 Sep 2014 18:40:20
@@ -241,6 +246,8 @@ module.exports = function() {
 			this.last_modified = new moment().subtract(20, "years");
 			console.log("Forcing an update on start, set date to: ",this.last_modified.toDate());
 		}
+
+		callback();
 
 
 	}.bind(this);
