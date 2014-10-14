@@ -7,8 +7,6 @@ var options = new Options();
 
 options.parse(function(opts){
 
-	console.log("!trace what's up on the opts??? ",opts);
-
 	var IRC = require('./library/IRC.js');
 	var irc = new IRC(opts);
 

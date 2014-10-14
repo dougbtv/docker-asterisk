@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "async": "*",
+    "pull-request": "*",
     "moment": "*",
     "pasteall": "*",
     "irc": "*",

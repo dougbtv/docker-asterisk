@@ -1,6 +1,6 @@
 module.exports = function() {
 
-	var GITHUB_REPO = "dougbtv/docker-asterisk.git";
+	var GITHUB_REPO = "dougbtv/docker-asterisk";
 
 	this.parse = function(callback) {
 
@@ -18,7 +18,7 @@ module.exports = function() {
 			.option('gitrepo', {
 				abbr: 'r',
 				default: GITHUB_REPO,
-				help: 'Github repo url in format: user/project.git'
+				help: 'Github repo url in format: user/project'
 			})
 			.option('irc_channel', {
 				default: "##asterisk-autobuilder",

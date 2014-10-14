@@ -5,6 +5,7 @@ module.exports = function(opts,bot) {
 	var ASTERISK_URL = "/pub/telephony/certified-asterisk/certified-asterisk-11.6-current.tar.gz";
 	var CLONE_PATH = "/tmp/docker-asterisk/";
 	var BRANCH_NAME = "autobuild";
+	var BRANCH_MASTER = "master";
 
 	// Our requirements.
 	var http = require('http');
@@ -12,6 +13,7 @@ module.exports = function(opts,bot) {
 	var async = require('async');
 	var schedule = require('node-schedule');
 	var pasteall = require("pasteall"); 		// wewt, I wrote that module!
+	var pr = require("pull-request");
 
 	var exec = require('child_process').exec;
 
@@ -136,7 +138,7 @@ module.exports = function(opts,bot) {
 				// We're done with this running job.
 				job_in_progress = false;
 				if (!err) {
-					console.log("!trace all done series.");
+					this.logit("Looking good -- appears we have a successful build!");
 				} else {
 					this.logit("ERROR: Failed to performUpdate -- ",err);
 				}
@@ -152,47 +154,103 @@ module.exports = function(opts,bot) {
 	this.gitCloneAndUpdate = function(buildstamp,callback) {
 
 		// Ok, let's clone the repo, and update it.
+		branch_name = "autobuild-" + buildstamp;
 		
-		async.series([
+		async.series({
 			// Remove the tempdir if necessary
-			function(callback){
+			rmdir: function(callback){
 				exec("rm -Rf " + CLONE_PATH,function(err){
 					callback(err);
 				});
 			}.bind(this),
 
 			// Clone with git.
-			function(callback){
+			clone: function(callback){
 				this.logit("Beginning git clone.");
-				var cmd_gitclone = 'git clone https://' + opts.gituser + ':' + opts.gitpassword + '@github.com/' + opts.gitrepo + " " + CLONE_PATH;
-				console.log("!trace cmd_gitclone: ",cmd_gitclone);
+				var cmd_gitclone = 'git clone https://' + opts.gituser + ':' + opts.gitpassword + '@github.com/' + opts.gitrepo + ".git " + CLONE_PATH;
+				// console.log("!trace cmd_gitclone: ",cmd_gitclone);
 				exec(cmd_gitclone,function(err,stdout,stderr){
-					
-					callback(err);
+					callback(err,stdout);
 				});
 			}.bind(this),
 
 			// 1. Branch from master
-			function(callback){
-				exec('git checkout -b autobuild', {cwd: CLONE_PATH}, function(err,stdout){
-					console.log("!trace branch stdout: ",stdout);
-					callback(err);
+			branch: function(callback){
+				exec('git checkout -b ' + branch_name, {cwd: CLONE_PATH}, function(err,stdout){
+					// console.log("!trace branch stdout: ",stdout);
+					callback(err,stdout);
 				});
 			},
 
-			function(callback){
+			branch_verbose: function(callback){
 				exec('git branch -v', {cwd: CLONE_PATH}, function(err,stdout){
-					console.log("!trace branch -v stdout: ",stdout);
-					callback(err);
+					// console.log("!trace branch -v stdout: \n",stdout);
+					callback(err,stdout);
 				});
 			},
 
-			function(callback){
-				exec('git branch -v', {cwd: CLONE_PATH}, function(err,stdout){
-					console.log("!trace branch -v stdout: ",stdout);
-					callback(err);
+			branch_verbose: function(callback){
+				exec('sed -i -e "s|AUTOBUILD_UNIXTIME [0-9]*|AUTOBUILD_UNIXTIME ' + buildstamp + '|" Dockerfile', {cwd: CLONE_PATH}, function(err,stdout){
+					callback(err,stdout);
 				});
 			},
+
+			git_add: function(callback){
+				exec('git add Dockerfile', {cwd: CLONE_PATH}, function(err,stdout){ callback(err,stdout); });
+			},
+
+			git_commit: function(callback){
+				exec('git commit -m "[autobuild] Updating, new tarball found @ ' + buildstamp + '"', {cwd: CLONE_PATH}, function(err,stdout){ callback(err,stdout); });
+			},
+
+			/* git_push: function(callback){
+				exec('git push origin ' + branch_name, {cwd: CLONE_PATH}, function(err,stdout){ callback(err,stdout); });
+			}, */
+
+			pull_request: function(callback) {
+
+				var plain_repo = opts.gitrepo.replace(/^.+\/(.+)$/,"$1");
+				// console.log("!trace PLAIN REPO: ",plain_repo);
+
+				// Create auth options.
+				var gitoptions = {
+					username: opts.gituser, 
+					password: opts.gitpassword
+				};
+
+				var from_branch = {
+					user: opts.gituser,
+					repo: plain_repo,
+					branch: branch_name,
+				};
+
+				var to_branch = {
+					user: opts.gituser,
+					repo: plain_repo,
+					branch: BRANCH_MASTER,
+				};
+
+				var pr_message = {
+					title: "[autobuild] Updating Asterisk @ " + buildstamp,
+					body: "Your friendly builder bot here saying that we're updating @ " + buildstamp,
+				};
+
+				console.log("!trace USER / REPO: %s/%s",opts.gituser,plain_repo);
+
+				pr.exists(opts.gituser, opts.gitrepo, gitoptions, function(exists){
+					if (1) {
+						pr.pull(from_branch, to_branch, pr_message, gitoptions, function(err){
+							console.log("!trace PULL RESULT: ",err);
+							callback(err,"");
+						});
+					} else {
+						callback("Error: I can't make a pull request, that user/repo doesn't exist.");
+					}
+				});
+
+				
+
+			}
 
 			// Alright, that's great, all we need to do is simply.
 			
@@ -202,8 +260,12 @@ module.exports = function(opts,bot) {
 			// 5. Push.
 
 
-		],function(err,result){
+		},function(err,result){
 			if (!err) {
+
+				console.log("!trace gitCloneAndUpdate RESULTS");
+				console.log(JSON.stringify(result, null, 2));
+
 				this.logit("Successfully cloned and updated");
 				callback(null);
 			} else {
