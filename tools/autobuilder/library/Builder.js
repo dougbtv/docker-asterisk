@@ -27,8 +27,22 @@ module.exports = function(opts,bot) {
 
 	this.ircHandler = function(text,from) {
 
+		// Let's parse the command.
 		console.log("text",text);
 		console.log("from",from);
+
+		bot.parse(text,function(cmd){
+			if (cmd) {
+				switch (cmd.command) {
+					case "foo":
+						this.logit("W00t, foo command");
+						break;
+					default:
+						this.logit("Sorry, I don't know the command !" + cmd.command);
+						break;
+				}
+			}
+		}.bind(this));
 
 	}.bind(this);
 
@@ -198,7 +212,7 @@ module.exports = function(opts,bot) {
 
 			// console.log(JSON.stringify(res.headers));
 			var raw_modified = res.headers['last-modified'];
-			console.log("!trace raw_modified: ",raw_modified);
+			// console.log("!trace raw_modified: ",raw_modified);
 
 			// Ok, let's parse that date.
 			// Thu, 18 Sep 2014 18:40:20
@@ -239,6 +253,7 @@ module.exports = function(opts,bot) {
 
 	this.logit = function(message) {
 		console.log("[log message] " + message);
+		bot.say(message);
 	}
 
 	this.instantiate();

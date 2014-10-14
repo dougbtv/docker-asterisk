@@ -1,5 +1,7 @@
 module.exports = function(opts) {
 
+	var is_connected = false;
+
 	// We use an IRC bot on freenode for our interface to this guy.
 	var irc = require("irc");
 	this.bot = new irc.Client(opts.irc_server, opts.irc_nick, {
@@ -26,6 +28,7 @@ module.exports = function(opts) {
 	if (!opts.irc_disabled) {
 		this.bot.connect(function() {
 			// Ok we're connected.
+			is_connected = true;
 			console.log("Cool, we connected");
 			// Identify if need be.
 			/* if (privates.IRC_DO_IDENTIFY) {
@@ -38,7 +41,25 @@ module.exports = function(opts) {
 
 	// Give a way to say something.
 	this.say = function(message) {
-		this.bot.say(opts.irc_channel, message);
+		if (!opts.irc_disabled && is_connected) {
+			this.bot.say(opts.irc_channel, message);
+		}
+	}
+
+	this.parse = function(message,callback) {
+		if (/^!/.test(message)) {
+			// That's a command
+			// Replace that bang, and split by spaces
+			var raw = message.replace(/^\!/,"");
+			var pts = raw.split(" ");
+			var command = pts.shift();
+			callback({
+				command: command,
+				args: pts,
+			});
+		} else {
+			callback(false);
+		}
 	}
 
 
