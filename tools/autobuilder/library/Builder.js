@@ -1,9 +1,8 @@
-module.exports = function() {
+module.exports = function(opts,bot) {
 
 	// Constants.
 	var ASTERISK_HOST = "downloads.asterisk.org";
 	var ASTERISK_URL = "/pub/telephony/certified-asterisk/certified-asterisk-11.6-current.tar.gz";
-	var GITHUB_REPO = "dougbtv/docker-asterisk.git";
 	var CLONE_PATH = "/tmp/docker-asterisk/";
 	var BRANCH_NAME = "autobuild";
 
@@ -23,48 +22,49 @@ module.exports = function() {
 
 	// Our properties
 	this.last_modified = new moment();	// When was the file on server last updated?
-	this.opts;						    // These are our command line options.
 
 	// Our virtual constructor.
 	this.instantiate = function() {
 
-		// Ok, parse the options
-		this.parseOptions(function(){
+		if (opts.forceupdate) {
+			this.last_modified = new moment().subtract(20, "years");
+			this.logit("Forcing an update on start, set date to: ",this.last_modified.toDate());
+		} 
 
-			// Check for update once, then, once it's updated, schedule the job to recur.
-			this.checkForUpdate(function(initialupdate){
+		// Check for update once, then, once it's updated, schedule the job to recur.
+		this.checkForUpdate(function(initialupdate){
 
-				console.log("did initial update? ",initialupdate);
-				if (initialupdate) {
-					this.performUpdate();
+			console.log("did initial update? ",initialupdate);
+			if (initialupdate) {
+				this.performUpdate();
+			}
+
+			// Create a range
+			// that runs every other unit.
+			var rule = new schedule.RecurrenceRule();
+			rule.minute = [];
+			for (var i = 0; i < 60; i++) { 
+				if (i % 2 == 0) {
+					rule.minute.push(i);
 				}
+			}
 
-				// Create a range
-				// that runs every other unit.
-				var rule = new schedule.RecurrenceRule();
-				rule.minute = [];
-				for (var i = 0; i < 60; i++) { 
-					if (i % 2 == 0) {
-						rule.minute.push(i);
+			var j = schedule.scheduleJob(rule, function(){
+				this.checkForUpdate(function(updated){
+
+					if (updated) {
+						// Ok, kick it off!
+						this.performUpdate();
 					}
-				}
 
-				var j = schedule.scheduleJob(rule, function(){
-					this.checkForUpdate(function(updated){
-
-						if (updated) {
-							// Ok, kick it off!
-							this.performUpdate();
-						}
-
-					}.bind(this));
 				}.bind(this));
-
+			
 			}.bind(this));
 
 		}.bind(this));
 
-	}
+
+	}.bind(this);
 
 	this.performUpdate = function() {
 
@@ -101,7 +101,7 @@ module.exports = function() {
 
 	}
 
-	this.gitCloneAndUpdate = function(callback) {
+	this.gitCloneAndUpdate = function(buildstamp,callback) {
 
 		// Ok, let's clone the repo, and update it.
 		
@@ -116,7 +116,7 @@ module.exports = function() {
 			// Clone with git.
 			function(callback){
 				this.logit("Beginning git clone.");
-				var cmd_gitclone = 'git clone https://' + this.opts.gituser + ':' + this.opts.gitpassword + '@github.com/' + this.opts.gitrepo + " " + CLONE_PATH;
+				var cmd_gitclone = 'git clone https://' + opts.gituser + ':' + opts.gitpassword + '@github.com/' + opts.gitrepo + " " + CLONE_PATH;
 				console.log("!trace cmd_gitclone: ",cmd_gitclone);
 				exec(cmd_gitclone,function(err,stdout,stderr){
 					
@@ -213,42 +213,6 @@ module.exports = function() {
 
 		}.bind(this));
 		req.end();
-
-	}.bind(this);
-
-	// Get the options read.
-
-	this.parseOptions = function(callback) {
-
-		this.opts = require("nomnom")
-			.option('gitrepo', {
-				abbr: 'r',
-				default: GITHUB_REPO,
-				help: 'Github repo url in format: user/project.git'
-			})
-			.option('gituser', {
-				abbr: 'u',
-				help: 'Github user',
-				required: true
-			})
-			.option('gitpassword', {
-				abbr: 'p',
-				help: 'Github password',
-				required: true
-			})
-			.option('forceupdate', {
-				flag: true,
-				help: 'Force an update automatically.'
-			})
-			.parse();
-
-		if (this.opts.forceupdate) {
-			this.last_modified = new moment().subtract(20, "years");
-			console.log("Forcing an update on start, set date to: ",this.last_modified.toDate());
-		}
-
-		callback();
-
 
 	}.bind(this);
 

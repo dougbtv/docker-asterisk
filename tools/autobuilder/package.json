@@ -20,6 +20,7 @@
   "dependencies": {
     "async": "*",
     "moment": "*",
+    "irc": "*",
     "node-schedule": "*",
     "nomnom": "*"
   }
