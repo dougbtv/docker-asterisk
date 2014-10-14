@@ -38,11 +38,11 @@ module.exports = function() {
 			})
 			.option('irc_debug', {
 				flag: true,
-				help: 'The IRC network to connect to'
+				help: 'Show IRC debug output'
 			})
 			.option('irc_disabled', {
 				flag: true,
-				help: 'The IRC network to connect to'
+				help: 'Do not connect to IRC'
 			})
 			.option('forceupdate', {
 				flag: true,

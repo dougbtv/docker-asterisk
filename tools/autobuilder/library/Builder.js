@@ -20,12 +20,22 @@ module.exports = function(opts,bot) {
 		});
 	*/
 
+	var job_in_progress = false;
+
 	// Our properties
 	this.last_modified = new moment();	// When was the file on server last updated?
+
+	this.ircHandler = function(text,from) {
+
+		console.log("text",text);
+		console.log("from",from);
+
+	}.bind(this);
 
 	// Our virtual constructor.
 	this.instantiate = function() {
 
+		// For an update if we've asked for one.
 		if (opts.forceupdate) {
 			this.last_modified = new moment().subtract(20, "years");
 			this.logit("Forcing an update on start, set date to: ",this.last_modified.toDate());
@@ -68,36 +78,47 @@ module.exports = function(opts,bot) {
 
 	this.performUpdate = function() {
 
-		// Ok, let's handle a new build.
-		// Steps:
-		// update the git repo
-		// pull the dockers
-		// build the docker image
-		// push the docker image
-		this.logit("Beginning update");
+		if (!job_in_progress) {
 
-		// Let's make a build time for this.
-		var buildstamp = new moment().unix();
+			// Set that we have a running job.
+			job_in_progress = true;
 
-		async.series([
-			function(callback){
-				// Let's update our git repository.
-				this.gitCloneAndUpdate(buildstamp,function(err){
-					callback(err);
-				});
-			}.bind(this),
-			function(callback){
-				// do some more stuff ...
-				callback(null, 'two');
-				
-			}.bind(this)
-		],function(err,result){
-			if (!err) {
-				console.log("!trace all done series.");
-			} else {
-				this.logit("ERROR: Failed to performUpdate -- ",err);
-			}
-		}.bind(this));
+			// Ok, let's handle a new build.
+			// Steps:
+			// update the git repo
+			// pull the dockers
+			// build the docker image
+			// push the docker image
+			this.logit("Beginning update");
+
+			// Let's make a build time for this.
+			var buildstamp = new moment().unix();
+
+			async.series([
+				function(callback){
+					// Let's update our git repository.
+					this.gitCloneAndUpdate(buildstamp,function(err){
+						callback(err);
+					});
+				}.bind(this),
+				function(callback){
+					// do some more stuff ...
+					callback(null, 'two');
+					
+				}.bind(this)
+			],function(err,result){
+				// We're done with this running job.
+				job_in_progress = false;
+				if (!err) {
+					console.log("!trace all done series.");
+				} else {
+					this.logit("ERROR: Failed to performUpdate -- ",err);
+				}
+			}.bind(this));
+
+		} else {
+
+		}
 
 	}
 
