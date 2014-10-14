@@ -11,10 +11,20 @@ module.exports = function(opts,bot) {
 	var moment = require('moment');
 	var async = require('async');
 	var schedule = require('node-schedule');
+	var pasteall = require("pasteall"); 		// wewt, I wrote that module!
 
 	var exec = require('child_process').exec;
 
 	/*
+
+		pasteall.paste("function(foo,bar,quux){\n  console.log('foothousandthree');\n}","javascript",function(err,url){
+			if (!err) {
+				console.log("resulting url of paste:",url);
+			} else {
+				console.log("pasteall errored: ",err);
+			}
+		});
+
 		exec("ls -la", function(error, stdout, stderr) {
 			console.log(stdout);
 		});
@@ -32,6 +42,8 @@ module.exports = function(opts,bot) {
 		console.log("from",from);
 
 		bot.parse(text,function(cmd){
+			// "!foo bar quux" returns: 
+			// { command: "foo", args: ["bar","quux"]}
 			if (cmd) {
 				switch (cmd.command) {
 					case "foo":
@@ -131,6 +143,7 @@ module.exports = function(opts,bot) {
 			}.bind(this));
 
 		} else {
+			// There's nothing to do, usually.
 
 		}
 

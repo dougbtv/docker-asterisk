@@ -1,5 +1,7 @@
 module.exports = function(opts) {
 
+	// Keep something around to say that we're connected.
+	// Before a connection, we can't "say" anything.
 	var is_connected = false;
 
 	// We use an IRC bot on freenode for our interface to this guy.
