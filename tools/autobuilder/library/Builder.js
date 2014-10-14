@@ -13,7 +13,13 @@ module.exports = function(opts,bot) {
 	var async = require('async');
 	var schedule = require('node-schedule');
 	var pasteall = require("pasteall"); 		// wewt, I wrote that module!
-	var pr = require("pull-request");
+	var github = require('github-basic');
+	var pr = github({
+		version: 3,
+			user: opts.gituser,
+			password: opts.gitpassword
+		
+	});
 
 	var exec = require('child_process').exec;
 

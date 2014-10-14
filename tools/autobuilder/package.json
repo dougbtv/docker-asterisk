@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "async": "*",
-    "pull-request": "*",
+    "github-basic": "*",
     "moment": "*",
     "pasteall": "*",
     "irc": "*",
