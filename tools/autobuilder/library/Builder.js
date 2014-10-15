@@ -13,8 +13,21 @@ module.exports = function(opts,bot) {
 	var async = require('async');
 	var schedule = require('node-schedule');
 	var pasteall = require("pasteall"); 		// wewt, I wrote that module!
-
 	var exec = require('child_process').exec;
+	var GitHubApi = require("github");
+
+	var github = new GitHubApi({
+		// required
+		version: "3.0.0",
+	});
+	
+	// OAuth2 Key/Secret
+	github.authenticate({
+		type: "basic",
+		username: opts.gituser,
+		password: opts.gitpassword
+	});
+
 
 	/*
 
@@ -202,14 +215,25 @@ module.exports = function(opts,bot) {
 				exec('git commit -m "[autobuild] Updating, new tarball found @ ' + buildstamp + '"', {cwd: CLONE_PATH}, function(err,stdout){ callback(err,stdout); });
 			},
 
-			/* git_push: function(callback){
+			git_push: function(callback){
 				exec('git push origin ' + branch_name, {cwd: CLONE_PATH}, function(err,stdout){ callback(err,stdout); });
-			}, */
+			},
 
 			pull_request: function(callback) {
 
 				var plain_repo = opts.gitrepo.replace(/^.+\/(.+)$/,"$1");
 				console.log("!trace PLAIN REPO: |" + plain_repo + "|");
+
+				github.pullRequests.create({
+					user: opts.gituser,
+					repo: plain_repo,
+					title: "[autobuild] Updating Asterisk @ " + buildstamp,
+					body: "Your friendly builder bot here saying that we're updating @ " + buildstamp,
+					base: BRANCH_MASTER,
+					head: branch_name,
+				},function(err,result){
+					console.log("!trace PULL REQUEST err/result: ",err,result);
+				});
 
 				/*
 				// Create auth options.
@@ -231,8 +255,6 @@ module.exports = function(opts,bot) {
 				};
 
 				var pr_message = {
-					title: "[autobuild] Updating Asterisk @ " + buildstamp,
-					body: "Your friendly builder bot here saying that we're updating @ " + buildstamp,
 				};
 
 				console.log("!trace USER / REPO: %s/%s",opts.gituser,plain_repo);
