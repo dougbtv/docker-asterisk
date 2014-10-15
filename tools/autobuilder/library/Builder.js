@@ -13,13 +13,6 @@ module.exports = function(opts,bot) {
 	var async = require('async');
 	var schedule = require('node-schedule');
 	var pasteall = require("pasteall"); 		// wewt, I wrote that module!
-	var github = require('github-basic');
-	var pr = github({
-		version: 3,
-			user: opts.gituser,
-			password: opts.gitpassword
-		
-	});
 
 	var exec = require('child_process').exec;
 
@@ -216,8 +209,9 @@ module.exports = function(opts,bot) {
 			pull_request: function(callback) {
 
 				var plain_repo = opts.gitrepo.replace(/^.+\/(.+)$/,"$1");
-				// console.log("!trace PLAIN REPO: ",plain_repo);
+				console.log("!trace PLAIN REPO: |" + plain_repo + "|");
 
+				/*
 				// Create auth options.
 				var gitoptions = {
 					username: opts.gituser, 
@@ -243,9 +237,10 @@ module.exports = function(opts,bot) {
 
 				console.log("!trace USER / REPO: %s/%s",opts.gituser,plain_repo);
 
-				pr.exists(opts.gituser, opts.gitrepo, gitoptions, function(exists){
+				pr.exists(opts.gituser, plain_repo, function(exists){
+					console.log("!trace EXISTS??? ",exists);
 					if (1) {
-						pr.pull(from_branch, to_branch, pr_message, gitoptions, function(err){
+						pr.pull(from_branch, to_branch, pr_message, function(err){
 							console.log("!trace PULL RESULT: ",err);
 							callback(err,"");
 						});
@@ -253,6 +248,7 @@ module.exports = function(opts,bot) {
 						callback("Error: I can't make a pull request, that user/repo doesn't exist.");
 					}
 				});
+				*/
 
 				
 
