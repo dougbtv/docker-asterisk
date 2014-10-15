@@ -221,58 +221,21 @@ module.exports = function(opts,bot) {
 
 			pull_request: function(callback) {
 
-				var plain_repo = opts.gitrepo.replace(/^.+\/(.+)$/,"$1");
-				console.log("!trace PLAIN REPO: |" + plain_repo + "|");
+				var repo_username = opts.gitrepo.replace(/^(.+)\/.+$/,"$1");
+				var repo_name = opts.gitrepo.replace(/^.+\/(.+)$/,"$1");
+				// console.log("!trace PLAIN REPO: |" + repo_name + "|");
 
 				github.pullRequests.create({
-					user: opts.gituser,
-					repo: plain_repo,
+					user: repo_username,
+					repo: repo_name,
 					title: "[autobuild] Updating Asterisk @ " + buildstamp,
 					body: "Your friendly builder bot here saying that we're updating @ " + buildstamp,
 					base: BRANCH_MASTER,
 					head: branch_name,
 				},function(err,result){
-					console.log("!trace PULL REQUEST err/result: ",err,result);
+					// console.log("!trace PULL REQUEST err/result: ",err,result.url);
+					callback(err,result);
 				});
-
-				/*
-				// Create auth options.
-				var gitoptions = {
-					username: opts.gituser, 
-					password: opts.gitpassword
-				};
-
-				var from_branch = {
-					user: opts.gituser,
-					repo: plain_repo,
-					branch: branch_name,
-				};
-
-				var to_branch = {
-					user: opts.gituser,
-					repo: plain_repo,
-					branch: BRANCH_MASTER,
-				};
-
-				var pr_message = {
-				};
-
-				console.log("!trace USER / REPO: %s/%s",opts.gituser,plain_repo);
-
-				pr.exists(opts.gituser, plain_repo, function(exists){
-					console.log("!trace EXISTS??? ",exists);
-					if (1) {
-						pr.pull(from_branch, to_branch, pr_message, function(err){
-							console.log("!trace PULL RESULT: ",err);
-							callback(err,"");
-						});
-					} else {
-						callback("Error: I can't make a pull request, that user/repo doesn't exist.");
-					}
-				});
-				*/
-
-				
 
 			}
 
