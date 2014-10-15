@@ -36,6 +36,14 @@ module.exports = function() {
 				default: "chat.freenode.net",
 				help: 'The IRC network to connect to'
 			})
+			.option('irc_authuser', {
+				default: "protocoldoug",
+				help: 'The IRC network to connect to'
+			})
+			.option('irc_authhost', {
+				default: "unaffiliated/protocoldoug",
+				help: 'The IRC network to connect to'
+			})
 			.option('irc_debug', {
 				flag: true,
 				help: 'Show IRC debug output'

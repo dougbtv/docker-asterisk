@@ -11,7 +11,7 @@ module.exports = function(opts) {
 		realName: opts.irc_realname,
 		port: 7000,
 		// debug: opts.irc_debug,
-		debug: true,
+		debug: opts.irc_debug,
 		showErrors: true,
 		autoRejoin: true,
 		autoConnect: false,

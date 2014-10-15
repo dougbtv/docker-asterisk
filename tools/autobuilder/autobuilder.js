@@ -17,7 +17,7 @@ options.parse(function(opts){
 	// Connect the irc bot's listener to the builder
 	irc.bot.addListener("message", function(from, to, text, message) {
 		// Let's handle this command.
-		builder.ircHandler(text,from);
+		builder.ircHandler(text,from,message);
 	});
 
 });

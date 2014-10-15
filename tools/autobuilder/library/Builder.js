@@ -49,11 +49,18 @@ module.exports = function(opts,bot) {
 	// Our properties
 	this.last_modified = new moment();	// When was the file on server last updated?
 
-	this.ircHandler = function(text,from) {
+	this.ircHandler = function(text,from,message) {
 
 		// Let's parse the command.
 		console.log("text",text);
 		console.log("from",from);
+		console.log("from",message);
+
+		// Let's check if they're authorized.
+		var authorized = false;
+		if (message.nick == opts.irc_authuser && message.host == opts.irc_authhost) {
+			authorized = true;
+		}
 
 		bot.parse(text,function(cmd){
 			// "!foo bar quux" returns: 
@@ -62,6 +69,17 @@ module.exports = function(opts,bot) {
 				switch (cmd.command) {
 					case "foo":
 						this.logit("W00t, foo command");
+						break;
+					case "help":
+						this.logit("I know these commands: !build (force a build) !foo (just a test function)");
+						break;
+					case "build":
+						if (authorized) {
+							this.logit("No prob, I'm kicking off an update for you.");
+							this.performUpdate();
+						} else {
+							this.logit("You're not my master, ask " + opts.irc_authuser + " to do this");
+						}
 						break;
 					default:
 						this.logit("Sorry, I don't know the command !" + cmd.command);
@@ -84,7 +102,6 @@ module.exports = function(opts,bot) {
 		// Check for update once, then, once it's updated, schedule the job to recur.
 		this.checkForUpdate(function(initialupdate){
 
-			console.log("did initial update? ",initialupdate);
 			if (initialupdate) {
 				this.performUpdate();
 			}
@@ -129,7 +146,7 @@ module.exports = function(opts,bot) {
 			// pull the dockers
 			// build the docker image
 			// push the docker image
-			this.logit("Beginning update");
+			this.logit("We're starting to perform an update");
 
 			// Let's make a build time for this.
 			var buildstamp = new moment().unix();
@@ -178,7 +195,7 @@ module.exports = function(opts,bot) {
 
 			// Clone with git.
 			clone: function(callback){
-				this.logit("Beginning git clone.");
+				// this.logit("Beginning git clone.");
 				var cmd_gitclone = 'git clone https://' + opts.gituser + ':' + opts.gitpassword + '@github.com/' + opts.gitrepo + ".git " + CLONE_PATH;
 				// console.log("!trace cmd_gitclone: ",cmd_gitclone);
 				exec(cmd_gitclone,function(err,stdout,stderr){
@@ -246,15 +263,15 @@ module.exports = function(opts,bot) {
 			// 4. commit
 			// 5. Push.
 
-
 		},function(err,result){
 			if (!err) {
 
-				console.log("!trace gitCloneAndUpdate RESULTS");
-				console.log(JSON.stringify(result, null, 2));
+				// console.log("!trace gitCloneAndUpdate RESULTS");
+				// console.log(JSON.stringify(result, null, 2));
 
-				this.logit("Successfully cloned and updated");
+				this.logit("Repo cloned & updated, pull request @ " + result.pull_request.html_url);
 				callback(null);
+
 			} else {
 				var errtxt = "ERROR with the gitCloneAndUpdate: " + err
 				this.logit(errtxt);
