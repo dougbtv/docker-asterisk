@@ -15,4 +15,8 @@ RUN git clone https://github.com/dougbtv/docker-asterisk.git
 WORKDIR /docker-asterisk/tools/autobuilder
 RUN npm install
 
+# Note this must match the --name of the "docker-in-docker" container
+# RUN export DOCKER_HOST="tcp://dind:4444"
+ENV DOCKER_HOST tcp://dind:4444
+
 # ENTRYPOINT [forever -e /var/log/autobuilder.log -o /var/log/autobuilder.log autobuilder.js ]

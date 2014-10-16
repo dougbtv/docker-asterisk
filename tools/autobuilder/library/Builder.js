@@ -214,6 +214,11 @@ module.exports = function(opts,bot) {
 					callback(err,{stdout: stdout, stderr: stderr});
 				});
 			}.bind(this),
+
+			// Docker login:
+			// NOTE THE SINGLE QUOTES.
+			// docker login --email="user@email.com" --username="dougbtv" --password='f000000000000000000'
+			
 		},function(err,results){
 			
 			// console.log("!trace results: %j",results);
