@@ -167,7 +167,6 @@ module.exports = function(opts,bot) {
 				}.bind(this),
 				function(callback){
 
-
 					// Ok, now, we can perform the docker build.
 					this.dockerBuild(function(err){
 						callback(err);	
