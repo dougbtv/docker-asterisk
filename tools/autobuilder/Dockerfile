@@ -8,8 +8,10 @@ RUN yum install -y npm wget git
 
 RUN npm install -g forever
 
+ENV version_increment 0x00000b33f
 RUN git clone https://github.com/dougbtv/docker-asterisk.git
 
 WORKDIR /docker-asterisk/tools/autobuilder
+RUN npm install
 
-ENTRYPOINT forever start -l /var/log/autobuilder.log /autobuilder/autobuilder.js
+# ENTRYPOINT [forever -e /var/log/autobuilder.log -o /var/log/autobuilder.log autobuilder.js ]

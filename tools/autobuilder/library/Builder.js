@@ -217,7 +217,7 @@ module.exports = function(opts,bot) {
 			}.bind(this),
 		},function(err,results){
 			
-			console.log("!trace results: %j",results);
+			// console.log("!trace results: %j",results);
 
 			// Let's collect the output, and put it on a paste bin.
 			/* 
@@ -404,7 +404,9 @@ module.exports = function(opts,bot) {
 	}.bind(this);
 
 	this.logit = function(message) {
-		console.log("[log message] " + message);
+		// Let's give a time.
+		var displaytime = new moment().format("YYYY-MM-DD HH:mm:ss");
+		console.log("[ " + displaytime + " ] " + message);
 		bot.say(message);
 	}
 
