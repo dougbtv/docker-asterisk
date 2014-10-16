@@ -6,6 +6,7 @@ module.exports = function(opts,bot) {
 	var CLONE_PATH = "/tmp/docker-asterisk/";
 	var BRANCH_NAME = "autobuild";
 	var BRANCH_MASTER = "master";
+	var LOG_DOCKER = "/tmp/autobuild.docker.log";
 
 	// Our requirements.
 	var http = require('http');
@@ -52,12 +53,17 @@ module.exports = function(opts,bot) {
 	this.ircHandler = function(text,from,message) {
 
 		// Let's parse the command.
-		console.log("text",text);
-		console.log("from",from);
-		console.log("from",message);
+		// console.log("text",text);
+		// console.log("from",from);
+		// console.log("from",message);
 
 		// Let's check if they're authorized.
 		var authorized = false;
+
+		// Sometimes, in dev you don't care about auth.
+		if (opts.authdisabled) {
+			authorized = true;
+		}
 		if (message.nick == opts.irc_authuser && message.host == opts.irc_authhost) {
 			authorized = true;
 		}
@@ -157,10 +163,16 @@ module.exports = function(opts,bot) {
 					this.gitCloneAndUpdate(buildstamp,function(err){
 						callback(err);
 					});
+				
 				}.bind(this),
 				function(callback){
-					// do some more stuff ...
-					callback(null, 'two');
+
+
+					// Ok, now, we can perform the docker build.
+					this.dockerBuild(function(err){
+						callback(err);	
+					});
+					
 					
 				}.bind(this)
 			],function(err,result){
@@ -169,7 +181,7 @@ module.exports = function(opts,bot) {
 				if (!err) {
 					this.logit("Looking good -- appears we have a successful build!");
 				} else {
-					this.logit("ERROR: Failed to performUpdate -- ",err);
+					this.logit("ERROR: Failed to performUpdate -- " + err);
 				}
 			}.bind(this));
 
@@ -178,6 +190,60 @@ module.exports = function(opts,bot) {
 
 		}
 
+	}
+
+	var execlog = function(cmd,callback){
+		exec('echo "================= ' + cmd + '" >> ' + LOG_DOCKER,function(){
+			exec(cmd + ' >> ' + LOG_DOCKER + ' 2>&1 ',function(err,stdout,stderr){
+				callback(err,stdout,stderr);
+			});
+		});
+	}
+
+	this.dockerBuild = function(callback) {
+
+		async.series({
+			docker_pull: function(callback) {
+				this.logit("Beginning docker pull");
+				execlog('docker pull ' + opts.docker_image,function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+			docker_build: function(callback) {
+				this.logit("And we begin the docker build");
+				execlog('docker build -t ' + opts.docker_image + ' ' + CLONE_PATH,function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+		},function(err,results){
+			
+			console.log("!trace results: %j",results);
+
+			// Let's collect the output, and put it on a paste bin.
+			/* 
+			var output = "";
+			for (var key in results) {
+				if (results.hasOwnProperty(key)) {
+					output += "====================== " + key + "\n\n";
+					output += "-- stdout\n";
+					output += results[key].stdout + "\n\n";
+					output += "-- stderr\n";
+					output += results[key].stderr + "\n\n";
+					// console.log(key + " -> " + results[key]);
+				}
+			}
+			console.log("!trace collected output: \n\n",output);
+			
+			if (err) {
+				this.logit("Docker build failed with: " + err);
+			}
+			*/
+
+			callback(err);
+
+			
+		}.bind(this));
+		
 	}
 
 	this.gitCloneAndUpdate = function(buildstamp,callback) {
@@ -220,7 +286,14 @@ module.exports = function(opts,bot) {
 
 			branch_verbose: function(callback){
 				exec('sed -i -e "s|AUTOBUILD_UNIXTIME [0-9]*|AUTOBUILD_UNIXTIME ' + buildstamp + '|" Dockerfile', {cwd: CLONE_PATH}, function(err,stdout){
-					callback(err,stdout);
+					// Ok, after this point, if we're not updating the clone...
+					// We exit with an error.
+					if (!opts.skipclone) {
+						callback(err,stdout);	
+					} else {
+						callback("We've skipped updating the clone.");
+					}
+
 				});
 			},
 

@@ -31,7 +31,6 @@ module.exports = function(opts) {
 		this.bot.connect(function() {
 			// Ok we're connected.
 			is_connected = true;
-			console.log("Cool, we connected");
 			// Identify if need be.
 			/* if (privates.IRC_DO_IDENTIFY) {
 				this.bot.say("nickserv", "identify " + privates.IRC_IDENTPASS);

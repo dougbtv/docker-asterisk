@@ -15,6 +15,18 @@ module.exports = function() {
 				help: 'Github password',
 				required: true
 			})
+			.option('docker_user', {
+				help: 'Dockerhub user.',
+				required: true
+			})
+			.option('docker_password', {
+				help: 'Dockerhub password',
+				required: true
+			})
+			.option('docker_image', {
+				default: "dougbtv/asterisk",
+				help: 'The docker image that we update'
+			})
 			.option('gitrepo', {
 				abbr: 'r',
 				default: GITHUB_REPO,
@@ -51,6 +63,14 @@ module.exports = function() {
 			.option('irc_disabled', {
 				flag: true,
 				help: 'Do not connect to IRC'
+			})
+			.option('authdisabled', {
+				flag: true,
+				help: 'Do not authenticate users to use commands'
+			})
+			.option('skipclone', {
+				flag: true,
+				help: 'Skip updating the github repo.'
 			})
 			.option('forceupdate', {
 				flag: true,
