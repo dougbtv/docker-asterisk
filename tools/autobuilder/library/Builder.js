@@ -206,16 +206,19 @@ module.exports = function(opts,bot) {
 				exec('> ' + LOG_DOCKER,function(err){
 					callback(err);
 				});
-			}
+			},
+
 			docker_pull: function(callback) {
 				this.logit("Beginning docker pull");
 				execlog('docker pull ' + opts.docker_image,function(err,stdout,stderr){
 					callback(err,{stdout: stdout, stderr: stderr});
 				});
 			}.bind(this),
+
 			docker_build: function(callback) {
 				this.logit("And we begin the docker build");
 				this.logit("WARNING: !trace turn back on build");
+					callback(null);
 				/* 
 				execlog('docker build -t ' + opts.docker_image + ' ' + CLONE_PATH,function(err,stdout,stderr){
 					callback(err,{stdout: stdout, stderr: stderr});
@@ -223,16 +226,48 @@ module.exports = function(opts,bot) {
 				*/
 			}.bind(this),
 
-			docker_login: function(callback) {
-				execlog('docker login --email="' + opts.docker_email + 
-					'" --username="' + opts.docker_user + 
-					'" --password=\'' + opts.docker_password + '\' ' + opts.docker_image,
-					function(err,stdout,stderr){
-					
-						callback(err,{stdout: stdout, stderr: stderr});
-
+			docker_show_images: function(callback) {
+				execlog('docker images',function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
 				});
 			}.bind(this),
+
+			docker_login: function(callback) {
+				// Uhhh, you don't wanna log this.
+				exec('docker login --email=\"' + opts.docker_email + '\"' +
+					' --username=\"' + opts.docker_user + '\"' +
+					' --password=\'' + opts.docker_password + '\' ',
+					function(err,stdout,stderr){
+						callback(err,{stdout: stdout, stderr: stderr});
+					});
+			}.bind(this),
+
+			docker_kill: function(callback) {
+				execlog('docker kill $(docker ps -a -q) || true',function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+
+			docker_clean: function(callback) {
+				execlog('docker rm $(docker ps -a -q) || true',function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+
+			docker_remove_untagged: function(callback) {
+				execlog('docker images | grep -i "none" | awk \'{print \$3}\' | xargs docker rmi || true',function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+			
+			docker_push: function(callback) {
+				this.logit("Beginning docker pull");
+				execlog('docker push ' + opts.docker_image,function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+
+			// 
 
 
 			// Docker login:
