@@ -76,6 +76,10 @@ module.exports = function() {
 				flag: true,
 				help: 'Skip updating the github repo.'
 			})
+			.option('skipbuild', {
+				flag: true,
+				help: 'Skip updating the github repo.'
+			})
 			.option('forceupdate', {
 				flag: true,
 				help: 'Force an update automatically.'

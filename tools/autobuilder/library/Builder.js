@@ -32,8 +32,14 @@ module.exports = function(opts,bot) {
 
 	var job_in_progress = false;
 
+	// Break up the repo options, for normalization in calling the github module.
+	var repo_username = opts.gitrepo.replace(/^(.+)\/.+$/,"$1");
+	var repo_name = opts.gitrepo.replace(/^.+\/(.+)$/,"$1");
+				
+
 	// Our properties
 	this.last_modified = new moment();	// When was the file on server last updated?
+	this.last_pullrequest = 0;
 
 	this.ircHandler = function(text,from,message) {
 
@@ -163,10 +169,15 @@ module.exports = function(opts,bot) {
 				}.bind(this),
 				function(callback){
 
-					// Ok, now, we can perform the docker build.
-					this.dockerBuild(function(err){
-						callback(err);	
-					});
+					if (!opts.skipbuild) {
+						// Ok, now, we can perform the docker build.
+						this.dockerBuild(function(err){
+							callback(err);	
+						});
+					} else {
+						this.logit("We skipped the build, by a debug flag.");
+						callback(null);
+					}
 					
 					
 				}.bind(this)
@@ -395,8 +406,6 @@ module.exports = function(opts,bot) {
 
 			pull_request: function(callback) {
 
-				var repo_username = opts.gitrepo.replace(/^(.+)\/.+$/,"$1");
-				var repo_name = opts.gitrepo.replace(/^.+\/(.+)$/,"$1");
 				// console.log("!trace PLAIN REPO: |" + repo_name + "|");
 
 				github.pullRequests.create({
@@ -407,11 +416,30 @@ module.exports = function(opts,bot) {
 					base: BRANCH_MASTER,
 					head: branch_name,
 				},function(err,result){
-					// console.log("!trace PULL REQUEST err/result: ",err,result.url);
+					if (!err) {
+						// Keep our last pull request.
+						this.last_pullrequest = result.number;
+					}
+					// console.log("!trace PULL REQUEST err/result: ",err,result);
 					callback(err,result);
-				});
+				}.bind(this));
 
-			}
+			}.bind(this),
+
+			create_comment: function(callback) {
+				// last_pullrequest
+				github.pullRequests.createCommentReply({
+					user: repo_username,
+					repo: repo_name,
+					body: "Build complete, log posted @ http://foo.bar/",
+					number: this.last_pullrequest,
+					in_reply_to: this.last_pullrequest,
+				},function(err,result){
+					console.log("!trace PULL REQUEST err/result: ",err,result);
+					callback(err,result);
+				}.bind(this));
+
+			}.bind(this),
 
 			// Alright, that's great, all we need to do is simply.
 			
