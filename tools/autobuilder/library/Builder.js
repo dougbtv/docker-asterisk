@@ -117,11 +117,9 @@ module.exports = function(opts,bot) {
 			// Create a range
 			// that runs every other unit.
 			var rule = new schedule.RecurrenceRule();
-			rule.minute = [];
-			for (var i = 0; i < 60; i++) { 
-				if (i % 2 == 0) {
-					rule.minute.push(i);
-				}
+			rule.hour = [];
+			for (var i = 0; i =< 24; i++) { 
+				rule.hour.push(i);	
 			}
 
 			var j = schedule.scheduleJob(rule, function(){
