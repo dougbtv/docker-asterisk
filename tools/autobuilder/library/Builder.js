@@ -234,10 +234,13 @@ module.exports = function(opts,bot) {
 
 			docker_login: function(callback) {
 				// Uhhh, you don't wanna log this.
-				exec('docker login --email=\"' + opts.docker_email + '\"' +
+				var cmd_login = 'docker login --email=\"' + opts.docker_email + '\"' +
 					' --username=\"' + opts.docker_user + '\"' +
-					' --password=\'' + opts.docker_password + '\' ',
+					' --password=\'' + opts.docker_password + '\' ';
+				console.log("!trace What's the login command? ",cmd_login);
+				exec(cmd_login,
 					function(err,stdout,stderr){
+						// this.logit();
 						callback(err,{stdout: stdout, stderr: stderr});
 					});
 			}.bind(this),
@@ -282,6 +285,7 @@ module.exports = function(opts,bot) {
 				this.logit("Docker build failed with: " + err);
 			}
 
+			/*
 			// Let's read the log file, and post to pasteall
 			fs.readFile(LOG_DOCKER, 'utf8', function (readlogerr, logcontents) {
 				if (readlogerr) throw readlogerr;
@@ -295,6 +299,7 @@ module.exports = function(opts,bot) {
 				}.bind(this));
 
 			}.bind(this));
+			*/
 			
 
 			// console.log("!trace results: %j",results);
