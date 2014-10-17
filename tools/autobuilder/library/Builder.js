@@ -9,6 +9,7 @@ module.exports = function(opts,bot) {
 	var LOG_DOCKER = "/tmp/autobuild.docker.log";
 
 	// Our requirements.
+	var fs = require('fs');
 	var http = require('http');
 	var moment = require('moment');
 	var async = require('async');
@@ -28,7 +29,6 @@ module.exports = function(opts,bot) {
 		username: opts.gituser,
 		password: opts.gitpassword
 	});
-
 
 	/*
 
@@ -275,12 +275,26 @@ module.exports = function(opts,bot) {
 			// 
 			
 		},function(err,results){
-			
+
 			if (!err) { 
 				this.logit("Grreeeat! Docker build & push successful");
 			} else {
 				this.logit("Docker build failed with: " + err);
 			}
+
+			// Let's read the log file, and post to pasteall
+			fs.readFile(LOG_DOCKER, 'utf8', function (readlogerr, logcontents) {
+				if (readlogerr) throw readlogerr;
+
+				pasteall.paste(logcontents,"text",function(err,url){
+					if (!err) {
+						this.logit("Build results posted @ " + url);
+					} else {
+						this.logit("pasteall errored: " + err);
+					}
+				}.bind(this));
+
+			}.bind(this));
 			
 
 			// console.log("!trace results: %j",results);
