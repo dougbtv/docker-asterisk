@@ -125,6 +125,9 @@ module.exports = function(opts,bot) {
 			}
 
 			var j = schedule.scheduleJob(rule, function(){
+
+				this.logit("Checking for an update @ " + moment().format("YYYY-MM-DD HH:mm:ss"));
+
 				this.checkForUpdate(function(updated){
 
 					if (updated) {
@@ -232,30 +235,6 @@ module.exports = function(opts,bot) {
 				});
 			},
 
-			docker_pull: function(callback) {
-				this.logit("Beginning docker pull");
-				execlog('docker pull ' + opts.docker_image,function(err,stdout,stderr){
-					callback(err,{stdout: stdout, stderr: stderr});
-				});
-			}.bind(this),
-
-			docker_build: function(callback) {
-				this.logit("And we begin the docker build");
-				this.logit("WARNING: !trace turn back on build");
-					callback(null);
-				/* 
-				execlog('docker build -t ' + opts.docker_image + ' ' + CLONE_PATH,function(err,stdout,stderr){
-					callback(err,{stdout: stdout, stderr: stderr});
-				});
-				*/
-			}.bind(this),
-
-			docker_show_images: function(callback) {
-				execlog('docker images',function(err,stdout,stderr){
-					callback(err,{stdout: stdout, stderr: stderr});
-				});
-			}.bind(this),
-
 			docker_login: function(callback) {
 				// Uhhh, you don't wanna log this.
 				var cmd_login = 'docker login --email=\"' + opts.docker_email + '\"' +
@@ -266,6 +245,27 @@ module.exports = function(opts,bot) {
 						// this.logit();
 						callback(err,{stdout: stdout, stderr: stderr});
 					});
+			}.bind(this),
+
+			docker_pull: function(callback) {
+				this.logit("Beginning docker pull");
+				execlog('docker pull ' + opts.docker_image,function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+
+			docker_build: function(callback) {
+				this.logit("And we begin the docker build");
+				execlog('docker build -t ' + opts.docker_image + ' ' + CLONE_PATH,function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+				
+			}.bind(this),
+
+			docker_show_images: function(callback) {
+				execlog('docker images',function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
 			}.bind(this),
 
 			docker_kill: function(callback) {
@@ -292,6 +292,7 @@ module.exports = function(opts,bot) {
 					callback(err,{stdout: stdout, stderr: stderr});
 				});
 			}.bind(this),
+
 			
 		},function(err,results){
 
@@ -308,6 +309,25 @@ module.exports = function(opts,bot) {
 				pasteall.paste(logcontents,"text",function(err,url){
 					if (!err) {
 						this.logit("Build results posted @ " + url);
+
+						// last_pullrequest
+						if (!opts.skipclone) {
+							github.issues.createComment({
+								user: repo_username,
+								repo: repo_name,
+								body: "Build complete, log posted @ " + url,
+								number: this.last_pullrequest,
+							},function(err,result){
+								if (err) {
+									console.log("Oooops, somehow the github issue comment failed: " + err);
+								}
+								// console.log("!trace PULL REQUEST err/result: ",err,result);
+								// callback(err,result);
+							}.bind(this));
+						} else {
+							// callback(null);					
+						}
+
 					} else {
 						this.logit("pasteall errored: " + err);
 					}
@@ -421,21 +441,6 @@ module.exports = function(opts,bot) {
 						this.last_pullrequest = result.number;
 					}
 					// console.log("!trace PULL REQUEST err/result: ",err,result);
-					callback(err,result);
-				}.bind(this));
-
-			}.bind(this),
-
-			create_comment: function(callback) {
-				// last_pullrequest
-				github.pullRequests.createCommentReply({
-					user: repo_username,
-					repo: repo_name,
-					body: "Build complete, log posted @ http://foo.bar/",
-					number: this.last_pullrequest,
-					in_reply_to: this.last_pullrequest,
-				},function(err,result){
-					console.log("!trace PULL REQUEST err/result: ",err,result);
 					callback(err,result);
 				}.bind(this));
 
