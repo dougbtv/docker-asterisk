@@ -192,7 +192,7 @@ module.exports = function(opts,bot) {
 	}
 
 	var execlog = function(cmd,callback){
-		exec('echo "================= ' + cmd + '" >> ' + LOG_DOCKER,function(){
+		exec('echo "========== ' + cmd + ' (@ ' + moment().format("YYYY-MM-DD HH:mm:ss") + ')" >> ' + LOG_DOCKER,function(){
 			exec(cmd + ' >> ' + LOG_DOCKER + ' 2>&1 ',function(err,stdout,stderr){
 				callback(err,stdout,stderr);
 			});
@@ -202,6 +202,11 @@ module.exports = function(opts,bot) {
 	this.dockerBuild = function(callback) {
 
 		async.series({
+			clear_log: function(callback) {
+				exec('> ' + LOG_DOCKER,function(err){
+					callback(err);
+				});
+			}
 			docker_pull: function(callback) {
 				this.logit("Beginning docker pull");
 				execlog('docker pull ' + opts.docker_image,function(err,stdout,stderr){
@@ -210,17 +215,39 @@ module.exports = function(opts,bot) {
 			}.bind(this),
 			docker_build: function(callback) {
 				this.logit("And we begin the docker build");
+				this.logit("WARNING: !trace turn back on build");
+				/* 
 				execlog('docker build -t ' + opts.docker_image + ' ' + CLONE_PATH,function(err,stdout,stderr){
 					callback(err,{stdout: stdout, stderr: stderr});
 				});
+				*/
 			}.bind(this),
+
+			docker_login: function(callback) {
+				execlog('docker login --email="' + opts.docker_email + 
+					'" --username="' + opts.docker_user + 
+					'" --password=\'' + opts.docker_password + '\' ' + opts.docker_image,
+					function(err,stdout,stderr){
+					
+						callback(err,{stdout: stdout, stderr: stderr});
+
+				});
+			}.bind(this),
+
 
 			// Docker login:
 			// NOTE THE SINGLE QUOTES.
-			// docker login --email="user@email.com" --username="dougbtv" --password='f000000000000000000'
+			// 
 			
 		},function(err,results){
 			
+			if (!err) { 
+				this.logit("Grreeeat! Docker build & push successful");
+			} else {
+				this.logit("Docker build failed with: " + err);
+			}
+			
+
 			// console.log("!trace results: %j",results);
 
 			// Let's collect the output, and put it on a paste bin.
@@ -238,9 +265,6 @@ module.exports = function(opts,bot) {
 			}
 			console.log("!trace collected output: \n\n",output);
 			
-			if (err) {
-				this.logit("Docker build failed with: " + err);
-			}
 			*/
 
 			callback(err);

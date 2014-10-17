@@ -19,6 +19,10 @@ module.exports = function() {
 				help: 'Dockerhub user.',
 				required: true
 			})
+			.option('docker_email', {
+				help: 'Dockerhub user.',
+				required: true
+			})
 			.option('docker_password', {
 				help: 'Dockerhub password',
 				required: true
