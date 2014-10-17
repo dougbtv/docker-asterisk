@@ -25,5 +25,5 @@ docker run \
   -t dougbtv/asterisk-autobuilder \
   forever -e /var/log/autobuilder.log -o /var/log/autobuilder.log autobuilder.js \
     -u asteriskautobuilder -p "aaaaaaaaaaaaaaaaa" \
-    --docker_user dougbtv --docker_password "aaaaaaaaaaaaaa" --docker_email="d00d@d00d.com" \
+    --docker_user dougbtv --docker_password "aaaaaaaaaaaaaa" --docker_email "d00d@d00d.com" \
     --skipclone --irc_debug --irc_disabled --forceupdate --authdisabled

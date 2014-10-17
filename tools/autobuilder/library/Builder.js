@@ -30,21 +30,6 @@ module.exports = function(opts,bot) {
 		password: opts.gitpassword
 	});
 
-	/*
-
-		pasteall.paste("function(foo,bar,quux){\n  console.log('foothousandthree');\n}","javascript",function(err,url){
-			if (!err) {
-				console.log("resulting url of paste:",url);
-			} else {
-				console.log("pasteall errored: ",err);
-			}
-		});
-
-		exec("ls -la", function(error, stdout, stderr) {
-			console.log(stdout);
-		});
-	*/
-
 	var job_in_progress = false;
 
 	// Our properties
@@ -77,8 +62,19 @@ module.exports = function(opts,bot) {
 						this.logit("W00t, foo command");
 						break;
 					case "help":
-						this.logit("I know these commands: !build (force a build) !foo (just a test function)");
+						this.logit("I know these commands: !build !lastcmd !tail");
 						break;
+					case "lastcmd":
+						this.lastCommandLog(function(last){
+							this.logit("Last command: " + last);
+						}.bind(this));
+						break;
+					case "tail":
+						this.tailCommandLog(function(last){
+							this.logit("Log tail: " + last);
+						}.bind(this));
+						break;
+
 					case "build":
 						if (authorized) {
 							this.logit("No prob, I'm kicking off an update for you.");
@@ -199,6 +195,23 @@ module.exports = function(opts,bot) {
 		});
 	}
 
+	this.lastCommandLog = function(callback) {
+
+		exec('cat ' + LOG_DOCKER + ' | grep "==========" | tail -n 1',function(err,stdout,stderr){
+			callback(stdout);
+		});
+
+	}
+
+	this.tailCommandLog = function(callback) {
+
+		exec('tail -n 3 ' + LOG_DOCKER,function(err,stdout,stderr){
+			callback(stdout);
+		});
+
+	}
+
+
 	this.dockerBuild = function(callback) {
 
 		async.series({
@@ -263,18 +276,11 @@ module.exports = function(opts,bot) {
 			}.bind(this),
 			
 			docker_push: function(callback) {
-				this.logit("Beginning docker pull");
+				this.logit("And we've started pushing it");
 				execlog('docker push ' + opts.docker_image,function(err,stdout,stderr){
 					callback(err,{stdout: stdout, stderr: stderr});
 				});
 			}.bind(this),
-
-			// 
-
-
-			// Docker login:
-			// NOTE THE SINGLE QUOTES.
-			// 
 			
 		},function(err,results){
 
