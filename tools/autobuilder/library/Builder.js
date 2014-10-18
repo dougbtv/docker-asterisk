@@ -118,7 +118,7 @@ module.exports = function(opts,bot) {
 			// that runs every other unit.
 			var rule = new schedule.RecurrenceRule();
 			rule.hour = [];
-			for (var i = 0; i =< 24; i++) { 
+			for (var i = 0; i <= 24; i++) { 
 				rule.hour.push(i);	
 			}
 
