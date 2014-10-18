@@ -375,14 +375,14 @@ module.exports = function(opts,bot) {
 			
    			// 1. Branch from master
 			git_set_email: function(callback){
-				exec('git config --global user.email "' + opts.git_setemail + '"', {cwd: CLONE_PATH}, function(err,stdout){
+				exec('git config --global user.email "' + opts.git_setemail + '"', function(err,stdout){
 					// console.log("!trace branch stdout: ",stdout);
 					callback(err,stdout);
 				});
 			},
 
 			git_set_email: function(callback){
-				exec('git config --global user.name "' + opts.git_setname + '"', {cwd: CLONE_PATH}, function(err,stdout){
+				exec('git config --global user.name "' + opts.git_setname + '"', function(err,stdout){
 					// console.log("!trace branch stdout: ",stdout);
 					callback(err,stdout);
 				});
