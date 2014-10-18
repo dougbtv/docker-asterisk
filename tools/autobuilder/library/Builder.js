@@ -371,6 +371,23 @@ module.exports = function(opts,bot) {
 				});
 			}.bind(this),
 
+			// Set your git config user items.
+			
+   			// 1. Branch from master
+			git_set_email: function(callback){
+				exec('git config --global user.email "' + opts.git_setemail + '"', {cwd: CLONE_PATH}, function(err,stdout){
+					// console.log("!trace branch stdout: ",stdout);
+					callback(err,stdout);
+				});
+			},
+
+			git_set_email: function(callback){
+				exec('git config --global user.name "' + opts.git_setname + '"', {cwd: CLONE_PATH}, function(err,stdout){
+					// console.log("!trace branch stdout: ",stdout);
+					callback(err,stdout);
+				});
+			},
+
 			// Clone with git.
 			clone: function(callback){
 				// this.logit("Beginning git clone.");

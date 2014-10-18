@@ -68,6 +68,14 @@ module.exports = function() {
 				flag: true,
 				help: 'Do not connect to IRC'
 			})
+			.option('git_setemail', {
+				default: "auto@builder.com",
+				help: 'The IRC network to connect to'
+			})
+			.option('git_setname', {
+				default: "Your loyal autobuilder",
+				help: 'The IRC network to connect to'
+			})
 			.option('authdisabled', {
 				flag: true,
 				help: 'Do not authenticate users to use commands'
