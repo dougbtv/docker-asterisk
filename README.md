@@ -10,7 +10,20 @@ Which is as simple as running:
 
     docker pull dougbtv/asterisk
 
----
+## What is it based on?
+
+* Based on Centos 6.5 base image
+* Latest current available version of Asterisk 11
+  * Which at last edit stands @ 11.6 Cert 6
+  * ...More versions to come in the future.
+
+## Check out the latest build!
+
+The image is backed by an auto-building-irc-bot which watches for the latest tarball from downloads.asterisk.org, and then automatically pushes it.
+
+Whenever a new build is created, the bot creates a pull request here, you can check out the latest merged pull requests, and you'll find a link to the results of the build posted on a paste bin. Here's [an example automatically generated pull request](https://github.com/dougbtv/docker-asterisk/pull/16), and here's [an example log](http://www.pasteall.org/54631/text). 
+
+You can come visit the bot in `##asterisk-autobuilder` on freenode. Or, naturally feel free to run it yourself. (More docs on this to come, you'll find the commands the bot currently takes at the bottom of this readme.)
 
 ## Running it.
 
@@ -53,18 +66,24 @@ docker build -t dougbtv/fastagi fastagi/.
 Let's inspect the important files in the clone
 
     .
-    ├── Dockerfile
-    ├── extensions.conf
-    ├── iax.conf
-    ├── fastagi
-    │   ├── agiLaunch.sh
-    │   ├── agi.php
-    │   ├── Dockerfile
-    │   └── xinetd_agi
-    └── tools
-        ├── asterisk-cli.sh
-        ├── clean.sh
-        └── run.sh
+    |-- Dockerfile
+    |-- extensions.conf
+    |-- fastagi/
+    |   |-- agiLaunch.sh
+    |   |-- agi.php
+    |   |-- Dockerfile
+    |   `-- xinetd_agi
+    |-- iax.conf
+    |-- modules.conf
+    |-- README.md
+    `-- tools/
+        |-- asterisk-cli.sh
+        |-- autobuilder/
+        |   |
+        |   ` ...
+        |-- clean.sh
+        `-- run.sh
+
 
 In the root dir:
 
@@ -84,6 +103,18 @@ In the `tools/` dir are some utilities I find myself using over and over:
 * `asterisk-cli.sh` runs the `nsenter` command (note: image name must contain "asterisk" for it to detect it, easy enough to modify to fit your needs)
 * `clean.sh` kills all containers, and removes them.
 * `run.sh` a suggested way to run the Docker container.
+
+Finally, the `tools/` dir contains the `autobuilder/` dir, which is the node.js source code for the autobuilder bot, which watches for changes and then builds a new image and pushes it to dockerhub.
+
+...Not listed is the `asterisk/` dir, where there's a sample build for Asterisk 13 beta. This Dockerfile works. Just getting the ducks in a row for when it's released.
+
+## Bot commands
+
+If you're checking out the bot, you'll notice just a few commands, most of which are most interesting during a build:
+
+* `!build` initiates a build manually (only for authorized users)
+* `!lastcmd` shows the last executed command during long builds
+* `!tail` shows the last three lines of the log
 
 ## Lessons Learned
 
