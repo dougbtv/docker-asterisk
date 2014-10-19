@@ -19,7 +19,7 @@ RUN npm install
 # RUN export DOCKER_HOST="tcp://dind:4444"
 ENV DOCKER_HOST tcp://dind:4444
 
-RUN git config --global user.email "autobuilder@localhost"
+RUN git config --global user.email "asteriskautobuilder@users.noreply.github.com"
 RUN git config --global user.name "Your friendly autobuilder"
 
 ENV quick_pull 0x00000001
