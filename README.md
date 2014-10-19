@@ -13,13 +13,12 @@ Which is as simple as running:
 ## What is it based on?
 
 * Based on Centos 6.5 base image
-* Latest current available version of Asterisk 11
-  * Which at last edit stands @ 11.6 Cert 6
-  * ...More versions to come in the future.
+* Latest current available version of Asterisk 11, certified branch
+  * ...More branches to come in the future.
 
 ## Check out the latest build!
 
-The image is backed by an auto-building-irc-bot which watches for the latest tarball from downloads.asterisk.org, and then automatically pushes it.
+The image is backed by an auto-building-irc-bot which watches for the latest tarball from downloads.asterisk.org, builds it into this docker image and then automatically pushes it to dockerhub.
 
 Whenever a new build is created, the bot creates a pull request here, you can check out the latest merged pull requests, and you'll find a link to the results of the build posted on a paste bin. Here's [an example automatically generated pull request](https://github.com/dougbtv/docker-asterisk/pull/16), and here's [an example log](http://www.pasteall.org/54631/text). 
 
