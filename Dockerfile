@@ -1,5 +1,5 @@
 FROM centos:centos6
-MAINTAINER Doug Smith <dsmith@800response.com>
+MAINTAINER Doug Smith <info@laboratoryb.org>
 ENV build_date 2014-10-02
 
 RUN yum update -y
