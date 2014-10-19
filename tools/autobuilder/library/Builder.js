@@ -159,15 +159,16 @@ module.exports = function(opts,bot) {
 			// Let's make a build time for this.
 			var buildstamp = new moment().unix();
 
-			async.series([
-				function(callback){
+			async.series({
+				clone_and_update: function(callback){
 					// Let's update our git repository.
 					this.gitCloneAndUpdate(buildstamp,function(err){
 						callback(err);
 					});
 				
 				}.bind(this),
-				function(callback){
+
+				do_docker_build: function(callback){
 
 					if (!opts.skipbuild) {
 						// Ok, now, we can perform the docker build.
@@ -181,7 +182,8 @@ module.exports = function(opts,bot) {
 					
 					
 				}.bind(this)
-			],function(err,result){
+
+			},function(err,result){
 				// We're done with this running job.
 				job_in_progress = false;
 				if (!err) {
@@ -199,7 +201,7 @@ module.exports = function(opts,bot) {
 	}
 
 	var execlog = function(cmd,callback){
-		exec('echo "========== ' + cmd + ' (@ ' + moment().format("YYYY-MM-DD HH:mm:ss") + ')" >> ' + LOG_DOCKER,function(){
+		exec('echo "=>======== ' + cmd + ' (@ ' + moment().format("YYYY-MM-DD HH:mm:ss") + ')" >> ' + LOG_DOCKER,function(){
 			exec(cmd + ' >> ' + LOG_DOCKER + ' 2>&1 ',function(err,stdout,stderr){
 				callback(err,stdout,stderr);
 			});
@@ -208,7 +210,7 @@ module.exports = function(opts,bot) {
 
 	this.lastCommandLog = function(callback) {
 
-		exec('cat ' + LOG_DOCKER + ' | grep "==========" | tail -n 1',function(err,stdout,stderr){
+		exec('cat ' + LOG_DOCKER + ' | grep \'=>========\' | tail -n 1',function(err,stdout,stderr){
 			callback(stdout);
 		});
 
@@ -482,9 +484,6 @@ module.exports = function(opts,bot) {
 				callback(errtxt);
 			}
 		}.bind(this));
-
-
-		callback();
 
 	}
 
