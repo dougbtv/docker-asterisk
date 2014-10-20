@@ -5,7 +5,7 @@ ENV build_date 2014-10-02
 RUN yum update -y
 RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar -y
 
-ENV AUTOBUILD_UNIXTIME 1413665835
+ENV AUTOBUILD_UNIXTIME 1413824400
 
 # Download asterisk.
 # Currently Certified Asterisk 11.6 cert 6.
