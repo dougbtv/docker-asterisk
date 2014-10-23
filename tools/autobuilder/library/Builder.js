@@ -117,14 +117,14 @@ module.exports = function(opts,bot) {
 			// Create a range
 			// that runs every other unit.
 			var rule = new schedule.RecurrenceRule();
-			rule.minute = [];
-			for (var i = 0; i < 60; i++) { 
-				if (i % 2 == 0) {
-					rule.minute.push(i);
-				}
-			}
+			// rule.hour = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+			rule.minute = 0;
+			
 
 			var j = schedule.scheduleJob(rule, function(){
+
+				this.logit("Checking for an update @ " + moment().format("YYYY-MM-DD HH:mm:ss"));
+
 				this.checkForUpdate(function(updated){
 
 					if (updated) {
@@ -159,15 +159,16 @@ module.exports = function(opts,bot) {
 			// Let's make a build time for this.
 			var buildstamp = new moment().unix();
 
-			async.series([
-				function(callback){
+			async.series({
+				clone_and_update: function(callback){
 					// Let's update our git repository.
 					this.gitCloneAndUpdate(buildstamp,function(err){
 						callback(err);
 					});
 				
 				}.bind(this),
-				function(callback){
+
+				do_docker_build: function(callback){
 
 					if (!opts.skipbuild) {
 						// Ok, now, we can perform the docker build.
@@ -181,7 +182,8 @@ module.exports = function(opts,bot) {
 					
 					
 				}.bind(this)
-			],function(err,result){
+
+			},function(err,result){
 				// We're done with this running job.
 				job_in_progress = false;
 				if (!err) {
@@ -199,7 +201,7 @@ module.exports = function(opts,bot) {
 	}
 
 	var execlog = function(cmd,callback){
-		exec('echo "========== ' + cmd + ' (@ ' + moment().format("YYYY-MM-DD HH:mm:ss") + ')" >> ' + LOG_DOCKER,function(){
+		exec('echo "=>======== ' + cmd + ' (@ ' + moment().format("YYYY-MM-DD HH:mm:ss") + ')" >> ' + LOG_DOCKER,function(){
 			exec(cmd + ' >> ' + LOG_DOCKER + ' 2>&1 ',function(err,stdout,stderr){
 				callback(err,stdout,stderr);
 			});
@@ -208,7 +210,7 @@ module.exports = function(opts,bot) {
 
 	this.lastCommandLog = function(callback) {
 
-		exec('cat ' + LOG_DOCKER + ' | grep "==========" | tail -n 1',function(err,stdout,stderr){
+		exec('cat ' + LOG_DOCKER + ' | grep \'=>========\' | tail -n 1',function(err,stdout,stderr){
 			callback(stdout);
 		});
 
@@ -232,30 +234,6 @@ module.exports = function(opts,bot) {
 				});
 			},
 
-			docker_pull: function(callback) {
-				this.logit("Beginning docker pull");
-				execlog('docker pull ' + opts.docker_image,function(err,stdout,stderr){
-					callback(err,{stdout: stdout, stderr: stderr});
-				});
-			}.bind(this),
-
-			docker_build: function(callback) {
-				this.logit("And we begin the docker build");
-				this.logit("WARNING: !trace turn back on build");
-					callback(null);
-				/* 
-				execlog('docker build -t ' + opts.docker_image + ' ' + CLONE_PATH,function(err,stdout,stderr){
-					callback(err,{stdout: stdout, stderr: stderr});
-				});
-				*/
-			}.bind(this),
-
-			docker_show_images: function(callback) {
-				execlog('docker images',function(err,stdout,stderr){
-					callback(err,{stdout: stdout, stderr: stderr});
-				});
-			}.bind(this),
-
 			docker_login: function(callback) {
 				// Uhhh, you don't wanna log this.
 				var cmd_login = 'docker login --email=\"' + opts.docker_email + '\"' +
@@ -266,6 +244,27 @@ module.exports = function(opts,bot) {
 						// this.logit();
 						callback(err,{stdout: stdout, stderr: stderr});
 					});
+			}.bind(this),
+
+			docker_pull: function(callback) {
+				this.logit("Beginning docker pull");
+				execlog('docker pull ' + opts.docker_image,function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+			}.bind(this),
+
+			docker_build: function(callback) {
+				this.logit("And we begin the docker build");
+				execlog('docker build -t ' + opts.docker_image + ' ' + CLONE_PATH,function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
+				
+			}.bind(this),
+
+			docker_show_images: function(callback) {
+				execlog('docker images',function(err,stdout,stderr){
+					callback(err,{stdout: stdout, stderr: stderr});
+				});
 			}.bind(this),
 
 			docker_kill: function(callback) {
@@ -292,6 +291,7 @@ module.exports = function(opts,bot) {
 					callback(err,{stdout: stdout, stderr: stderr});
 				});
 			}.bind(this),
+
 			
 		},function(err,results){
 
@@ -308,6 +308,25 @@ module.exports = function(opts,bot) {
 				pasteall.paste(logcontents,"text",function(err,url){
 					if (!err) {
 						this.logit("Build results posted @ " + url);
+
+						// last_pullrequest
+						if (!opts.skipclone) {
+							github.issues.createComment({
+								user: repo_username,
+								repo: repo_name,
+								body: "Build complete, log posted @ " + url,
+								number: this.last_pullrequest,
+							},function(err,result){
+								if (err) {
+									console.log("Oooops, somehow the github issue comment failed: " + err);
+								}
+								// console.log("!trace PULL REQUEST err/result: ",err,result);
+								// callback(err,result);
+							}.bind(this));
+						} else {
+							// callback(null);					
+						}
+
 					} else {
 						this.logit("pasteall errored: " + err);
 					}
@@ -353,6 +372,23 @@ module.exports = function(opts,bot) {
 					callback(err);
 				});
 			}.bind(this),
+
+			// Set your git config user items.
+			
+   			// 1. Branch from master
+			git_set_email: function(callback){
+				exec('git config --global user.email "' + opts.git_setemail + '"', function(err,stdout){
+					// console.log("!trace branch stdout: ",stdout);
+					callback(err,stdout);
+				});
+			},
+
+			git_set_email: function(callback){
+				exec('git config --global user.name "' + opts.git_setname + '"', function(err,stdout){
+					// console.log("!trace branch stdout: ",stdout);
+					callback(err,stdout);
+				});
+			},
 
 			// Clone with git.
 			clone: function(callback){
@@ -426,21 +462,6 @@ module.exports = function(opts,bot) {
 
 			}.bind(this),
 
-			create_comment: function(callback) {
-				// last_pullrequest
-				github.pullRequests.createCommentReply({
-					user: repo_username,
-					repo: repo_name,
-					body: "Build complete, log posted @ http://foo.bar/",
-					number: this.last_pullrequest,
-					in_reply_to: this.last_pullrequest,
-				},function(err,result){
-					console.log("!trace PULL REQUEST err/result: ",err,result);
-					callback(err,result);
-				}.bind(this));
-
-			}.bind(this),
-
 			// Alright, that's great, all we need to do is simply.
 			
 			// 2. Edit the file.
@@ -463,9 +484,6 @@ module.exports = function(opts,bot) {
 				callback(errtxt);
 			}
 		}.bind(this));
-
-
-		callback();
 
 	}
 

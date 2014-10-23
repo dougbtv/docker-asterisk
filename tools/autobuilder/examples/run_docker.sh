@@ -21,7 +21,6 @@ echo "Starting autobuilder..."
 docker run \
   --name autobuilder \
   --link dind:dind \
-  -e PORT=4444 \
   -t dougbtv/asterisk-autobuilder \
   forever -e /var/log/autobuilder.log -o /var/log/autobuilder.log autobuilder.js \
     -u asteriskautobuilder -p "aaaaaaaaaaaaaaaaa" \
