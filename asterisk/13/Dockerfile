@@ -24,7 +24,7 @@ ENV AUTOBUILD_UNIXTIME 123123
 
 # Download asterisk.
 # This is an experiment for Asterisk 13
-RUN curl -sf -o /tmp/asterisk.tar.gz -L http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-13.0.0-beta2.tar.gz
+RUN curl -sf -o /tmp/asterisk.tar.gz -L http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-13-current.tar.gz
 
 # gunzip asterisk
 RUN mkdir /tmp/asterisk
