@@ -12,9 +12,16 @@ Which is as simple as running:
 
 ## What is it based on?
 
+Asterisk 13 has been released!
+
+* The Dockerfile is in `asterisk/13/Dockerfile` & available with `docker pull dougbtv/asterisk13`
+
+Dockerfile in the root directory is:
+
 * Based on Centos 6.5 base image
 * Latest current available version of Asterisk 11, certified branch
   * ...More branches to come in the future.
+* Available with `docker pull dougbtv/asterisk`
 
 ## Check out the latest build!
 
