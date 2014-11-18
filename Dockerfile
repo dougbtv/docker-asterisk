@@ -19,14 +19,14 @@ WORKDIR /tmp/asterisk
 # make asterisk.
 ENV rebuild_date 2014-10-07
 # Configure
-RUN ./configure --libdir=/usr/lib64
+RUN ./configure --libdir=/usr/lib64 1> /dev/null
 # Remove the native build option
 RUN make menuselect.makeopts
 RUN sed -i "s/BUILD_NATIVE//" menuselect.makeopts
 # Continue with a standard make.
-RUN make
-RUN make install
-RUN make samples
+RUN make 1> /dev/null
+RUN make install 1> /dev/null
+RUN make samples 1> /dev/null
 WORKDIR /
 
 RUN mkdir -p /etc/asterisk
