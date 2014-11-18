@@ -23,6 +23,6 @@ docker run \
   --link dind:dind \
   -t dougbtv/asterisk-autobuilder \
   forever -e /var/log/autobuilder.log -o /var/log/autobuilder.log autobuilder.js \
-    -u asteriskautobuilder -p "aaaaaaaaaaaaaaaaa" \
-    --docker_user dougbtv --docker_password "aaaaaaaaaaaaaa" --docker_email "d00d@d00d.com" \
-    --skipclone --irc_debug --irc_disabled --forceupdate --authdisabled
+    -u asteriskautobuilder -p "iErs6lw6yJwugQe01n3XrO7BLgl4sQ5V" \
+    --docker_user dougbtv --docker_password "UvIfAYh1E5K*uQZ2HxmQ6zC7Ke&yJfGD" --docker_email="douglaskippsmith@gmail.com" \
+    --irc_debug

@@ -25,11 +25,11 @@ Dockerfile in the root directory is:
 
 ## Check out the latest build!
 
-The image is backed by an auto-building-irc-bot which watches for the latest tarball from downloads.asterisk.org, builds it into this docker image and then automatically pushes it to dockerhub.
+The image is backed by [bowline](https://github.com/dougbtv/bowline) (a Docker build server, which I wrote) which watches for the latest tarball from downloads.asterisk.org, builds it into this docker image and then automatically pushes it to dockerhub.
 
 Whenever a new build is created, the bot creates a pull request here, you can check out the latest merged pull requests, and you'll find a link to the results of the build posted on a paste bin. Here's [an example automatically generated pull request](https://github.com/dougbtv/docker-asterisk/pull/16), and here's [an example log](http://www.pasteall.org/54631/text). 
 
-You can come visit the bot in `##asterisk-autobuilder` on freenode. Or, naturally feel free to run it yourself. (More docs on this to come, you'll find the commands the bot currently takes at the bottom of this readme.)
+Bowline is under-work, but, was inspired by my Asterisk dockerfiles, seeing, it takes a while to compile Asterisk. (which is why it's nice to have an up-to-date image available)
 
 ## Running it.
 
@@ -84,9 +84,6 @@ Let's inspect the important files in the clone
     |-- README.md
     `-- tools/
         |-- asterisk-cli.sh
-        |-- autobuilder/
-        |   |
-        |   ` ...
         |-- clean.sh
         `-- run.sh
 
@@ -110,17 +107,13 @@ In the `tools/` dir are some utilities I find myself using over and over:
 * `clean.sh` kills all containers, and removes them.
 * `run.sh` a suggested way to run the Docker container.
 
-Finally, the `tools/` dir contains the `autobuilder/` dir, which is the node.js source code for the autobuilder bot, which watches for changes and then builds a new image and pushes it to dockerhub.
-
 ...Not listed is the `asterisk/` dir, where there's a sample build for Asterisk 13 beta. This Dockerfile works. Just getting the ducks in a row for when it's released.
 
-## Bot commands
+## Bowline
 
-If you're checking out the bot, you'll notice just a few commands, most of which are most interesting during a build:
+This bot is backed by [bowline](https://github.com/dougbtv/bowline), which is a Docker build server / application, that I also wrote. It's actually while making these files I was inspired to build this.
 
-* `!build` initiates a build manually (only for authorized users)
-* `!lastcmd` shows the last executed command during long builds
-* `!tail` shows the last three lines of the log
+This ensures there's a fresh image built and available on Dockerhub. There used to be a prototype here, alas, I have removed it -- I recommend checking out bowline if you're interested.
 
 ## Lessons Learned
 
