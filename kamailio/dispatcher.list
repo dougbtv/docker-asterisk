@@ -1,0 +1,4 @@
+# group  sip addresses of your * units
+1 sip:10.1.2.3:5060
+1 sip:10.1.2.4:5060
+1 sip:10.1.2.5:5060
