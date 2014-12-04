@@ -1,13 +1,13 @@
 #!/bin/bash
 
-IP_ADDR="192.168.2.103"
+IP_ADDR="192.168.122.1"
 # $(ifconfig | grep -i 192.168.100 | awk '{print $2}')
 
 docker run --rm -it \
     -p 4001:4001 -p 7001:7001 \
     -v /var/etcd/:/data \
     -i -t coreos/etcd:latest \
-    -discovery=https://discovery.etcd.io/226641ca3f5355cb1138ed250a2a3328 \
+    -discovery=https://discovery.etcd.io/a9183c3c0f556f37bb9f10de85086fcc \
     -peer-addr $IP_ADDR:7001 \
     -addr $IP_ADDR:4001 \
     -name etcdindocker1234
