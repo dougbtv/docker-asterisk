@@ -1,10 +1,10 @@
-module.exports = function(log) {
+module.exports = function(log,ip_address) {
 
 	var async = require('async');
 	var moment = require('moment');
 
 	var Etcd = require('node-etcd');
-	var etcd = new Etcd('127.0.0.1', '4001');
+	var etcd = new Etcd(ip_address, '4001');
 
 	var ASTERISK_HOSTS = "asterisk";
 	var LOOP_WAIT = 1000;
@@ -45,10 +45,7 @@ module.exports = function(log) {
 
 			// Check to see that the directory exists.
 			if (err) {
-				console.log("!trace ast hosts: ",ASTERISK_HOSTS);
-				etcd.mkdir( ASTERISK_HOSTS + "/",function(){
-					log.it("created_root_etcd_key",{msg: "Created asterisk directory."});
-				});
+				createRootKey();
 			} else {
 				if (hosts.node.dir) {
 					log.it("found_root_etcd_key","Found existing asterisk directory");
@@ -85,21 +82,47 @@ module.exports = function(log) {
 
 	}
 
+	var createRootKey = function(callback) {
+
+		if (typeof callback == 'undefined') {
+			callback = function(){}; 
+		}
+
+		etcd.mkdir( ASTERISK_HOSTS + "/",function(err){
+			log.it("created_root_etcd_key",{msg: "Created asterisk directory."});
+			callback(err);
+		});
+
+	}
+
 	var terminalKey = function(instr) {
 		return instr.replace(/^.+\/(.+)$/,'$1');
 	}
 
 	var loadAllBoxes = function() {
-
 		
 		// Alright, now let's get that recursively...
 		etcd.get(ASTERISK_HOSTS, { recursive: true }, function(err,hosts){
-			if (err) {
+			if (!err) {
+
+				if (hosts.node) {
+					if (hosts.node.nodes) {
+						boxesToJson(hosts.node.nodes);
+					} else {
+						log.warn("hosts_incomplete",hosts);
+					}
+				} else {
+					log.warn("hosts_incomplete",hosts);
+				}
+
+			} else {
+
 				log.error("etcd_get_rootkey_failed",{err: err});
+				createRootKey();
+
 			}
 
-			console.log("!trace hosts before:", hosts.node);
-			boxesToJson(hosts.node.nodes);
+			
 		});	
 
 	}
