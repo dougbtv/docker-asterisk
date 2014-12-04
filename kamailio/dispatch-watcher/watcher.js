@@ -1,126 +1,148 @@
-var async = require('async');
-var moment = require('moment');
+module.exports = function(log) {
 
-var Etcd = require('node-etcd');
-var etcd = new Etcd('127.0.0.1', '4001');
+	var async = require('async');
+	var moment = require('moment');
 
-var ASTERISK_HOSTS = "asterisk";
-var LOOP_WAIT = 1000;
+	var Etcd = require('node-etcd');
+	var etcd = new Etcd('127.0.0.1', '4001');
 
-/*
+	var ASTERISK_HOSTS = "asterisk";
+	var LOOP_WAIT = 1000;
 
-Example keys:
+	/*
 
-asterisk/
-asterisk/box1
-asterisk/box1/ip/192.168.1.100
-asterisk/box1/heartbeat/11293847289734
-asterisk/box2
-asterisk/box3
+	Example keys:
 
-Into json:
+	asterisk/
+	asterisk/box1
+	asterisk/box1/ip/192.168.1.100
+	asterisk/box1/heartbeat/11293847289734
+	asterisk/box2
+	asterisk/box3
 
-var thing = [
-	box1: {
-		ip: 192.168.1.100,
-		heartbeat: {uuid}
-	},
-	box2: {
-		ip: 192.168.1.101,
-		heartbeat: {uuid}
-	}
-]
+	Into json:
 
-*/
-
-// Our boxes.
-var boxen = {};
-
-var terminalKey = function(instr) {
-	return instr.replace(/^.+\/(.+)$/,'$1');
-}
-
-var boxesToJson = function(hosts,callback) {
-
-	// console.log("!trace hosts: ",hosts);
-
-	hosts.forEach(function(host){
-
-		// Get the box name.
-		var hostname = terminalKey(host.key);
-		console.log("!trace HOSTNAME: ",hostname);
-		console.log("!trace host: %j",host);
-
-		// Is this key set?
-		if (typeof boxen[hostname] == 'undefined') {
-			// It's not, let's set it
-			console.log("Discovered new box: ",hostname);
-			boxen[hostname] = {};
+	var thing = [
+		box1: {
+			ip: 192.168.1.100,
+			heartbeat: {uuid}
+		},
+		box2: {
+			ip: 192.168.1.101,
+			heartbeat: {uuid}
 		}
+	]
 
-		// Now let's cycle it's values.
-		host.nodes.forEach(function(hostkey){
-			var eachkey = terminalKey(hostkey.key);
-			boxen[hostname][eachkey] = hostkey.value;
+	*/
+
+	// Our boxes.
+	var boxen = {};
+
+	var initialize = function() {
+
+		// Alright let's initialize the app.
+		etcd.get(ASTERISK_HOSTS, { recursive: true }, function(err,hosts){
+
+			// Check to see that the directory exists.
+			if (err) {
+				console.log("!trace ast hosts: ",ASTERISK_HOSTS);
+				etcd.mkdir( ASTERISK_HOSTS + "/",function(){
+					log.it("created_root_etcd_key",{msg: "Created asterisk directory."});
+				});
+			} else {
+				if (hosts.node.dir) {
+					log.it("found_root_etcd_key","Found existing asterisk directory");
+				}
+			}
+
+			// Set a watch on the root key.
+			watcher = etcd.watcher(ASTERISK_HOSTS, null, {recursive: true});
+			
+			// Triggers on set operations
+			watcher.on("set", function(etcd_event){
+
+				console.log("!trace err/etcd_event",etcd_event);
+				// Ok, something changed...
+				console.log("Key %s changed to %s",etcd_event.node.key,etcd_event.node.value); // etcd_event.prevNode.value,
+
+
+				// relead the boxes
+				loadAllBoxes();
+
+			});
+
+			// Let's start up by 
+			loadAllBoxes();
+
+			// watcher.on("delete", console.log); // Triggers on delete.
+			// watcher.on("change", console.log); // Triggers on all changes
+			
+			// console.log("!trace HOSTS EXIST?",err,hosts);
+
+			// watcherLoop();
+
 		});
 
-	});
-
-	console.log("!trace boxen: ",JSON.stringify(boxen, null, '\t'));
-
-};
-
-var watcherLoop = function() {
-
-    console.log('foo');
-
-    // Go into a loop and do this again, and again.
-	setTimeout(watcherLoop,LOOP_WAIT);
-};
-
-etcd.get(ASTERISK_HOSTS, { recursive: true }, function(err,hosts){
-
-	// Check to see that the directory exists.
-	if (err) {
-		console.log("!trace ast hosts: ",ASTERISK_HOSTS);
-		etcd.mkdir( ASTERISK_HOSTS + "/",function(){
-			console.log("Created asterisk directory.");
-		});
-	} else {
-		if (hosts.node.dir) {
-			console.log("Found existing asterisk directory");
-		}
 	}
 
-	watcher = etcd.watcher(ASTERISK_HOSTS, null, {recursive: true});
-	
-	// Triggers on specific changes (set ops)
-	watcher.on("set", function(evt){
+	var terminalKey = function(instr) {
+		return instr.replace(/^.+\/(.+)$/,'$1');
+	}
 
-		// console.log("!trace err/evt",evt);
-		// Ok, something changed...
-		console.log("Key %s changed to %s",evt.node.key,evt.node.value); // evt.prevNode.value,
+	var loadAllBoxes = function() {
 
+		
 		// Alright, now let's get that recursively...
 		etcd.get(ASTERISK_HOSTS, { recursive: true }, function(err,hosts){
 			if (err) {
-				console.log("ERROR: ",err);
+				log.error("etcd_get_rootkey_failed",{err: err});
 			}
 
-			// console.log("!trace hosts:", hosts.node);
+			console.log("!trace hosts before:", hosts.node);
 			boxesToJson(hosts.node.nodes);
-		});		
+		});	
 
-	});
+	}
 
-	// watcher.on("delete", console.log); // Triggers on delete.
-	// watcher.on("change", console.log); // Triggers on all changes
-	
-	// console.log("!trace HOSTS EXIST?",err,hosts);
+	var boxesToJson = function(hosts,callback) {
 
-	// watcherLoop();
+		// console.log("!trace hosts: ",hosts);
 
-});
+		hosts.forEach(function(host){
 
+			// Get the box name.
+			var hostname = terminalKey(host.key);
+			console.log("!trace HOSTNAME: ",hostname);
+			console.log("!trace host: %j",host);
 
+			// Is this key set?
+			if (typeof boxen[hostname] == 'undefined') {
+				// It's not, let's set it
+				log.it("new_asterisk_host_discovered",{hostname: hostname });
+				boxen[hostname] = {};
+			}
+
+			// Now let's cycle it's values.
+			host.nodes.forEach(function(hostkey){
+				var eachkey = terminalKey(hostkey.key);
+				boxen[hostname][eachkey] = hostkey.value;
+			});
+
+		});
+
+		log.it("boxen_debug",{boxen: boxen});
+
+	};
+
+	var watcherLoop = function() {
+
+	    console.log('foo');
+
+	    // Go into a loop and do this again, and again.
+		setTimeout(watcherLoop,LOOP_WAIT);
+	};
+
+	initialize();
+
+}
 

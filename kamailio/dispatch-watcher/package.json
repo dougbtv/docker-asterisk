@@ -20,6 +20,8 @@
   "dependencies": {
     "async": "*",
     "moment": "*",
+    "bunyan": "*",
+    "bunyan-prettystream": "*",
     "node-etcd": "*"
   }
 }
