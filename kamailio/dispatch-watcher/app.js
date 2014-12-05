@@ -35,8 +35,12 @@ Where the IP address is where etcd can be found.
 	log.it("etcd_ipaddress",{ip_address: ip_address});
 
 	// ----------------------------------- end ip assign.
+
+	// When do we timeout?
+	// 5 seconds for testing...
+	var TIMEOUT_AFTER = 5000;
 	
 	// Instantiate our main app.
 	var Watcher = require('./watcher.js');
-	var watcher = new Watcher(log,ip_address);
+	var watcher = new Watcher(log,ip_address,TIMEOUT_AFTER);
 	

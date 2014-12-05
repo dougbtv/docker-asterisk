@@ -1,4 +1,4 @@
-module.exports = function(log,ip_address) {
+module.exports = function(log,ip_address,timeout_after) {
 
 	var async = require('async');
 	var moment = require('moment');
@@ -58,27 +58,79 @@ module.exports = function(log,ip_address) {
 			// Triggers on set operations
 			watcher.on("set", function(etcd_event){
 
-				console.log("!trace err/etcd_event",etcd_event);
 				// Ok, something changed...
-				console.log("Key %s changed to %s",etcd_event.node.key,etcd_event.node.value); // etcd_event.prevNode.value,
+				// console.log("!trace err/etcd_event",etcd_event);
+				// console.log("Key %s changed to %s",etcd_event.node.key,etcd_event.node.value); // etcd_event.prevNode.value,
 
+				// Perform specific actions for special keys.
+				var termkey = terminalKey(etcd_event.node.key);
+				// console.log("!trace key set: ",etcd_event.node.key);
+				switch (termkey) {
+					case "heartbeat":
+						updateHeartBeat(etcd_event.node.key);
+						break;
+					default:
+						// Nothing necessary.
+						break;
+				}
 
 				// relead the boxes
 				loadAllBoxes();
 
 			});
 
-			// Let's start up by 
+			// Let's start up by loading all the boxes.
 			loadAllBoxes();
 
+			// Start a loop watching the heart beat
+			checkPulse();
+
+			// Other events to watch, if need be.
 			// watcher.on("delete", console.log); // Triggers on delete.
 			// watcher.on("change", console.log); // Triggers on all changes
 			
-			// console.log("!trace HOSTS EXIST?",err,hosts);
-
-			// watcherLoop();
 
 		});
+
+	}
+
+	var checkPulse = function() {
+
+		for (var boxkey in boxen){
+			if (boxen.hasOwnProperty(boxkey)) {
+				
+				// console.log("boxkey is " + boxkey + ", value is" + boxen[boxkey]);
+				var box = boxen[boxkey];
+				
+				if (box.last_update) {
+					// It has a last update
+					var now_moment = new moment();
+					var last_beat = now_moment.diff(box.last_update);
+					console.log("!trace LAST HEART BEAT: ",last_beat,boxkey);
+				} else {
+					console.warn("box_missing_heartbeat",{ box: boxkey});
+				}
+
+			}
+		}
+
+		// Go into a loop and do this again, and again.
+		setTimeout(checkPulse,LOOP_WAIT);
+	};
+
+	var updateHeartBeat = function(key) {
+
+		var pts = key.split("/");
+
+		var boxidx = pts[2];
+
+		if (typeof boxen[boxidx] != 'undefined') {
+			boxen[boxidx].last_update = new moment();
+			log.it("heartbeat_updated",{box: boxidx});
+		} else {
+			log.error("key_not_found",{box: boxidx, fullkey: key, keysplit: pts});
+		}
+		
 
 	}
 
@@ -135,8 +187,8 @@ module.exports = function(log,ip_address) {
 
 			// Get the box name.
 			var hostname = terminalKey(host.key);
-			console.log("!trace HOSTNAME: ",hostname);
-			console.log("!trace host: %j",host);
+			// console.log("!trace HOSTNAME: ",hostname);
+			// console.log("!trace host: %j",host);
 
 			// Is this key set?
 			if (typeof boxen[hostname] == 'undefined') {
@@ -148,6 +200,16 @@ module.exports = function(log,ip_address) {
 			// Now let's cycle it's values.
 			host.nodes.forEach(function(hostkey){
 				var eachkey = terminalKey(hostkey.key);
+
+				switch (eachkey) {
+					case "heartbeat":
+						updateHeartBeat(hostkey.key);
+						break;
+					default:
+						// Nothing necessary.
+						break;
+				}
+
 				boxen[hostname][eachkey] = hostkey.value;
 			});
 
@@ -155,14 +217,6 @@ module.exports = function(log,ip_address) {
 
 		log.it("boxen_debug",{boxen: boxen});
 
-	};
-
-	var watcherLoop = function() {
-
-	    console.log('foo');
-
-	    // Go into a loop and do this again, and again.
-		setTimeout(watcherLoop,LOOP_WAIT);
 	};
 
 	initialize();
