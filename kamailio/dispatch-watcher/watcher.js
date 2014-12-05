@@ -1,10 +1,10 @@
-module.exports = function(log,ip_address,timeout_after) {
+module.exports = function(log,opts) {
 
 	var async = require('async');
 	var moment = require('moment');
 
 	var Etcd = require('node-etcd');
-	var etcd = new Etcd(ip_address, '4001');
+	var etcd = new Etcd(opts.ipadress, '4001');
 
 	var ASTERISK_HOSTS = "asterisk";
 	var LOOP_WAIT = 1000;
@@ -96,6 +96,7 @@ module.exports = function(log,ip_address,timeout_after) {
 
 	var checkPulse = function() {
 
+		var deleters = [];
 		for (var boxkey in boxen){
 			if (boxen.hasOwnProperty(boxkey)) {
 				
@@ -106,12 +107,39 @@ module.exports = function(log,ip_address,timeout_after) {
 					// It has a last update
 					var now_moment = new moment();
 					var last_beat = now_moment.diff(box.last_update);
-					console.log("!trace LAST HEART BEAT: ",last_beat,boxkey);
+					if (last_beat > opts.timeout) {
+						// Uh oh, that box is down.
+						log.it("box_down",{box: boxkey, last_update: box.last_update.toDate()});
+						// We need to process this somehow, too.
+						// Let's tear down it's key.
+						etcd.del( ASTERISK_HOSTS + "/" + boxkey, { recursive: true }, function(err){
+							if (err) {
+								log.error("delete_host_error",{err: err});
+							}
+
+							log.it("etcd_removed_host",{box: boxkey});
+
+						});
+
+						// We can delete this mother.
+						deleters.push(boxkey);
+
+					}
+					
+					// console.log("!trace LAST HEART BEAT: ",last_beat,boxkey);
+
 				} else {
 					console.warn("box_missing_heartbeat",{ box: boxkey});
 				}
 
 			}
+		}
+
+		// Remove from boxen when we're deleting.
+		if (deleters.length) {
+			deleters.forEach(function(box){
+				delete boxen[box];	
+			});
 		}
 
 		// Go into a loop and do this again, and again.

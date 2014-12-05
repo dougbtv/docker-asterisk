@@ -7,12 +7,29 @@ Part of a High Availability setup with Asterisk under coreOS & docker.
 
 Run like:
 
-node app.js 192.168.1.1
+node app.js --ipaddress 192.168.1.1 --timeout 20000
 
 Where the IP address is where etcd can be found.
+or get help with:
+
+node app.js --help
 
 */
 
+	var opts = require("nomnom")
+		.option('ipaddress', {
+			abbr: 'i',
+			default: '127.0.0.1',
+			help: 'Set etcd ip address'
+		})
+		.option('timeout', {
+			abbr: 't',
+			default: 20000,
+			help: 'Timeout before heartbeat pulse check fails (in milliseconds)'
+		})
+		.parse();
+
+	
 	// Create a log object.
 	var Log = require('./Log.js');
 	var log = new Log();
@@ -42,5 +59,5 @@ Where the IP address is where etcd can be found.
 	
 	// Instantiate our main app.
 	var Watcher = require('./watcher.js');
-	var watcher = new Watcher(log,ip_address,TIMEOUT_AFTER);
+	var watcher = new Watcher(log,opts);
 	
