@@ -6,5 +6,4 @@ ADD package.json /app/
 RUN npm install
 ADD *.js /app/
 
-CMD []
-ENTRYPOINT ["/nodejs/bin/node app.js"]
+ENTRYPOINT ["forever", "-o", "/dev/null", "app.js"]

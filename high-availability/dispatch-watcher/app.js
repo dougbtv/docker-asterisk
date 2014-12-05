@@ -7,7 +7,7 @@ Part of a High Availability setup with Asterisk under coreOS & docker.
 
 Run like:
 
-node app.js --ipaddress 192.168.1.1 --timeout 20000
+node app.js --etcdhost 192.168.1.1 --timeout 20000
 
 Where the IP address is where etcd can be found.
 or get help with:
@@ -17,10 +17,10 @@ node app.js --help
 */
 
 	var opts = require("nomnom")
-		.option('ipaddress', {
-			abbr: 'i',
+		.option('etcdhost', {
+			abbr: 'e',
 			default: '127.0.0.1',
-			help: 'Set etcd ip address'
+			help: 'Set etcd host or ip address'
 		})
 		.option('timeout', {
 			abbr: 't',
@@ -33,23 +33,6 @@ node app.js --help
 	// Create a log object.
 	var Log = require('./Log.js');
 	var log = new Log();
-
-	// --------------------------------
-	// Assign a custom etcd IP address as the first argument.
-	var ip_address;
-	var found_ip = false;
-	process.argv.forEach(function(arg){
-		if (arg.match(/\d+\./)) {
-			found_ip = true;
-			ip_address = arg;
-		}
-	});
-
-	if (!found_ip) {
-		ip_address = '127.0.0.1';
-	}
-
-	log.it("etcd_ipaddress",{ip_address: ip_address});
 
 	// ----------------------------------- end ip assign.
 

@@ -4,7 +4,10 @@ module.exports = function(log,opts) {
 	var moment = require('moment');
 
 	var Etcd = require('node-etcd');
-	var etcd = new Etcd(opts.ipadress, '4001');
+	var etcd = new Etcd(opts.etcdhost, '4001');
+
+	log.it("etcd_host",{host: opts.etcdhost});
+	log.it("timeout_set",{milliseconds: opts.timeout});
 
 	var ASTERISK_HOSTS = "asterisk";
 	var LOOP_WAIT = 1000;
@@ -116,9 +119,6 @@ module.exports = function(log,opts) {
 							if (err) {
 								log.error("delete_host_error",{err: err});
 							}
-
-							log.it("etcd_removed_host",{box: boxkey});
-
 						});
 
 						// We can delete this mother.
@@ -138,6 +138,7 @@ module.exports = function(log,opts) {
 		// Remove from boxen when we're deleting.
 		if (deleters.length) {
 			deleters.forEach(function(box){
+				log.it("etcd_removed_host",{box: box});
 				delete boxen[box];	
 			});
 		}
