@@ -12,8 +12,3 @@ docker run --rm -it \
     -addr $IP_ADDR:4001 \
     -name etcdindocker1234
 
-# -i -t microbox/etcd:latest \
-
-
-# docker run -p 4001:4001 coreos/etcd:v0.4.6 -name myetcd -discovery=https://discovery.etcd.io/c3176e9f6f49612ccc6bcd6fd8081682
-
