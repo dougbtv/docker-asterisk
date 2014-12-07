@@ -21,6 +21,7 @@
     "async": "*",
     "moment": "*",
     "bunyan": "*",
+    "uuid": "*",
     "nomnom": "*",
     "bunyan-prettystream": "*",
     "node-etcd": "*"

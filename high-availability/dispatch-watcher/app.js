@@ -22,30 +22,48 @@ Run an announcer like:
 */
 
 	var opts = require("nomnom")
+		// --------------------------------------- Global options.
 		.option('etcdhost', {
 			abbr: 'e',
 			default: '127.0.0.1',
 			help: 'Set etcd host or ip address'
 		})
+		// --------------------------------------- Dispatcher options.
 		.option('timeout', {
 			abbr: 't',
 			default: 20000,
 			help: 'Timeout before heartbeat pulse check fails (in milliseconds)'
 		})
+		.option('listpath', {
+			abbr: 'l',
+			default: "/etc/kamailio/dispatcher.list",
+			help: 'Path of the dispatcher.list file [dispatcher mode only]'
+		})
+		// --------------------------------------- Announcer options.
 		.option('announce', {
 			abbr: 'a',
 			flag: true,
 			help: 'Start in "announce" mode (defaults to dispatcher mode)'
 		})
+		.option('announceip', {
+			abbr: 'i',
+			default: "127.0.0.1",
+			help: 'IP Address to announce [announce mode only]'
+		})
+		.option('announceport', {
+			abbr: 'i',
+			default: '5060',
+			help: 'Port to announce [announce mode only]'
+		})
+		.option('weight', {
+			abbr: 'i',
+			default: false,
+			help: 'Percentage of calls to distribute to this node [announce mode only]'
+		})
 		.option('heartbeat', {
 			abbr: 'h',
 			default: 5000,
-			help: 'Time between heartbeat pulss [announce mode only] (in milliseconds)'
-		})
-		.option('listpath', {
-			abbr: 'l',
-			default: "/etc/kamailio/dispatcher.list",
-			help: 'Path of the dispatcher.list file [dispatcher mode only]'
+			help: 'Time between heartbeat pulses [announce mode only] (in milliseconds)'
 		})
 		.parse();
 
@@ -54,17 +72,22 @@ Run an announcer like:
 	var Log = require('./Log.js');
 	var log = new Log();
 
-	// Create the Kamailio object (which writes dispatcher.list files)
-	var Kamailio = require('./Kamailio.js');
-	var kamailio = new Kamailio(log,opts);
+	// Ok, let's load this next module based on announce/dispatch mode.
 
-	// ----------------------------------- end ip assign.
+	if (opts.announce) {
 
-	// When do we timeout?
-	// 5 seconds for testing...
-	var TIMEOUT_AFTER = 5000;
-	
-	// Instantiate our main app.
-	var Dispatcher = require('./Dispatcher.js');
-	var dispatcher = new Dispatcher(log,opts,kamailio);
-	
+		// Instantiate our main app.
+		var Announcer = require('./Announcer.js');
+		var announcer = new Announcer(log,opts);
+
+	} else {
+
+		// Create the Kamailio object (which writes dispatcher.list files)
+		var Kamailio = require('./Kamailio.js');
+		var kamailio = new Kamailio(log,opts);
+
+		// Instantiate our main app.
+		var Dispatcher = require('./Dispatcher.js');
+		var dispatcher = new Dispatcher(log,opts,kamailio);	
+
+	}

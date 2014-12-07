@@ -1,4 +1,4 @@
-module.exports = function(log,opts) {
+module.exports = function(log,opts,kamailio) {
 
 	var async = require('async');
 	var moment = require('moment');
@@ -12,29 +12,46 @@ module.exports = function(log,opts) {
 	var ASTERISK_HOSTS = "asterisk";
 	var LOOP_WAIT = 1000;
 
+	var uuid = require('uuid');
+
+	/*
+	// Generate a v1 (time-based) id
+	uuid.v1(); // -> '6c84fb90-12c4-11e1-840d-7b25c5ee775a'
+
+	// Generate a v4 (random) id
+	uuid.v4(); // -> '110ec58a-a0f2-4ac4-8393-c866d813b8d1'
+	*/
+
 	/*
 
 	Example keys:
 
+	key                         value
+	-----------------------------------------------------------------
 	asterisk/
 	asterisk/box1
-	asterisk/box1/ip/192.168.1.100
-	asterisk/box1/heartbeat/11293847289734
+	asterisk/box1/ip			192.168.1.100
+	asterisk/box1/port			5060
+	asterisk/box1/heartbeat		110ec58a-a0f2-4ac4-8393-c866d813b8d1
+	asterisk/box1/weight		15
 	asterisk/box2
+	asterisk/box2/ip			192.168.1.101
 	asterisk/box3
 
 	Into json:
 
-	var thing = [
+	var thing = {
 		box1: {
 			ip: 192.168.1.100,
+			port: 5060,
+			weight: 15,
 			heartbeat: {uuid}
 		},
 		box2: {
 			ip: 192.168.1.101,
 			heartbeat: {uuid}
 		}
-	]
+	}
 
 	*/
 
@@ -188,7 +205,15 @@ module.exports = function(log,opts) {
 
 				if (hosts.node) {
 					if (hosts.node.nodes) {
-						boxesToJson(hosts.node.nodes);
+						boxesToJson(hosts.node.nodes,function(allboxes){
+							kamailio.createList(allboxes,function(err){
+								if (err) {
+									log.error("kamailo_createlist",{err: err});
+								} else {
+									log.it("kamailo_createlist",{success: true});
+								}
+							});
+						});
 					} else {
 						log.warn("hosts_incomplete",hosts);
 					}
@@ -210,6 +235,10 @@ module.exports = function(log,opts) {
 
 	var boxesToJson = function(hosts,callback) {
 
+		if (typeof callback == 'undefined') {
+			callback = function(){};
+		}
+
 		// console.log("!trace hosts: ",hosts);
 
 		hosts.forEach(function(host){
@@ -226,25 +255,33 @@ module.exports = function(log,opts) {
 				boxen[hostname] = {};
 			}
 
-			// Now let's cycle it's values.
-			host.nodes.forEach(function(hostkey){
-				var eachkey = terminalKey(hostkey.key);
+			if (host.nodes) {
 
-				switch (eachkey) {
-					case "heartbeat":
-						updateHeartBeat(hostkey.key);
-						break;
-					default:
-						// Nothing necessary.
-						break;
-				}
+				// Now let's cycle it's values.
+				host.nodes.forEach(function(hostkey){
+					var eachkey = terminalKey(hostkey.key);
 
-				boxen[hostname][eachkey] = hostkey.value;
-			});
+					switch (eachkey) {
+						case "heartbeat":
+							updateHeartBeat(hostkey.key);
+							break;
+						default:
+							// Nothing necessary.
+							break;
+					}
 
+					boxen[hostname][eachkey] = hostkey.value;
+				});
+
+			} else {
+
+				log.warn("boxes_nodes_incomplete",{error: "whaaaaat, bummer."});
+
+			}
 		});
 
 		log.it("boxen_debug",{boxen: boxen});
+		callback(boxen);
 
 	};
 
