@@ -2,7 +2,7 @@ module.exports = function(log,opts) {
 
 	var moment = require('moment');
 	var fs = require('fs');
-	
+
 	/*
 
 	// boxen example
@@ -26,24 +26,21 @@ module.exports = function(log,opts) {
 
 		validateBoxen(boxen,function(boxes){
 
-			log.it("boxes_for_createlist",{boxes: boxes});
+			// log.it("boxes_for_createlist",{boxes: boxes});
 			
 			setWeights(boxes,function(weightedboxes){
 
-				log.it("weighted_boxes_result",{boxes: weightedboxes});
+				// log.it("weighted_boxes_result",{boxes: weightedboxes});
 
 				writeKamailioDispatcherList(boxes,function(err){
 
-
+					callback(null);
 
 				});
 
 			});
 			
-
 		});
-
-		callback(null);
 
 	}
 
@@ -70,7 +67,7 @@ module.exports = function(log,opts) {
 			}
 		}
 
-		log.it("resulting_list",{ flatfile: resultlist });
+		log.it("resulting_list",{ flatfile: resultlist, lines: resultlist.split("\n") });
 
 		fs.writeFile(opts.listpath, resultlist, function(err) {
 						
@@ -94,7 +91,7 @@ module.exports = function(log,opts) {
 		for (var boxkey in boxen){
 			if (boxen.hasOwnProperty(boxkey)) {
 				var box = boxen[boxkey];
-				console.log("!trace each boxen: ",box);
+				// console.log("!trace each boxen: ",box);
 				if (box.ip && box.heartbeat) {
 
 					// That seems good!

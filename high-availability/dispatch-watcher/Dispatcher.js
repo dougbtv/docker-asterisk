@@ -4,23 +4,12 @@ module.exports = function(log,opts,kamailio) {
 	var moment = require('moment');
 
 	var Etcd = require('node-etcd');
-	var etcd = new Etcd(opts.etcdhost, '4001');
+	var etcd = new Etcd(opts.etcdhost, opts.etcdport);
 
 	log.it("etcd_host",{host: opts.etcdhost});
 	log.it("timeout_set",{milliseconds: opts.timeout});
 
-	var ASTERISK_HOSTS = "asterisk";
 	var LOOP_WAIT = 1000;
-
-	var uuid = require('uuid');
-
-	/*
-	// Generate a v1 (time-based) id
-	uuid.v1(); // -> '6c84fb90-12c4-11e1-840d-7b25c5ee775a'
-
-	// Generate a v4 (random) id
-	uuid.v4(); // -> '110ec58a-a0f2-4ac4-8393-c866d813b8d1'
-	*/
 
 	/*
 
@@ -61,7 +50,7 @@ module.exports = function(log,opts,kamailio) {
 	var initialize = function() {
 
 		// Alright let's initialize the app.
-		etcd.get(ASTERISK_HOSTS, { recursive: true }, function(err,hosts){
+		etcd.get(opts.rootkey, { recursive: true }, function(err,hosts){
 
 			// Check to see that the directory exists.
 			if (err) {
@@ -73,7 +62,7 @@ module.exports = function(log,opts,kamailio) {
 			}
 
 			// Set a watch on the root key.
-			watcher = etcd.watcher(ASTERISK_HOSTS, null, {recursive: true});
+			watcher = etcd.watcher(opts.rootkey, null, {recursive: true});
 			
 			// Triggers on set operations
 			watcher.on("set", function(etcd_event){
@@ -82,7 +71,12 @@ module.exports = function(log,opts,kamailio) {
 				// console.log("!trace err/etcd_event",etcd_event);
 				// console.log("Key %s changed to %s",etcd_event.node.key,etcd_event.node.value); // etcd_event.prevNode.value,
 
-				// Perform specific actions for special keys.
+				// We only update all boxes when it's not the heartbeat.
+				// ...unless it's the first heartbeat (let the heartbeat handle determine this.)
+				// Other properties require re-writing the list
+				// However heart-beat is essentially no-change.
+				// As opposed to heartbeat failure... which is handled in the repeating loop to check pulse.
+
 				var termkey = terminalKey(etcd_event.node.key);
 				// console.log("!trace key set: ",etcd_event.node.key);
 				switch (termkey) {
@@ -90,12 +84,10 @@ module.exports = function(log,opts,kamailio) {
 						updateHeartBeat(etcd_event.node.key);
 						break;
 					default:
-						// Nothing necessary.
+						// relead the boxes
+						loadAllBoxes();
 						break;
 				}
-
-				// relead the boxes
-				loadAllBoxes();
 
 			});
 
@@ -132,7 +124,7 @@ module.exports = function(log,opts,kamailio) {
 						log.it("box_down",{box: boxkey, last_update: box.last_update.toDate()});
 						// We need to process this somehow, too.
 						// Let's tear down it's key.
-						etcd.del( ASTERISK_HOSTS + "/" + boxkey, { recursive: true }, function(err){
+						etcd.del( opts.rootkey + "/" + boxkey + "/", { recursive: true }, function(err){
 							if (err) {
 								log.error("delete_host_error",{err: err});
 							}
@@ -158,6 +150,10 @@ module.exports = function(log,opts,kamailio) {
 				log.it("etcd_removed_host",{box: box});
 				delete boxen[box];	
 			});
+
+			// Ok, after a box is removed, we need to load all boxes.
+			loadAllBoxes();
+
 		}
 
 		// Go into a loop and do this again, and again.
@@ -171,8 +167,21 @@ module.exports = function(log,opts,kamailio) {
 		var boxidx = pts[2];
 
 		if (typeof boxen[boxidx] != 'undefined') {
+
+			// On the first update, we need to load all boxes.
+			var perform_update = false;
+			if (!boxen[boxidx].last_update) {
+				perform_update = true;
+			}
 			boxen[boxidx].last_update = new moment();
-			log.it("heartbeat_updated",{box: boxidx});
+
+			// This is noisy.
+			// log.it("heartbeat_updated",{box: boxidx});
+
+			if (perform_update) {
+				loadAllBoxes();
+			}
+
 		} else {
 			log.error("key_not_found",{box: boxidx, fullkey: key, keysplit: pts});
 		}
@@ -186,7 +195,7 @@ module.exports = function(log,opts,kamailio) {
 			callback = function(){}; 
 		}
 
-		etcd.mkdir( ASTERISK_HOSTS + "/",function(err){
+		etcd.mkdir( opts.rootkey + "/",function(err){
 			log.it("created_root_etcd_key",{msg: "Created asterisk directory."});
 			callback(err);
 		});
@@ -200,7 +209,7 @@ module.exports = function(log,opts,kamailio) {
 	var loadAllBoxes = function() {
 		
 		// Alright, now let's get that recursively...
-		etcd.get(ASTERISK_HOSTS, { recursive: true }, function(err,hosts){
+		etcd.get(opts.rootkey, { recursive: true }, function(err,hosts){
 			if (!err) {
 
 				if (hosts.node) {
@@ -215,10 +224,10 @@ module.exports = function(log,opts,kamailio) {
 							});
 						});
 					} else {
-						log.warn("hosts_incomplete",hosts);
+						log.warn("no_hosts_found",hosts);
 					}
 				} else {
-					log.warn("hosts_incomplete",hosts);
+					log.warn("no_hosts_found",hosts);
 				}
 
 			} else {
