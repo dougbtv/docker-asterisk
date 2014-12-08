@@ -9,8 +9,8 @@ module.exports = function(log,opts,kamailio) {
 	log.it("set_etcd_host",{host: opts.etcdhost, port: opts.etcdport});
 	log.it("timeout_set",{milliseconds: opts.timeout});
 
-	var LOOP_WAIT = 1000;
-	var DELAY_CLUSTER_DELETE = 2500;
+	var LOOP_WAIT = 2500;
+	var DELAY_CLUSTER_SYNC = 1250;
 
 	/*
 
@@ -48,18 +48,31 @@ module.exports = function(log,opts,kamailio) {
 	// Our boxes.
 	this.boxen = {};
 
+	var initialLoad = function() {
+		// Let's start up by loading all the boxes.
+		log.it("initial_load");
+		loadAllBoxes(function(){
+			// Start a loop watching the heart beat
+			checkPulse();				
+		});
+	}
+
 	var initialize = function() {
 
 		// Alright let's initialize the app.
 		etcd.get(opts.rootkey, { recursive: true }, function(err,hosts){
 
 			// Check to see that the directory exists.
+			// And start our initial load at the right time.
 			if (err) {
-				createRootKey();
+				createRootKey(function(){
+					initialLoad();
+				});
 			} else {
 				if (hosts.node.dir) {
 					log.it("found_root_etcd_key","Found existing asterisk directory");
 				}
+				initialLoad();
 			}
 
 			// Set a watch on the root key.
@@ -99,14 +112,6 @@ module.exports = function(log,opts,kamailio) {
 
 			});
 
-			// Let's start up by loading all the boxes.
-			log.it("initial_load");
-			loadAllBoxes(function(){
-				// Start a loop watching the heart beat
-				checkPulse();				
-			});
-
-
 			// Other events to watch, if need be.
 			// watcher.on("delete", console.log); // Triggers on delete.
 			// watcher.on("change", console.log); // Triggers on all changes
@@ -127,7 +132,7 @@ module.exports = function(log,opts,kamailio) {
 				for (var boxkey in this.boxen){
 					if (this.boxen.hasOwnProperty(boxkey)) {
 						
-						// console.log("boxkey is " + boxkey + ", value is" + this.boxen[boxkey]);
+						// console.log("!trace boxkey is " + boxkey + ", value is %j",this.boxen[boxkey]);
 						var box = this.boxen[boxkey];
 						
 						if (box.last_update) {
@@ -149,7 +154,7 @@ module.exports = function(log,opts,kamailio) {
 							// console.log("!trace LAST HEART BEAT: ",last_beat,boxkey);
 
 						} else {
-							console.warn("box_missing_heartbeat",{ box: boxkey});
+							log.warn("box_missing_heartbeat",{ box: boxkey});
 						}
 
 					}
@@ -172,11 +177,12 @@ module.exports = function(log,opts,kamailio) {
 					// ...we remove from our own data structure at the end of the waterfall.
 					if (deleters.length) {
 						async.each(deleters,function(box,cb){
-							log.it("etcd_removed_host",{box: box});
+		
+							log.it("etcd_removing_host",{box: box});
 							etcd.del( opts.rootkey + "/" + box + "/", { recursive: true }, function(err){
-								cb(err);
+								cb(err);	
 							});
-							
+		
 						},function(err){
 
 							// report back with just deleters.
@@ -217,7 +223,7 @@ module.exports = function(log,opts,kamailio) {
 						// Go into a loop and do this again, and again.
 						setTimeout(checkPulse,LOOP_WAIT);
 					});
-				},DELAY_CLUSTER_DELETE);
+				},DELAY_CLUSTER_SYNC);
 			} else {
 				setTimeout(checkPulse,LOOP_WAIT);
 			}
@@ -254,7 +260,9 @@ module.exports = function(log,opts,kamailio) {
 
 		etcd.mkdir( opts.rootkey + "/",function(err){
 			log.it("created_root_etcd_key",{msg: "Created asterisk directory."});
-			callback(err);
+			setTimeout(function(){
+				callback(err);
+			},DELAY_CLUSTER_SYNC);
 		});
 
 	}.bind(this);
@@ -271,40 +279,37 @@ module.exports = function(log,opts,kamailio) {
 
 		// Alright, now let's get that recursively...
 		etcd.get(opts.rootkey, { recursive: true }, function(err,hosts){
+
+			var convert_nodes = {};
+
 			if (!err) {
 
 				if (hosts.node) {
 					
-					var convert_nodes;
 					if (hosts.node.nodes) {
 						convert_nodes = hosts.node.nodes;
 					} else {
-						convert_nodes = {};
-						callback("no_host_nodes_found");
 						log.warn("no_host_nodes_found",hosts);
 					}
-
-					boxesToJson(convert_nodes);
-					kamailio.createList(this.boxen,function(err){
-						if (!err) {
-							// That's a success.
-							// log.it("kamailo_createlist",{success: true});
-						} else {
-							log.error("kamailo_createlist",{err: err});
-						}
-						callback(err);
-					});
 					
 				} else {
-					callback("no_hosts_found");
 					log.warn("no_hosts_found",hosts);
 				}
 
 			} else {
-				callback("etcd_rootkey_missing");
 				log.warn("etcd_rootkey_missing",{err: err.error});
-				// createRootKey();
 			}
+
+			boxesToJson(convert_nodes);
+			kamailio.createList(this.boxen,function(err){
+				if (!err) {
+					// That's a success.
+					// log.it("kamailo_createlist",{success: true});
+				} else {
+					log.error("kamailo_createlist",{err: err});
+				}
+				callback(err);
+			});
 
 		}.bind(this));	
 
