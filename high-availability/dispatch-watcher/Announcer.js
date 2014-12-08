@@ -104,8 +104,20 @@ module.exports = function(log,opts) {
 				callback(null);
 			}
 		},
+
+		// We need a semaphore to say that we're done.
+		announce_complete: function(callback) {
+			etcd.set(boxpath + "complete","true",callback);
+		},
 			
 	},function(err,result){
+
+		log.it("box_announced",{
+			name: opts.announcename,
+			ip: opts.announceip,
+			weight: opts.weight,
+			port: opts.announceport,
+		});
 
 		if (err) {
 			log.error("announce_box",{err: err, result: result});

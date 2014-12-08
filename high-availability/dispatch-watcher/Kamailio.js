@@ -24,9 +24,11 @@ module.exports = function(log,opts) {
 
 	this.createList = function(boxen,callback) {
 
+		// log.it("boxes_for_createlist",{boxen: boxen});
+
 		validateBoxen(boxen,function(boxes){
 
-			// log.it("boxes_for_createlist",{boxes: boxes});
+			// log.it("valid_boxes_createlist",{boxes: boxes});
 			
 			setWeights(boxes,function(weightedboxes){
 
@@ -67,7 +69,7 @@ module.exports = function(log,opts) {
 			}
 		}
 
-		log.it("resulting_list",{ flatfile: resultlist, lines: resultlist.split("\n") });
+		log.it("writing_dispatcher_list",{ flatfile: resultlist, lines: resultlist.split("\n") });
 
 		fs.writeFile(opts.listpath, resultlist, function(err) {
 						
@@ -92,7 +94,7 @@ module.exports = function(log,opts) {
 			if (boxen.hasOwnProperty(boxkey)) {
 				var box = boxen[boxkey];
 				// console.log("!trace each boxen: ",box);
-				if (box.ip && box.heartbeat) {
+				if (box.complete) {
 
 					// That seems good!
 					valid[boxkey] = box;
@@ -142,6 +144,15 @@ module.exports = function(log,opts) {
 			}
 		}
 
+		switch (number_boxes) {
+			case 0:
+				log.warn("empty_cluster",{msg: "No hosts in the cluster"});
+				break;
+			case 1:
+				log.warn("cluster_of_one",{msg: "Only one host in the cluster."});
+				break;
+		}
+
 		// console.log("!trace number boxes: ",number_boxes);
 		// console.log("!trace weights: ",weights);
 
@@ -160,13 +171,17 @@ module.exports = function(log,opts) {
 
 
 		// We split that between unweighted boxes.
+		var no_unweighted = false;
 		if (!number_unweighted) {
 			// That's a divide by zero problem.
 			// All boxes must be weighted in this case.
 			// We have to give the remainder to the first box.
-			add_to_first = total_weight;
+			no_unweighted = true;
+			add_to_first = (100 - total_weight);
 
-			log.warn("no_unweighted",{ number_weighted: number_weighted});
+			if (number_boxes) {
+				log.warn("no_unweighted",{ number_weighted: number_weighted});
+			}
 
 		} else {
 
@@ -181,14 +196,16 @@ module.exports = function(log,opts) {
 			add_to_first = 100 - sum_all_weights;
 
 			// Let's log the remainder.
-			log.it("distribution_calculated",{
-				number_weighted: number_weighted,
-				number_unweighted: number_unweighted,
-				each_split: each_split,
-				remainder: add_to_first,
-				sum_unweight: sum_unweight,
-				sum_all_weights: sum_all_weights,
-			});
+			/*
+				log.it("distribution_calculated",{
+					number_weighted: number_weighted,
+					number_unweighted: number_unweighted,
+					each_split: each_split,
+					remainder: add_to_first,
+					sum_unweight: sum_unweight,
+					sum_all_weights: sum_all_weights,
+				});
+			*/
 
 
 		}
@@ -208,7 +225,7 @@ module.exports = function(log,opts) {
 				}
 
 				// Add any remainder weight to the first unweighted box.
-				if (add_to_first && !box.weight) {
+				if ((add_to_first && !box.weight) || (add_to_first && no_unweighted)) {
 					boxes[boxkey].calculated_weight = boxes[boxkey].calculated_weight + add_to_first;
 					add_to_first = false;
 				}

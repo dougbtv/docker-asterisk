@@ -6,10 +6,11 @@ module.exports = function(log,opts,kamailio) {
 	var Etcd = require('node-etcd');
 	var etcd = new Etcd(opts.etcdhost, opts.etcdport);
 
-	log.it("etcd_host",{host: opts.etcdhost});
+	log.it("set_etcd_host",{host: opts.etcdhost, port: opts.etcdport});
 	log.it("timeout_set",{milliseconds: opts.timeout});
 
 	var LOOP_WAIT = 1000;
+	var DELAY_CLUSTER_DELETE = 2500;
 
 	/*
 
@@ -45,7 +46,7 @@ module.exports = function(log,opts,kamailio) {
 	*/
 
 	// Our boxes.
-	var boxen = {};
+	this.boxen = {};
 
 	var initialize = function() {
 
@@ -67,6 +68,8 @@ module.exports = function(log,opts,kamailio) {
 			// Triggers on set operations
 			watcher.on("set", function(etcd_event){
 
+				// console.log("!trace --------------------------------------- SET ACTION: %j",etcd_event);
+
 				// Ok, something changed...
 				// console.log("!trace err/etcd_event",etcd_event);
 				// console.log("Key %s changed to %s",etcd_event.node.key,etcd_event.node.value); // etcd_event.prevNode.value,
@@ -80,22 +83,29 @@ module.exports = function(log,opts,kamailio) {
 				var termkey = terminalKey(etcd_event.node.key);
 				// console.log("!trace key set: ",etcd_event.node.key);
 				switch (termkey) {
+					
+					// A heartbeat pulse.
 					case "heartbeat":
 						updateHeartBeat(etcd_event.node.key);
 						break;
-					default:
-						// relead the boxes
+
+					// Our semaphore to say a new box came online.
+					case "complete":
+						log.it("host_joined_cluster",{key_found: etcd_event.node.key });
 						loadAllBoxes();
 						break;
+					
 				}
 
 			});
 
 			// Let's start up by loading all the boxes.
-			loadAllBoxes();
+			log.it("initial_load");
+			loadAllBoxes(function(){
+				// Start a loop watching the heart beat
+				checkPulse();				
+			});
 
-			// Start a loop watching the heart beat
-			checkPulse();
 
 			// Other events to watch, if need be.
 			// watcher.on("delete", console.log); // Triggers on delete.
@@ -104,61 +114,117 @@ module.exports = function(log,opts,kamailio) {
 
 		});
 
-	}
+	}.bind(this);
 
 	var checkPulse = function() {
 
-		var deleters = [];
-		for (var boxkey in boxen){
-			if (boxen.hasOwnProperty(boxkey)) {
-				
-				// console.log("boxkey is " + boxkey + ", value is" + boxen[boxkey]);
-				var box = boxen[boxkey];
-				
-				if (box.last_update) {
-					// It has a last update
-					var now_moment = new moment();
-					var last_beat = now_moment.diff(box.last_update);
-					if (last_beat > opts.timeout) {
-						// Uh oh, that box is down.
-						log.it("box_down",{box: boxkey, last_update: box.last_update.toDate()});
-						// We need to process this somehow, too.
-						// Let's tear down it's key.
-						etcd.del( opts.rootkey + "/" + boxkey + "/", { recursive: true }, function(err){
-							if (err) {
-								log.error("delete_host_error",{err: err});
-							}
-						});
+		async.waterfall([
 
-						// We can delete this mother.
-						deleters.push(boxkey);
+			function(callback){
+
+				var deleters = [];
+
+				for (var boxkey in this.boxen){
+					if (this.boxen.hasOwnProperty(boxkey)) {
+						
+						// console.log("boxkey is " + boxkey + ", value is" + this.boxen[boxkey]);
+						var box = this.boxen[boxkey];
+						
+						if (box.last_update) {
+							// It has a last update
+							var now_moment = new moment();
+							var last_beat = now_moment.diff(box.last_update);
+							if (last_beat > opts.timeout) {
+								// Uh oh, that box is down.
+								log.it("box_down",{box: boxkey, last_update: box.last_update.toDate()});
+								// We need to process this somehow, too.
+								// Let's tear down it's key.
+								
+
+								// We can delete this mother.
+								deleters.push(boxkey);
+
+							}
+							
+							// console.log("!trace LAST HEART BEAT: ",last_beat,boxkey);
+
+						} else {
+							console.warn("box_missing_heartbeat",{ box: boxkey});
+						}
 
 					}
-					
-					// console.log("!trace LAST HEART BEAT: ",last_beat,boxkey);
-
-				} else {
-					console.warn("box_missing_heartbeat",{ box: boxkey});
 				}
 
+				callback(null,deleters);
+
+			}.bind(this),
+
+			function(deleters,callback){
+
+				if (!deleters) {
+
+					// Nothing to do...
+					callback(null);
+
+				} else {
+
+					// Remove from etcd.
+					// ...we remove from our own data structure at the end of the waterfall.
+					if (deleters.length) {
+						async.each(deleters,function(box,cb){
+							log.it("etcd_removed_host",{box: box});
+							etcd.del( opts.rootkey + "/" + box + "/", { recursive: true }, function(err){
+								cb(err);
+							});
+							
+						},function(err){
+
+							// report back with just deleters.
+							callback(err,deleters);
+
+						});
+
+					} else {
+						callback(null,deleters);
+					}
+
+				}
+
+			}.bind(this),
+
+		],function(err,deleters){
+
+			// Just keep the boxes we want...
+			// delete object[key] was giving me fits.
+			if (deleters.length) {
+				var new_boxen = {};
+				for (var boxkey in this.boxen){
+					if (this.boxen.hasOwnProperty(boxkey)) {
+						var box = this.boxen[boxkey];
+						if (deleters.indexOf(boxkey) == -1) {
+							// We keep that.
+							new_boxen[boxkey] = box;
+						}
+					}
+				}
+				this.boxen = new_boxen;
+				
+				// Ok to reload now.
+				// So.... It seems the delete functionality takes a bit to sync with the cluster.
+				// So I think I should delay this with a timeout.
+				setTimeout(function(){
+					loadAllBoxes(function(){
+						// Go into a loop and do this again, and again.
+						setTimeout(checkPulse,LOOP_WAIT);
+					});
+				},DELAY_CLUSTER_DELETE);
+			} else {
+				setTimeout(checkPulse,LOOP_WAIT);
 			}
-		}
 
-		// Remove from boxen when we're deleting.
-		if (deleters.length) {
-			deleters.forEach(function(box){
-				log.it("etcd_removed_host",{box: box});
-				delete boxen[box];	
-			});
+		}.bind(this));
 
-			// Ok, after a box is removed, we need to load all boxes.
-			loadAllBoxes();
-
-		}
-
-		// Go into a loop and do this again, and again.
-		setTimeout(checkPulse,LOOP_WAIT);
-	};
+	}.bind(this);
 
 	var updateHeartBeat = function(key) {
 
@@ -166,28 +232,19 @@ module.exports = function(log,opts,kamailio) {
 
 		var boxidx = pts[2];
 
-		if (typeof boxen[boxidx] != 'undefined') {
+		if (typeof this.boxen[boxidx] != 'undefined') {
 
-			// On the first update, we need to load all boxes.
-			var perform_update = false;
-			if (!boxen[boxidx].last_update) {
-				perform_update = true;
-			}
-			boxen[boxidx].last_update = new moment();
+			this.boxen[boxidx].last_update = new moment();
 
 			// This is noisy.
 			// log.it("heartbeat_updated",{box: boxidx});
 
-			if (perform_update) {
-				loadAllBoxes();
-			}
-
 		} else {
-			log.error("key_not_found",{box: boxidx, fullkey: key, keysplit: pts});
+			log.warn("premature_heartbeat",{box: boxidx, fullkey: key }); // keysplit: pts
 		}
 		
 
-	}
+	}.bind(this);
 
 	var createRootKey = function(callback) {
 
@@ -200,68 +257,77 @@ module.exports = function(log,opts,kamailio) {
 			callback(err);
 		});
 
-	}
+	}.bind(this);
 
 	var terminalKey = function(instr) {
 		return instr.replace(/^.+\/(.+)$/,'$1');
-	}
+	}.bind(this);
 
-	var loadAllBoxes = function() {
-		
-		// Alright, now let's get that recursively...
-		etcd.get(opts.rootkey, { recursive: true }, function(err,hosts){
-			if (!err) {
-
-				if (hosts.node) {
-					if (hosts.node.nodes) {
-						boxesToJson(hosts.node.nodes,function(allboxes){
-							kamailio.createList(allboxes,function(err){
-								if (err) {
-									log.error("kamailo_createlist",{err: err});
-								} else {
-									log.it("kamailo_createlist",{success: true});
-								}
-							});
-						});
-					} else {
-						log.warn("no_hosts_found",hosts);
-					}
-				} else {
-					log.warn("no_hosts_found",hosts);
-				}
-
-			} else {
-
-				log.error("etcd_get_rootkey_failed",{err: err});
-				createRootKey();
-
-			}
-
-			
-		});	
-
-	}
-
-	var boxesToJson = function(hosts,callback) {
+	var loadAllBoxes = function(callback) {
 
 		if (typeof callback == 'undefined') {
 			callback = function(){};
 		}
 
+		// Alright, now let's get that recursively...
+		etcd.get(opts.rootkey, { recursive: true }, function(err,hosts){
+			if (!err) {
+
+				if (hosts.node) {
+					
+					var convert_nodes;
+					if (hosts.node.nodes) {
+						convert_nodes = hosts.node.nodes;
+					} else {
+						convert_nodes = {};
+						callback("no_host_nodes_found");
+						log.warn("no_host_nodes_found",hosts);
+					}
+
+					boxesToJson(convert_nodes);
+					kamailio.createList(this.boxen,function(err){
+						if (!err) {
+							// That's a success.
+							// log.it("kamailo_createlist",{success: true});
+						} else {
+							log.error("kamailo_createlist",{err: err});
+						}
+						callback(err);
+					});
+					
+				} else {
+					callback("no_hosts_found");
+					log.warn("no_hosts_found",hosts);
+				}
+
+			} else {
+				callback("etcd_rootkey_missing");
+				log.warn("etcd_rootkey_missing",{err: err.error});
+				// createRootKey();
+			}
+
+		}.bind(this));	
+
+	}.bind(this);
+
+	var boxesToJson = function(hosts) {
+
 		// console.log("!trace hosts: ",hosts);
 
-		hosts.forEach(function(host){
+		for (var i = 0; i < hosts.length; i++) {
 
+			var host = hosts[i];
+		
 			// Get the box name.
 			var hostname = terminalKey(host.key);
 			// console.log("!trace HOSTNAME: ",hostname);
+			// console.log("!trace this.boxen: ",this.boxen);
 			// console.log("!trace host: %j",host);
 
 			// Is this key set?
-			if (typeof boxen[hostname] == 'undefined') {
+			if (typeof this.boxen[hostname] == 'undefined') {
 				// It's not, let's set it
-				log.it("new_asterisk_host_discovered",{hostname: hostname });
-				boxen[hostname] = {};
+				this.boxen[hostname] = {};
 			}
 
 			if (host.nodes) {
@@ -279,20 +345,22 @@ module.exports = function(log,opts,kamailio) {
 							break;
 					}
 
-					boxen[hostname][eachkey] = hostkey.value;
-				});
+					this.boxen[hostname][eachkey] = hostkey.value;
+				}.bind(this));
 
 			} else {
 
 				log.warn("boxes_nodes_incomplete",{error: "whaaaaat, bummer."});
 
 			}
-		});
 
-		log.it("boxen_debug",{boxen: boxen});
-		callback(boxen);
+		};
 
-	};
+		// log.it("this.boxen_debug",{this.boxen: this.boxen});
+		// callback(this.boxen);
+		return;
+
+	}.bind(this);
 
 	initialize();
 
