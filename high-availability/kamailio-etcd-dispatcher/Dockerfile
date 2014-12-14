@@ -6,12 +6,8 @@
 FROM google/nodejs
 
 MAINTAINER Doug Smith <info@laboratoryb.org>
-ENV build_date 2014-12-08
+ENV build_date 2014-12-13
 
-RUN npm install -g forever
-WORKDIR /app
-ADD package.json /app/
-RUN npm install
-ADD *.js /app/
+RUN npm install -g kamailio-etcd-dispatcher
 
-ENTRYPOINT ["forever", "-o", "/dev/null", "app.js"]
+ENTRYPOINT ["etcd-dispatcher"]
