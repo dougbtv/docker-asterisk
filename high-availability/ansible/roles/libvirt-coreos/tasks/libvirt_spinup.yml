@@ -1,0 +1,43 @@
+---
+# Spin up a CoreOS box using libvirt
+
+  - name: Fail if public_ssh_keys is not defined
+    fail: msg="This role requires 'public_ssh_keys' as a variable"
+    when: public_ssh_keys is not defined
+
+  - name: Set initial facts
+    set_fact:
+      libvirt_name: "coreos{{ boxnumber }}"
+      libvirt_dir: "/var/lib/libvirt/images/coreos{{ boxnumber }}/"
+      force_destroy: false
+
+  - name: Shutdown And Destroy VM
+    include: libvirt_shutdown.yml
+    vars:
+      vm_name: "{{ libvirt_name }}"
+      destroy: true
+
+  - name: Assure image dir exists.
+    file:
+      path: "{{ libvirt_dir }}"
+      state: directory
+
+  - name: Copy image into place
+    shell: "rsync -ci {{ image_source }} {{ libvirt_dir }}"
+    register: rsync_result
+    changed_when: "rsync_result.stdout != ''"
+
+  - name: Create user data
+    include: libvirt_loaduserdata.yml
+
+  - name: Define libvirt VM
+    virt:
+        name: "{{ libvirt_name }}"
+        command: define
+        xml: "{{ lookup('template', 'coreos_xml.j2') }}"
+
+  - name: Start 'er up!
+    virt: "name={{ libvirt_name }} state=running"
+
+  # - name: Enable etcd
+  #   service: name=etcd.service enabled=yes

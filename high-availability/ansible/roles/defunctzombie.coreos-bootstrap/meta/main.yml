@@ -1,0 +1,10 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: defunctzombie
+  description: "bootstrap coreos hosts to run ansible"
+  license: "MIT"
+  min_ansible_version: 1.4
+  categories:
+    - system

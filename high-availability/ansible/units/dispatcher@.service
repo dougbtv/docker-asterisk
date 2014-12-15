@@ -1,0 +1,21 @@
+[Unit]
+Description=Dispatcher
+After=kamailio@%i.service
+Requires=kamailio@%i.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill dispatcher
+ExecStartPre=-/usr/bin/docker rm dispatcher
+ExecStartPre=/usr/bin/docker pull dougbtv/kamailio-etcd-dispatcher:latest
+ExecStart=/usr/bin/docker run \
+    --name dispatcher \
+    --volumes-from kamailio \
+    -t dougbtv/kamailio-etcd-dispatcher \
+    --etcdhost 172.17.42.1
+ExecStop=/usr/bin/docker stop dispatcher
+
+[X-Fleet]
+MachineMetadata=boxrole=kamailio
+MachineOf=kamailio@%i.service
+Conflicts=dispatcher@*.service

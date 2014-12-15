@@ -1,0 +1,21 @@
+[Unit]
+Description=Kamailio Proxy
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill kamailio
+ExecStartPre=-/usr/bin/docker rm kamailio
+ExecStartPre=/usr/bin/docker pull dougbtv/kamailio:latest
+ExecStart=/usr/bin/docker run \
+    --name kamailio \
+    -p 5060:5060/udp \
+    -v /etc/kamailio/kamailio.cfg:/etc/kamailio/kamailio.cfg \
+    -v /etc/kamailio \
+    -t dougbtv/kamailio
+ExecStop=/usr/bin/docker stop kamailio
+
+[X-Fleet]
+Conflicts=kamailio@*.service
+MachineMetadata=boxrole=kamailio

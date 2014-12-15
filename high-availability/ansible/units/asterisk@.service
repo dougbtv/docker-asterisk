@@ -1,0 +1,21 @@
+[Unit]
+Description=Asterisk
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill asterisk
+ExecStartPre=-/usr/bin/docker rm asterisk
+ExecStartPre=/usr/bin/docker pull dougbtv/asterisk:latest
+ExecStart=/usr/bin/docker run \
+    -v /etc/asterisk/sip.conf:/etc/asterisk/sip.conf \
+    -v /etc/asterisk/extensions.conf:/etc/asterisk/extensions.conf \
+    --name asterisk \
+    --net=host \
+    -t dougbtv/asterisk
+ExecStop=/usr/bin/docker stop asterisk
+
+[X-Fleet]
+Conflicts=asterisk@*.service
+MachineMetadata=boxrole=asterisk

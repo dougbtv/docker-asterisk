@@ -1,0 +1,23 @@
+[Unit]
+Description=Announcer
+After=asterisk@%i.service
+Requires=asterisk@%i.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill announcer
+ExecStartPre=-/usr/bin/docker rm announcer
+ExecStartPre=/usr/bin/docker pull dougbtv/kamailio-etcd-dispatcher:latest
+ExecStart=/bin/sh -c "/usr/bin/docker run \
+    --name announcer \
+    -t dougbtv/kamailio-etcd-dispatcher \
+    --announce \
+    --announceip $(ifconfig | grep -A1 eth0 | grep -v eth0 | awk '{print $2}') \
+    --etcdhost 172.17.42.1 \
+    --announcename $(cat /etc/hostname)"
+ExecStop=/usr/bin/docker stop announcer
+
+[X-Fleet]
+MachineMetadata=boxrole=asterisk
+MachineOf=asterisk@%i.service
+Conflicts=announcer@*.service

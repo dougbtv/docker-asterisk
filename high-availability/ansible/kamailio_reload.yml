@@ -1,0 +1,39 @@
+---
+
+- name: Sync kamailio configs
+  hosts: kamailio
+  vars:
+    each_kamailio:
+      - 1
+  sudo: true
+  tasks:
+
+    - name: Ensure /etc/kamailio exists
+      file: path=/etc/kamailio state=directory
+
+    - name: Copy config
+      copy: src=config/kamailio.cfg dest=/etc/kamailio/kamailio.cfg
+
+    - name: Stop kamailio
+      command: "fleetctl stop kamailio@{{ item }}"
+      with_items: each_kamailio
+
+    - name: Stop dispatcher
+      command: "fleetctl stop dispatcher@{{ item }}"
+      with_items: each_kamailio
+
+    - name: Tear down kamailio
+      command: "fleetctl destroy kamailio@{{ item }}"
+      with_items: each_kamailio
+
+    - name: Tear down dispatcher
+      command: "fleetctl destroy dispatcher@{{ item }}"
+      with_items: each_kamailio
+
+    - name: Spin up kamailio
+      command: "fleetctl start kamailio@{{ item }}"
+      with_items: each_kamailio
+
+    - name: Spin up dispatcher
+      command: "fleetctl start dispatcher@{{ item }}"
+      with_items: each_kamailio

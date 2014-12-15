@@ -1,0 +1,21 @@
+---
+# Reboot coreos machine with new cloud-init.
+
+  - name: Set initial facts
+    set_fact:
+      libvirt_name: "coreos{{ boxnumber }}"
+
+  - name: Fail if coreos_discovery is not defined
+    fail: msg="This role requires 'coreos_discovery' as a variable"
+    when: coreos_discovery is not defined
+
+  - name: Shutdown VM if running.
+    include: libvirt_shutdown.yml
+    vars:
+      vm_name: "{{ libvirt_name }}"
+
+  - name: Create user data
+    include: libvirt_loaduserdata.yml
+
+  - name: Start 'er up!
+    virt: "name={{ libvirt_name }} state=running"

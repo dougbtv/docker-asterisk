@@ -1,0 +1,58 @@
+## inventory file for our coreos test
+coreos0 ansible_ssh_host=192.168.122.200
+coreos1 ansible_ssh_host=192.168.122.201
+coreos2 ansible_ssh_host=192.168.122.202
+coreos3 ansible_ssh_host=192.168.122.203
+localbox ansible_ssh_host=192.168.122.1
+
+# ---------------------- Keep alive d.
+[keepalive_leader]
+coreos0
+
+[keepalive_follower]
+coreos1
+
+# Each box references it's partners IP. As opposed to it's own.
+[keepalive_leader:vars]
+keepalived_priority=101
+peer_ip=192.168.122.201
+
+[keepalive_follower:vars]
+keepalived_priority=100
+peer_ip=192.168.122.200
+
+
+# ----------------------- General Groups
+
+# - All the boxes.
+[coreos]
+coreos0
+coreos1
+coreos2
+coreos3
+
+# - Your localhost (for libvirt).
+[localboxes]
+localbox
+
+# - The host you send fleetctl commands to.
+[leader]
+coreos0
+
+[asterisk]
+coreos2
+coreos3
+
+[kamailio]
+coreos0
+coreos1
+
+[asterisk:vars]
+box_role=asterisk
+
+[kamailio:vars]
+box_role=kamailio
+
+[coreos:vars]
+ansible_ssh_user=core
+ansible_python_interpreter="PATH=/home/core/bin:$PATH python"

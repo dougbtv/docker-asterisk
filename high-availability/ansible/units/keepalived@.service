@@ -1,0 +1,24 @@
+[Unit]
+Description=keepalived
+After=kamailio@%i.service
+Requires=kamailio@%i.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill keepalived
+ExecStartPre=-/usr/bin/docker rm keepalived
+ExecStartPre=/usr/bin/docker pull dougbtv/keepalived:latest
+ExecStartPre=/bin/sh -c "/usr/sbin/sysctl -w net.ipv4.ip_nonlocal_bind=1"
+ExecStart=/bin/sh -c "/usr/bin/docker run \
+    -v /etc/keepalived/keepalived.conf:/etc/keepalived/keepalived.conf \
+    --name=keepalived \
+    --privileged=true \
+    --net=host \
+    -t dougbtv/keepalived \
+    /usr/sbin/keepalived -f /etc/keepalived/keepalived.conf --dont-fork --log-console"
+ExecStop=/usr/bin/docker stop keepalived
+
+[X-Fleet]
+MachineMetadata=boxrole=kamailio
+MachineOf=kamailio@%i.service
+Conflicts=keepalived@*.service

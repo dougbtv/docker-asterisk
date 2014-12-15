@@ -1,0 +1,19 @@
+
+  - name: Fail if box_role is not defined
+    fail: msg="This role requires 'box_role' as a variable"
+    when: box_role is not defined
+
+  - name: Set initial facts
+    set_fact:
+      libvirt_ip: "{{ libvirt_subnet }}.20{{ boxnumber }}"
+      libvirt_gateway: "{{ libvirt_subnet }}.1"
+      libvirt_userdatadir: "/var/lib/libvirt/images/coreos{{ boxnumber }}/configdrive/openstack/latest"
+
+  - name: Assure userdata dir exists.
+    file:
+      path: "{{ libvirt_userdatadir }}"
+      state: directory
+
+  - name: Template cloud-config for libvirt.
+    template: "src=libvirt-cloud-config.j2 dest={{ libvirt_userdatadir }}/user_data"
+

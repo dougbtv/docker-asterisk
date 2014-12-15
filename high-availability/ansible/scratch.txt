@@ -1,0 +1,26 @@
+https://github.com/defunctzombie/coreos-ansible-example
+https://coreos.com/blog/managing-coreos-with-ansible/
+
+
+
+ansible -i inventory/coreos all -m ping -u core
+
+ansible-galaxy install defunctzombie.coreos-bootstrap -p ./roles
+
+ansible-playbook -i inventory/coreos bootstrap.yml
+
+ansible-playbook -i inventory/coreos website.yml
+
+# extra variables
+ansible-playbook release.yml --extra-vars "version=1.23.45 other_variable=foo"
+
+------------------ spin up a libvirt box
+
+ansible-playbook --extra-vars "boxnumber=2" -i inventory/coreos libvirt_spinup.yml
+
+---------------
+
+check etcd units:
+
+ sudo systemctl cat etcd
+
