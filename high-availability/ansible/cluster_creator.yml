@@ -1,7 +1,7 @@
 - name: Spin up a cluster of CoreOS boxen.
-  hosts: localboxes
+  hosts: libvirthost
   vars_files:
-    - vars/coreos.yml
+    - ["vars/private.yml", "vars/coreos.yml"]
   vars:
     # All required variables.
     # Location of your coreos image.

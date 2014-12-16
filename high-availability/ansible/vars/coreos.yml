@@ -1,11 +1,11 @@
 # Great tute on configuring cloud-config with ansible:
 # http://www.tazj.in/en/1410951452
 coreos_discovery: https://discovery.etcd.io/a604a5c7af403bd62e03027237e86cf6
-public_ssh_keys: 
-    - "ssh-dss AAAAB3NzAC............"
-    - "ssh-dss AAAAB3NzAC............"
-    - "ssh-dss AAAAB3NzAC............"
 libvirt_subnet: "192.168.122"
 outbound_proxy: "192.168.122.200"
 floating_ip: "192.168.122.199"
 keepalived_password: fAKrTR0n
+public_ssh_keys: 
+    - "ssh-dss AAAAB3...."
+    - "ssh-dss AAAAB3...."
+    - "ssh-dss AAAAB3...."

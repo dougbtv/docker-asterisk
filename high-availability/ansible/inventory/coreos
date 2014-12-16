@@ -3,7 +3,7 @@ coreos0 ansible_ssh_host=192.168.122.200
 coreos1 ansible_ssh_host=192.168.122.201
 coreos2 ansible_ssh_host=192.168.122.202
 coreos3 ansible_ssh_host=192.168.122.203
-localbox ansible_ssh_host=192.168.122.1
+libvirtmachine ansible_ssh_host=192.168.122.1
 
 # ---------------------- Keep alive d.
 [keepalive_leader]
@@ -32,8 +32,8 @@ coreos2
 coreos3
 
 # - Your localhost (for libvirt).
-[localboxes]
-localbox
+[libvirthost]
+libvirtmachine
 
 # - The host you send fleetctl commands to.
 [leader]

@@ -8,7 +8,7 @@
     - keepalive_leader
     - keepalive_follower
   vars_files:
-    - vars/coreos.yml
+    - ["vars/private.yml", "vars/coreos.yml"]
   vars:
     floating_ip: "192.168.122.199"
     keepalived_password: "as877dvqf7s9d87DDnnZaZLMnB"

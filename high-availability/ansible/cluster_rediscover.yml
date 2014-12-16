@@ -1,10 +1,11 @@
 ---
 # Let a cluster of CoreOS boxen rediscover themselves when being spun up.
 - name: Rediscover a cluster of CoreOS boxen.
-  hosts: localboxes
+  hosts: libvirthost
   vars_files:
-    - vars/coreos.yml
+    - ["vars/private.yml", "vars/coreos.yml"]
   vars:
+    # These vars are required.
     # public_ssh_keys: 
     #     - "ssh-dss AAAAB3NzaC1kc3MAAACBAIvBhJuIa8wtkCh3VfNblCvf308NBC2kFBfUqqzCba18zI75eIyY1WeHDgYZGhodg0JDDHn/0G4kI/E496WewaE1DW16+vPP4lI7VdmMkTl7EGlu6vDivFxFXz/PNI+USqc2hCJ6yd37PxpQ6IENQj1VKJ8yM2CucNhaGEuuxGQ5AAAAFQDBVPt5GZvPJl+dYGp4HU0Cuvo/UwAAAIBdNx656JpQLQjP8lEFmgHLKNV4UgaZHo+RDRauy/k6Z7rxPBbgHv/p+Sr9zvJChKS66yCAycnM6uNarWRwDZO1+xM8iz9hOJu3LHxF0O9QO+9y4Hsk8msM7TpAwxjham4CEq86xnS48ktr0B9Yq34Uub2lYaD12ylktcs+6RsQ/gAAAIBhrd6GymtWeGRwrqhjq0xyuXheeoIs7+w3B0vWcqBBsA9tK3MkTbg64KNbSPEeVt2DhFQVnO/SheNIn1gcMWdTx8TpohEMjKeRcoxKw+gQeBNrrkX7ZqvhHD1dzd+aEwT600lHhQstTgRvjwdPtg0wgoPfB7TwZv/E7ZsaSeH2ww== doug@talos"
     #     - "ssh-dss AAAAB3NzaC1kc3MAAACBANYnXuP6wI1r1NCFpL5ZEXW5b6SjQNf3776YGpQq2Ss3VFzpLSRBsXSiJHm1j0pLkmA4+mhb1KIzMbj72ipmHUqs3r9EZT0ZsbCPm3bZubqFuuU4SC3yFe0CwaLHiA1oQK0vTuByjhuqrwnoA/QH4E/7EC+32nScmeAUStW5V/QhAAAAFQC7rppfLeW9xtCUOgaeZQi42+xLfQAAAIEAjDLhNsYeiUwcBUnlZ+SpgdayDn3UXc9HQ+H1mV1YX/ot7sSVuf5I+uSLEMplqg/p0DCCBLCzX3IXqjy9VREYdIQRCU09ptjViO/B8W4r5yAzZl/NfBbgo/dBFu3MxqDUBOkeUBgt2tkXq8dpnM1awchCzUDw6CxrhwIAgpJKzTEAAACBAMpEzzgwiRDzkk1QtbDNh/Gmhvs3gfS4KIxQNmFZbngfficAnHCx2uIsGVCFN4jFD0yQVoTpZVBd16c/7wVsis9tTX2TGS8FV3OB9dg3Nj1LizM1Rp5oy7V5CFw1rvkUe/lZR5+S8luvSzuiLZauKB7De33fcYeb8B5UsRGsYpAw doug@localhost.localdomain"
