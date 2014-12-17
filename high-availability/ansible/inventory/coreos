@@ -1,11 +1,13 @@
-## inventory file for our coreos test
+# ---------------------- Inventory
+
 coreos0 ansible_ssh_host=192.168.122.200
 coreos1 ansible_ssh_host=192.168.122.201
 coreos2 ansible_ssh_host=192.168.122.202
 coreos3 ansible_ssh_host=192.168.122.203
 libvirtmachine ansible_ssh_host=192.168.122.1
 
-# ---------------------- Keep alive d.
+# ------------------------ Keep alive d.
+
 [keepalive_leader]
 coreos0
 
@@ -22,7 +24,7 @@ keepalived_priority=100
 peer_ip=192.168.122.200
 
 
-# ----------------------- General Groups
+# ------------------------ All CoreOS machines
 
 # - All the boxes.
 [coreos]
@@ -31,28 +33,37 @@ coreos1
 coreos2
 coreos3
 
-# - Your localhost (for libvirt).
-[libvirthost]
-libvirtmachine
+[coreos:vars]
+ansible_ssh_user=core
+ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 
 # - The host you send fleetctl commands to.
 [leader]
 coreos0
 
-[asterisk]
-coreos2
-coreos3
+# ------------------------ Kamailio boxes
 
 [kamailio]
 coreos0
 coreos1
 
-[asterisk:vars]
-box_role=asterisk
-
 [kamailio:vars]
 box_role=kamailio
 
-[coreos:vars]
-ansible_ssh_user=core
-ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
+# ------------------------ Asterisk Boxes
+
+
+[asterisk]
+coreos2
+coreos3
+
+[asterisk:vars]
+box_role=asterisk
+
+
+
+# ------------------------ Libvirt machine
+
+# - Your localhost (for libvirt).
+[libvirthost]
+libvirtmachine
