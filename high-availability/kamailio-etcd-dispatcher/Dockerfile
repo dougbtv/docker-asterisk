@@ -6,7 +6,7 @@
 FROM google/nodejs
 
 MAINTAINER Doug Smith <info@laboratoryb.org>
-ENV build_date 2014-12-13
+ENV build_date 2014-12-19
 
 RUN npm install -g kamailio-etcd-dispatcher
 

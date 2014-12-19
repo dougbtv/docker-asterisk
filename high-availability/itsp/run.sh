@@ -1,7 +1,11 @@
 #!/bin/bash
-docker kill asterisk
-docker rm asterisk
+INDIR=$(pwd)
+CONTAINER_NAME=asterisk
+
+docker kill $CONTAINER_NAME
+docker rm $CONTAINER_NAME
 docker run \
-  -v /home/doug/codebase/docker-asterisk/high-availability/itsp/sip.conf:/etc/asterisk/sip.conf \
-  --name asterisk \
+  -v $INDIR/extensions.conf:/etc/asterisk/extensions.conf \
+  -v $INDIR/sip.conf:/etc/asterisk/sip.conf \
+  --name $CONTAINER_NAME \
   --net=host -d -t dougbtv/asterisk
