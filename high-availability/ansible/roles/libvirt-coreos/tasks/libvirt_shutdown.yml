@@ -54,5 +54,5 @@
     when: did_shutdown
 
   - name: Undefine namespace
-    virt: "name={{ vm_name }} command=undefine"
+    include: libvirt_destroy.yml
     when: destroy and machine_exists

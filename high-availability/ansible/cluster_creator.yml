@@ -5,7 +5,7 @@
   vars:
     # All required variables.
     # Location of your coreos image.
-    image_source: /home/doug/Downloads/coreos_production_qemu_image.img
+    # image_source: /home/doug/Downloads/coreos_production_qemu_image.img
     # public_ssh_keys: 
     #     - "ssh-dss AAAAB3Nz...."
     #     - "ssh-dss AAAAG4Nz...."

@@ -8,7 +8,7 @@ ssh_authorized_keys:
 hostname: {{ libvirt_name }}
 coreos:
   etcd:
-    name: {{ libvirt_name }}
+    # name: {{ libvirt_name }}
     # generate a new token for each unique cluster from https://discovery.etcd.io/new
     discovery: {{ coreos_discovery }}
     # use $public_ipv4 if your datacenter of choice does not support private networking
