@@ -1,26 +1,26 @@
-# https://github.com/sipcapture/captagent
+# Project @ https://github.com/sipcapture/captagent
+# A capture agent for Homer sip capture server.
 
-FROM centos:centos6
+FROM centos:centos7
 MAINTAINER Doug Smith <info@laboratoryb.org>
 ENV build_date 2014-12-21
 
-RUN yum install -y libpcap automake expat-devel libtool git libpcap-devel
+# Install deps.
+RUN yum install -y libpcap automake expat-devel libtool git libpcap-devel file
+RUN yum install -y make
 
-RUN git clone https://code.google.com/p/captagent/ captagent
+RUN git clone https://github.com/sipcapture/captagent.git
 WORKDIR /captagent/captagent
 
-ENV cachebust 0x000011
-
-# Didn't work?
-#RUN ./build.sh
-# RUN git checkout ltmain.sh
-
-RUN aclocal 
-RUN libtoolize --force 
-RUN autoheader 
-RUN autoconf
+RUN ./build.sh
 RUN ./configure
 RUN make 
 RUN make install
 
+WORKDIR /
+
 COPY captagent.xml /usr/local/etc/captagent/captagent.xml
+COPY run.sh /
+
+EXPOSE 8909 
+ENTRYPOINT [ "/run.sh" ]
