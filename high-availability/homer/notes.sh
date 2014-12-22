@@ -27,3 +27,5 @@ docker run \
   -d dougbtv/captagent \
   -d wlp3s0 -h 172.17.42.1 -p 9060 -i 2001
 
+# woooot
+# docker run -p 80:80 --link mysql:mysql -it dougbtv/homer /bin/bash
