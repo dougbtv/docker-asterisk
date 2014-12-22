@@ -7,7 +7,7 @@ PATH_CAPTAGENT_XML=/usr/local/etc/captagent/captagent.xml
 # Options, defaults.
 ETHERNET_DEV=eth0
 CAPTURE_HOST=capture.homercloud.org
-CAPTURE_PORT=9000
+CAPTURE_PORT=9060
 CAPTURE_ID=2001
 CAPTURE_PASSWORD=myHep
 CLI_PASSWORD=12345
@@ -24,7 +24,7 @@ It then kicks off the captagent script in the foreground.
 
     --dev -d                Set ethernet device (default: eth0)
     --capturehost -h        Homer SIP capture host (default: capture.homercloud.org)
-    --captureport -p        Homer SIP capture port (default: 9000)
+    --captureport -p        Homer SIP capture port (default: 9060)
     --captureid -i          Homer capture id (default: 2001)
     --capturepassword -w    Homer capture password (default: myHep)
     --clipassword -c        CLI password (default: 12345)
