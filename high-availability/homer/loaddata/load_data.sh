@@ -18,4 +18,4 @@ mysql --host mysql -u "$sqluser" -p"$sqlpassword" homer_db < $SQL_LOCATION/webho
 mysql --host mysql -u "$sqluser" -p"$sqlpassword" homer_users < $SQL_LOCATION/webhomer/homer_users.sql
 mysql --host mysql -u "$sqluser" -p"$sqlpassword" homer_users -e "TRUNCATE TABLE homer_nodes;"
 echo "Creating local DB Node..."
-mysql --host mysql -u "$sqluser" -p"$sqlpassword" homer_users -e "INSERT INTO homer_nodes VALUES(1,'127.0.0.1','homer_db','3306','"$sqlhomeruser"','"$sqlhomerpassword"','sip_capture','node1', 1);"
+mysql --host mysql -u "$sqluser" -p"$sqlpassword" homer_users -e "INSERT INTO homer_nodes VALUES(1,'mysql','homer_db','3306','"$sqlhomeruser"','"$sqlhomerpassword"','sip_capture','node1', 1);"

@@ -16,10 +16,10 @@ define('DB', "homer_users");
 *  this user must have the same password for all Homer nodes
 *  please define all your nodes in homer_nodes table
 */
-define('HOMER_HOST', "localhost"); /* DEFAULT. Don't forget insert this host to your DB nodes table */
+define('HOMER_HOST', "mysql"); /* DEFAULT. Don't forget insert this host to your DB nodes table */
 define('HOMER_PORT', 3306);
-define('HOMER_USER', "homer_user");
-define('HOMER_PW', "homer_password");
+define('HOMER_USER', "homer");
+define('HOMER_PW', "homersecret");
 define('HOMER_DB', "homer_db");
 define('HOMER_TABLE', "sip_capture");
 

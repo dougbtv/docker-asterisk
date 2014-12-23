@@ -1,4 +1,4 @@
-# dougbtv/captagent
+# dougbtv/homer-captagent
 
 An implementation of the [Homer captagent](https://github.com/sipcapture/captagent).
 
