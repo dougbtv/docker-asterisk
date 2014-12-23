@@ -55,3 +55,9 @@ done
 perl -p -i -e "s/\{\{ DB_PASS \}\}/$DB_PASS/" $PATH_HOMER_CONFIG
 perl -p -i -e "s/\{\{ DB_HOST \}\}/$DB_HOST/" $PATH_HOMER_CONFIG
 perl -p -i -e "s/\{\{ DB_USER \}\}/$DB_USER/" $PATH_HOMER_CONFIG
+
+# Argh permission giving me hell. Needed for generating images.
+chmod -R 0777 /var/www/html/webhomer/tmp/
+
+# Foreground apache.
+apachectl -DFOREGROUND

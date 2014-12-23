@@ -10,8 +10,8 @@ RUN git clone --depth 1 https://github.com/sipcapture/homer/ /homer
 
 # Get the webroot set up
 # ...and copy the configs.
-ENV WEBROOT /var/www/html
-RUN cp -R /homer/webhomer $WEBROOT/
+RUN cp -R /homer/webhomer /var/www/html/
+RUN chmod -R 0777 /var/www/html/webhomer/tmp
 COPY configuration.php /var/www/html/webhomer/configuration.php
 COPY preferences.php /var/www/html/webhomer/preferences.php
 
@@ -20,3 +20,5 @@ COPY vhost.conf /etc/httpd/conf.d/000-homer.conf
 
 # Setup our entrypoint.
 COPY run.sh /run.sh
+
+ENTRYPOINT [ "/run.sh" ]

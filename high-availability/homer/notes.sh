@@ -31,10 +31,10 @@ docker run \
   -d $ETHERNET_DEVICE -h 172.17.42.1 -p 9060 -i 2001
 
 # woooot
-# docker kill homer
-# docker rm homer
-# --name homer \
+docker kill homer
+docker rm homer
 docker run \
   -p 80:80 \
+  --name homer \
   --link mysql:mysql \
-  -it dougbtv/homer /bin/bash
+  -dt dougbtv/homer-webapp
