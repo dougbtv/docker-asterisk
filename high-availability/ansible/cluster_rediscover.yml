@@ -28,3 +28,4 @@
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 1, box_role: "kamailio" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 2, box_role: "asterisk" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 3, box_role: "asterisk" }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 4, box_role: "homer" }

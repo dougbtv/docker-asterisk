@@ -1,0 +1,24 @@
+[Unit]
+Description=HomerCaptureServer
+BindsTo=mysql@%i.service
+After=mysql@%i.service
+
+[Service]
+TimeoutStartSec=0
+# ExecStartPre=/bin/ifconfig | /bin/grep -A1 eth0 | /bin/grep -v eth0 | /bin/awk '{print $2}' > /tmp/ip.txt
+# ExecStartPre=/bin/cat /tmp/ip.txt | /bin/xargs /bin/etcdctl set captureserver 
+# ExecStartPre=/bin/touch /tmp/foo
+ExecStartPre=-/usr/bin/docker kill captureserver
+ExecStartPre=-/usr/bin/docker rm captureserver
+ExecStartPre=/usr/bin/docker pull dougbtv/homer-captureserver:latest
+ExecStart=/bin/etcdctl set captureserver $(ifconfig | grep -A1 eth0 | grep -v eth0 | awk '{print $2}'); \
+    /usr/bin/docker run \
+      --name captureserver \
+      -p 9060:9060/udp \
+      --link mysql:mysql \
+      -d dougbtv/homer-captureserver
+ExecStop=/usr/bin/docker stop captureserver
+
+[X-Fleet]
+Conflicts=captureserver@*.service
+MachineMetadata=boxrole=homer

@@ -4,6 +4,7 @@ coreos0 ansible_ssh_host=192.168.100.200
 coreos1 ansible_ssh_host=192.168.100.201
 coreos2 ansible_ssh_host=192.168.100.202
 coreos3 ansible_ssh_host=192.168.100.203
+coreos4 ansible_ssh_host=192.168.100.204
 libvirtmachine ansible_ssh_host=192.168.100.1
 
 # ------------------------ Keep alive d.
@@ -32,6 +33,7 @@ coreos0
 coreos1
 coreos2
 coreos3
+coreos4
 
 [coreos:vars]
 ansible_ssh_user=core
@@ -42,6 +44,13 @@ ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 coreos0
 
 # ------------------------ Kamailio boxes
+
+[homer]
+coreos4
+
+[homer:vars]
+box_role=homer
+
 
 [kamailio]
 coreos0
