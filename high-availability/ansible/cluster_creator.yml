@@ -24,10 +24,10 @@
         coreos_discovery: "{{ curl_result.stdout }}"
 
   roles:
-    # - { role: libvirt-coreos, mode: create, boxnumber: 0, box_role: kamailio }
-    # - { role: libvirt-coreos, mode: create, boxnumber: 1, box_role: kamailio }
-    # - { role: libvirt-coreos, mode: create, boxnumber: 2, box_role: asterisk }
-    # - { role: libvirt-coreos, mode: create, boxnumber: 3, box_role: asterisk }
+    - { role: libvirt-coreos, mode: create, boxnumber: 0, box_role: kamailio }
+    - { role: libvirt-coreos, mode: create, boxnumber: 1, box_role: kamailio }
+    - { role: libvirt-coreos, mode: create, boxnumber: 2, box_role: asterisk }
+    - { role: libvirt-coreos, mode: create, boxnumber: 3, box_role: asterisk }
     - { role: libvirt-coreos, mode: create, boxnumber: 4, box_role: homer }
 
     # - { include: tasks/libvirt_spinup.yml, boxnumber: 0 }

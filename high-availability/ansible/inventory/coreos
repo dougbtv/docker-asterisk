@@ -18,11 +18,11 @@ coreos1
 # Each box references it's partners IP. As opposed to it's own.
 [keepalive_leader:vars]
 keepalived_priority=101
-peer_ip=192.168.100.201
+peer_ip=192.168.122.201
 
 [keepalive_follower:vars]
 keepalived_priority=100
-peer_ip=192.168.100.200
+peer_ip=192.168.122.200
 
 
 # ------------------------ All CoreOS machines
@@ -69,6 +69,11 @@ coreos3
 [asterisk:vars]
 box_role=asterisk
 
+[homer]
+coreos4
+
+[homer:vars]
+box_role=homer
 
 
 # ------------------------ Libvirt machine
