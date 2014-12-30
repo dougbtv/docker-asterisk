@@ -1,13 +1,16 @@
 [Unit]
-Description=HomerAnnouncer
-After=docker.service
-Requires=docker.service
+Description=Announce Homer IP
+BindsTo=captureserver@%i.service
+After=captureserver@%i.service
 
 [Service]
-Type=oneshot
-ExecStart=/bin/etcdctl set captureserver $(ifconfig | grep -A1 eth0 | grep -v eth0 | awk '{print $2}')
+ExecStart=/bin/sh -c "while true; \
+      do etcdctl set /captureserver $(ifconfig | grep -A1 eth0 | grep -v eth0 | awk '{print $2}') --ttl 60; \
+      sleep 45; \
+    done"
+ExecStop=/usr/bin/etcdctl rm /captureserver
 
 [X-Fleet]
 Conflicts=homerannouncer@*.service
-MachineOf=captureservice@%i.service
+MachineOf=captureserver@%i.service
 MachineMetadata=boxrole=homer

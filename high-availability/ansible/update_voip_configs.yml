@@ -1,0 +1,36 @@
+- name: Sync asterisk configs
+  hosts: asterisk
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  # vars:
+  #   outbound_proxy: 192.168.122.200
+  sudo: true
+  tasks:
+
+    - name: Ensure /etc/asterisk exists
+      file: path=/etc/asterisk state=directory
+
+    - name: Template sip.conf
+      template: src=config/asterisk/sip.conf dest=/etc/asterisk/sip.conf
+
+    - name: Copy dialplan
+      copy: src=config/asterisk/extensions.conf dest=/etc/asterisk/extensions.conf
+
+- name: Sync kamailio configs
+  hosts: kamailio
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  sudo: true
+  tasks:
+
+    - name: Ensure /etc/kamailio exists
+      file: path=/etc/kamailio state=directory
+
+    - name: Copy kamailio config
+      copy: src=config/kamailio.cfg dest=/etc/kamailio/kamailio.cfg
+
+    - name: Ensure /etc/keepalived exists
+      file: path=/etc/keepalived state=directory
+
+    - name: Template keepalived.conf
+      template: src=config/keepalived.conf.j2 dest=/etc/keepalived/keepalived.conf
