@@ -9,6 +9,7 @@ ENV build_date 2014-12-21
 RUN yum install -y libpcap automake expat-devel libtool git libpcap-devel file
 RUN yum install -y make
 
+ENV captagent_version 0x00001
 RUN git clone https://github.com/sipcapture/captagent.git
 WORKDIR /captagent/captagent
 
