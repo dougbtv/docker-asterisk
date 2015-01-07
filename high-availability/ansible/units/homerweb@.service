@@ -1,0 +1,22 @@
+[Unit]
+Description=Announce Homer IP
+BindsTo=captureserver@%i.service
+After=captureserver@%i.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill homerweb
+ExecStartPre=-/usr/bin/docker rm homerweb
+ExecStartPre=/usr/bin/docker pull dougbtv/homer-webapp:latest
+ExecStart=/usr/bin/docker run \
+      --name homerweb \
+      -p 80:80 \
+      --link mysql:mysql \
+      -t dougbtv/homer-webapp
+ExecStop=/usr/bin/docker stop homerweb
+
+
+[X-Fleet]
+Conflicts=homerweb@*.service
+MachineOf=captureserver@%i.service
+MachineMetadata=boxrole=homer
