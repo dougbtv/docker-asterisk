@@ -1,0 +1,6 @@
+# group  sip addresses of your * units
+# 1 sip:10.1.2.3:5060
+# 1 sip:10.1.2.4:5060
+# 1 sip:10.1.2.5:5060
+# 1 sip:127.0.0.1:5080 0 0 duid=abc;my=xyz
+1 sip:192.168.100.202:5060 0 0 weight=50

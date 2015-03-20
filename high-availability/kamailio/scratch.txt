@@ -1,0 +1,25 @@
+loadbalancing asterisk w/ kama:
+
+	http://www.kamailio.org/dokuwiki/doku.php/asterisk:load-balancing-and-ha
+
+kama logging
+
+	http://nil.uniza.sk/sip/kamailio/kamailio-logging-how-debian-lenny
+
+dispatcher docs:
+
+	http://kamailio.org/docs/modules/4.1.x/modules/dispatcher.html#idp1879032
+
+
+------------ reload dispatcher
+
+[root@fa3aff20f9a4 log]# nano /etc/kamailio/dispatcher.list 
+[root@fa3aff20f9a4 log]# kamcmd dispatcher.list
+error: 500 - No Destination Sets
+[root@fa3aff20f9a4 log]# kamcmd dispatcher.reload
+[root@fa3aff20f9a4 log]# kamcmd dispatcher.list
+
+
+---------------- rtp proxy
+
+http://kamailio.org/docs/modules/4.1.x/modules/rtpproxy.html
