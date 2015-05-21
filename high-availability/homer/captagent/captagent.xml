@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+
+<document type="captagent/xml">
+
+        <configuration name="core.conf" description="CORE Settings">
+          <settings>
+            <param name="debug" value="3"/>
+            <param name="daemon" value="false"/>
+            <param name="syslog" value="false"/>
+            <param name="pid_file" value="/var/run/captagent.pid"/>
+            <param name="path" value="/usr/local/lib/captagent/modules"/>
+          </settings>
+        </configuration>
+
+        <configuration name="modules.conf" description="Modules">
+          <modules>
+                <load module="core_hep"/>
+                <load module="proto_uni"/>
+                <load module="proto_rtcp"/>
+                <load module="capt_cli"/>
+          </modules>
+        </configuration>
+
+        <!-- CORE MODULES -->
+
+        <configuration name="core_hep.conf" description="HEP Socket">
+          <settings>
+            <param name="version" value="3"/>
+            <param name="capture-host" value="{{ CAPTURE_HOST }}"/>
+            <param name="capture-port" value="{{ CAPTURE_PORT }}"/>
+            <param name="capture-proto" value="udp"/>
+            <param name="capture-id" value="{{ CAPTURE_ID }}"/>
+            <param name="capture-password" value="{{ CAPTURE_PASSWORD }}"/>
+            <param name="payload-compression" value="false" />
+          </settings>
+        </configuration>
+
+        <!-- PROTOCOLS -->
+
+        <configuration name="proto_uni.conf" description="UNI Proto Basic capture">
+          <settings>
+            <param name="port" value="5060"/>
+            <!-- <param name="portrange" value="5060-5090"/> -->
+            <!--
+                use -D flag for pcap import
+                use "any" for all interfaces in your system
+            -->
+            <param name="dev"  value="{{ ETHERNET_DEV }}"/>
+            <param name="promisc" value="true"/>
+            <!--
+                comment it if you want to see all IPProto (tcp/udp)
+            -->
+            <!-- enable this if you want to get RTCP stats -->
+            <param name="sip-parse"  value="true"/>
+            <param name="rtcp-tracking"  value="true"/>
+            <param name="ip-proto" value="udp"/>
+            <param name="proto-type"  value="sip"/>
+            <!-- <param name="filter" value="not src port 5099"/> -->
+            <!-- 
+                <param name="expire-timer" value ="120"/>                       
+                <param name="expire-rtcp" value ="120"/>                       
+            -->
+          </settings>
+        </configuration>
+
+        <configuration name="proto_rtcp.conf" description="RTCP capture">
+            <settings>
+                <!-- <param name="portrange" value="5060-5090"/> -->
+                <param name="dev"  value="{{ ETHERNET_DEV }}"/>       
+                <param name="promisc" value="true"/>
+                <param name="debug" value ="false"/>                    
+                <!-- <param name="rtcp-json" value="false"/> -->
+                <!-- <param name="send-sdes" value="false"/> -->
+                <!-- <param name="filter" value="not src port 5099"/> -->
+                <!-- <param name="vlan" value="false"/> -->
+            </settings>
+          </configuration>
+
+        <!-- CLI  -->
+
+        <configuration name="capt_cli.conf" description="CLI socket">
+          <settings>
+            <param name="cli-host" value="localhost"/>
+            <param name="cli-port" value="{{ CLI_PORT }}"/>
+            <param name="cli-password" value="{{ CLI_PASSWORD }}"/>
+          </settings>
+        </configuration>
+
+</document>

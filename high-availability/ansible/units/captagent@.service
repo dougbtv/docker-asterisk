@@ -1,0 +1,21 @@
+[Unit]
+Description=Homer Capture Agent
+BindsTo=asterisk@%i.service
+After=asterisk@%i.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill captagent
+ExecStartPre=-/usr/bin/docker rm captagent
+ExecStartPre=/usr/bin/docker pull dougbtv/homer-captagent:latest
+ExecStart=/bin/sh -c "/usr/bin/docker run \
+    --net=host \
+    --name captagent \
+    -t dougbtv/homer-captagent \
+    -d eth0 -h $(etcdctl get /captureserver) -p 9060 -i 2001"
+ExecStop=/usr/bin/docker stop captagent
+
+[X-Fleet]
+Conflicts=captagent@*.service
+MachineOf=asterisk@%i.service
+MachineMetadata=boxrole=asterisk

@@ -1,0 +1,33 @@
+#cloud-config
+
+ssh_authorized_keys:
+ {% for key in public_ssh_keys %}
+ - {{ key }}
+ {% endfor %}
+
+hostname: {{ libvirt_name }}
+coreos:
+  etcd:
+    # name: {{ libvirt_name }}
+    # generate a new token for each unique cluster from https://discovery.etcd.io/new
+    discovery: {{ coreos_discovery }}
+    # use $public_ipv4 if your datacenter of choice does not support private networking
+    addr: {{ libvirt_ip }}:4001
+    peer-addr: {{ libvirt_ip }}:7001
+  fleet:
+    public-ip: {{ libvirt_ip }}   # used for fleetctl ssh command
+    metadata: boxrole={{ box_role }}
+  units:
+    - name: etcd.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: 10-ens3.network
+      content: |
+        [Match]
+        MACAddress=52:54:00:fe:b3:c{{ boxnumber }}
+
+        [Network]
+        Address={{ libvirt_ip }}/24
+        Gateway={{ libvirt_gateway }}
+        DNS=8.8.8.8

@@ -1,0 +1,58 @@
+---
+# Shutdown (and optionally destroy) a libvirt VM.
+# takes two variables:
+# vm_name
+
+  - name: Fail if vm_name is not defined
+    fail: msg="This task requires 'vm_name' variable"
+    when: vm_name is not defined
+
+  - name: Default to not destructing
+    set_fact:
+      destroy: false
+    when: destroy is not defined
+
+  - name: Default to not destructing
+    set_fact:
+      did_shutdown: false
+
+  - name: Default to box not existing
+    set_fact:
+      machine_exists: false
+    when: machine_exists is not defined
+
+  - name: List the VMs
+    virt: "command=list_vms"
+    register: virtlist
+
+  - name: "When found, register the need to destroy it"
+    set_fact:
+      machine_exists: true
+    with_items: virtlist.list_vms
+    when: "item == '{{ vm_name }}'"
+
+  - name: Look at machine status
+    virt: "name={{ vm_name }} command=status"
+    register: machine_status
+    when: machine_exists
+
+  - name: Assume no shutdown
+    set_fact:
+      did_shutdown: false
+
+  - name: Register that we're shutting down if we are
+    set_fact:
+          did_shutdown: true
+    when: machine_exists and machine_status.status == 'running'
+
+  - name: Shutdown namespace (when exists and running)
+    virt: "name={{ vm_name }} command=shutdown"
+    when: machine_exists and machine_status.status == 'running'
+
+  # name: Pause for 2 seconds after shutdown
+  - pause: seconds=10
+    when: did_shutdown
+
+  - name: Undefine namespace
+    include: libvirt_destroy.yml
+    when: destroy and machine_exists

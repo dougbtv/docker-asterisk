@@ -1,0 +1,31 @@
+---
+# Let a cluster of CoreOS boxen rediscover themselves when being spun up.
+- name: Rediscover a cluster of CoreOS boxen.
+  hosts: libvirthost
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  vars:
+    # These vars are required.
+    # public_ssh_keys: 
+    #     - "ssh-dss AAAA...."
+    #     - "ssh-dss AAAAB3...."
+    # libvirt_subnet: "192.168.122"
+  sudo: true
+  pre_tasks:
+
+    - name: Get new etcd discovery token
+      command: curl https://discovery.etcd.io/new
+      register: curl_result
+
+    - name: Set etcd token
+      set_fact: 
+        coreos_discovery: "{{ curl_result.stdout }}"
+
+    - debug: "msg={{ curl_result.stdout }}"
+
+  roles:
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 0, box_role: "kamailio" }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 1, box_role: "kamailio" }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 2, box_role: "asterisk" }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 3, box_role: "asterisk" }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 4, box_role: "homer" }

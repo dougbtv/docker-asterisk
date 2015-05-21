@@ -1,0 +1,16 @@
+[Unit]
+Description=Announce Homer IP
+BindsTo=captureserver@%i.service
+After=captureserver@%i.service
+
+[Service]
+ExecStart=/bin/sh -c "while true; \
+      do etcdctl set /captureserver $(ifconfig | grep -A1 eth0 | grep -v eth0 | awk '{print $2}') --ttl 60; \
+      sleep 45; \
+    done"
+ExecStop=/usr/bin/etcdctl rm /captureserver
+
+[X-Fleet]
+Conflicts=homerannouncer@*.service
+MachineOf=captureserver@%i.service
+MachineMetadata=boxrole=homer

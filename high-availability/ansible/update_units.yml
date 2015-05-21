@@ -1,0 +1,65 @@
+---
+# Update fleet units on a coreos cluster.
+
+- name: Update fleet unit files in cluster
+  hosts: coreos
+  sudo: true
+  tasks:
+
+    - name: Copy unit files
+      copy: src=units/ dest=/home/core/units
+
+- name: Update fleet units in cluster
+  hosts: leader
+  vars:
+    units:
+      # - dispatcher@.service
+      # - kamailio@.service
+      # - asterisk@.service
+      # - announcer@.service
+      # - keepalived@.service
+      # - mysql@.service
+      # - captureserver@.service
+      # - homerannouncer@.service
+      # - captagent@.service
+      - homerweb@.service
+    instances:
+      # - { unit: kamailio,       instance: 1 }
+      # - { unit: kamailio,       instance: 2 }
+      # - { unit: keepalived,     instance: 1 }
+      # - { unit: keepalived,     instance: 2 }
+      # - { unit: dispatcher,     instance: 1 }
+      # - { unit: dispatcher,     instance: 2 }
+      # - { unit: asterisk,       instance: 1 }
+      # - { unit: asterisk,       instance: 2 }
+      # - { unit: announcer,      instance: 1 }
+      # - { unit: announcer,      instance: 2 }
+      # - { unit: mysql,          instance: 1 }
+      # - { unit: captureserver,  instance: 1 }
+      # - { unit: homerannouncer, instance: 1 }
+      - { unit: homerweb,       instance: 1 }
+      # - { unit: captagent,      instance: 1 }
+      # - { unit: captagent,      instance: 2 }
+
+  sudo: true
+  tasks:
+
+    - name: Destroy existing base unit files
+      command: "fleetctl destroy {{ item }}"
+      with_items: units
+      args:
+        chdir: /home/core/units
+
+    - name: Destroy instances
+      command: "fleetctl destroy {{ item.unit }}@{{ item.instance }}"
+      with_items: instances
+
+    - name: Load new unit files
+      command: "fleetctl submit {{ item }}"
+      with_items: units
+      args:
+        chdir: /home/core/units
+
+    - name: Spin up instances
+      command: "fleetctl start {{ item.unit }}@{{ item.instance }}"
+      with_items: instances

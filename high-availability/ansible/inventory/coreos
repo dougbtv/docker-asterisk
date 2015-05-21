@@ -1,0 +1,83 @@
+# ---------------------- Inventory
+
+coreos0 ansible_ssh_host=192.168.100.200
+coreos1 ansible_ssh_host=192.168.100.201
+coreos2 ansible_ssh_host=192.168.100.202
+coreos3 ansible_ssh_host=192.168.100.203
+coreos4 ansible_ssh_host=192.168.100.204
+libvirtmachine ansible_ssh_host=192.168.100.1
+
+# ------------------------ Keep alive d.
+
+[keepalive_leader]
+coreos0
+
+[keepalive_follower]
+coreos1
+
+# Each box references it's partners IP. As opposed to it's own.
+[keepalive_leader:vars]
+keepalived_priority=101
+peer_ip=192.168.122.201
+
+[keepalive_follower:vars]
+keepalived_priority=100
+peer_ip=192.168.122.200
+
+
+# ------------------------ All CoreOS machines
+
+# - All the boxes.
+[coreos]
+coreos0
+coreos1
+coreos2
+coreos3
+coreos4
+
+[coreos:vars]
+ansible_ssh_user=core
+ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
+
+# - The host you send fleetctl commands to.
+[leader]
+coreos0
+
+# ------------------------ Kamailio boxes
+
+[homer]
+coreos4
+
+[homer:vars]
+box_role=homer
+
+
+[kamailio]
+coreos0
+coreos1
+
+[kamailio:vars]
+box_role=kamailio
+
+# ------------------------ Asterisk Boxes
+
+
+[asterisk]
+coreos2
+coreos3
+
+[asterisk:vars]
+box_role=asterisk
+
+[homer]
+coreos4
+
+[homer:vars]
+box_role=homer
+
+
+# ------------------------ Libvirt machine
+
+# - Your localhost (for libvirt).
+[libvirthost]
+libvirtmachine

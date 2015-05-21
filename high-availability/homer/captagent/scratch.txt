@@ -1,0 +1,4 @@
+docker run --net=host -it dougbtv/captagent -d p5p1 -h 192.168.5.1 -p 9000 -i 2001 -w examplepass
+
+# ./run.sh -d p5p1 -h 192.168.5.1 -p 9000 -i 2001 -w examplepass
+

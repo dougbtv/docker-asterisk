@@ -1,0 +1,20 @@
+[Unit]
+Description=HomerCaptureServer
+BindsTo=mysql@%i.service
+After=mysql@%i.service
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill captureserver
+ExecStartPre=-/usr/bin/docker rm captureserver
+ExecStartPre=/usr/bin/docker pull dougbtv/homer-captureserver:latest
+ExecStart=/usr/bin/docker run \
+      --name captureserver \
+      -p 9060:9060/udp \
+      --link mysql:mysql \
+      -t dougbtv/homer-captureserver
+ExecStop=/usr/bin/docker stop captureserver
+
+[X-Fleet]
+Conflicts=captureserver@*.service
+MachineMetadata=boxrole=homer
