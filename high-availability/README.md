@@ -49,7 +49,8 @@ Docker isn't the only container option.
 ### Things we won't cover.
 
 * NAT
-
+* Logging (you'll want centralized logging)
+* Alerting
 
 
 ## Docker & CoreOS Review
@@ -58,6 +59,7 @@ Docker isn't the only container option.
 ## Managing the cluster
 
 ### Using Fleet
+### Using Homer
 
 ## Learning more
 
