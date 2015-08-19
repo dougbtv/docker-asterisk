@@ -33,7 +33,7 @@ Bowline is under-work, but, was inspired by my Asterisk dockerfiles, seeing, it 
 
 ## Running it.
 
-Asterisk with SIP tends to use a wide range of UDP ports (for RTP), so we have chosen to run the main aster container with `--net=host` option, until we can specify port ranges, we're [waiting on this PR!](https://github.com/docker/docker/pull/8167)
+Asterisk with SIP tends to use a wide range of UDP ports (for RTP), so we have chosen to run the main aster container with `--net=host` option. We can now expose a range of ports with `--expose=10000-20000`, however, it [can be very slow for a large number of ports](https://github.com/docker/docker/issues/14288).
 
 We publish the port for the FastAGI container (which is running xinetd), and then we call the loopback address from AGI. You could separate these and run them on different hosts, should you choose.
 
