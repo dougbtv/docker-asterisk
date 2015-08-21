@@ -1,6 +1,6 @@
 FROM centos:centos6
 MAINTAINER Doug Smith <info@laboratoryb.org>
-ENV build_date 2014-10-02
+ENV build_date 2015-08-21
 
 RUN yum update -y
 RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar -y
@@ -28,6 +28,9 @@ RUN make 1> /dev/null
 RUN make install 1> /dev/null
 RUN make samples 1> /dev/null
 WORKDIR /
+
+# Update max number of open files.
+RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk
 
 RUN mkdir -p /etc/asterisk
 # ADD modules.conf /etc/asterisk/
