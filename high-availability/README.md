@@ -54,6 +54,61 @@ Docker isn't the only container option.
 
 
 ## Docker & CoreOS Review
+## Spinning up a cluster
+
+You can spin up a cluster a number of ways, with physical machines, with cloud services like EC2 (CoreOS makes it easy for you with a quick 'deploy button' to spin up a new ec2 instance), or in this case, we'll use LibVirt & QEMU -- which if you're doing development on a linux workstation, makes it really easy to give it a go.
+
+Let's download CoreOS, and remember where we put it.
+
+```bash
+wget http://stable.release.core-os.net/amd64-usr/current/coreos_production_qemu_image.img.bz2 -O - | bzcat > coreos_production_qemu_image.img
+```
+
+We use Ansible to automate a number of things that are difficult and/or time consuming to do one step at a time, and we'll use this to set up the facets of the CoreOS cluster so that everything is just right -- and it's memorialized in our Ansible playbooks.
+
+If you need some intro and tips on how to use ansible checkout: `[STUB]`
+
+Now let's browse to the `high-availability/ansible` directory in the clone, we're going to edit the vars file in question. Let's edit `vars/coreos.yml`, and mainly we'll set the location of the CoreOS image, and we'll add our private keys into the file.
+
+You also could set the proper IP addresses to use, too. I like to create entries in `/etc/hosts` to later ssh to the CoreOS machines to inspect them.
+
+```yml
+image_source: "/home/doug/Downloads/coreos_production_qemu_image.img"
+public_ssh_keys: 
+    - "ssh-dss AAAAB3...."
+    - "ssh-dss AAAAB3...."
+```
+
+We'll use an Ansible playbook to spin up the cluster, and we'll need to know the location of the qemu image, and we'll need our ssh keys in there so we have access to the virtual machines that we spin up.
+
+These playbooks use your localhost as the host for the virtual machine guests, so make sure you have ssh keys for yourself on your own machine. 
+
+Then we'll run the playbook a la:
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_creator.yml 
+```
+
+Now you should be able to access the boxen via ssh, a la:
+
+```bash
+[doug@talos ansible]$ ssh core@coreos0
+Last login: Sat Aug 22 13:25:21 2015 from 192.168.122.1
+CoreOS stable (723.3.0)
+core@coreos0 ~ $ sudo su -
+coreos0 ~ # 
+```
+
+Note that we use the use "core" and we can use sudo from there. The remainder of the playbooks use this construct, you can see that we set this paradigm between seeing the `ansible_ssh_user=core` in the inventory and then use `sudo: true` in the playbooks.
+
+Ooops! You messed something up with the cluster? You can run the rediscover playbook. It'll re-load the cloud config user data, and set the proper tokens for service discovery if the cluster is borked.
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_rediscover.yml
+```
+
+
+
 ## Service Discovery
 ## Using kamailio-etcd-dispatcher
 ## Managing the cluster
