@@ -13,33 +13,33 @@
   hosts: leader
   vars:
     units:
-      # - dispatcher@.service
-      # - kamailio@.service
-      # - asterisk@.service
-      # - announcer@.service
-      # - keepalived@.service
-      # - mysql@.service
-      # - captureserver@.service
-      # - homerannouncer@.service
-      # - captagent@.service
+      - dispatcher@.service
+      - kamailio@.service
+      - asterisk@.service
+      - announcer@.service
+      - keepalived@.service
+      - mysql@.service
+      - captureserver@.service
+      - homerannouncer@.service
+      - captagent@.service
       - homerweb@.service
     instances:
-      # - { unit: kamailio,       instance: 1 }
-      # - { unit: kamailio,       instance: 2 }
-      # - { unit: keepalived,     instance: 1 }
-      # - { unit: keepalived,     instance: 2 }
-      # - { unit: dispatcher,     instance: 1 }
-      # - { unit: dispatcher,     instance: 2 }
-      # - { unit: asterisk,       instance: 1 }
-      # - { unit: asterisk,       instance: 2 }
-      # - { unit: announcer,      instance: 1 }
-      # - { unit: announcer,      instance: 2 }
-      # - { unit: mysql,          instance: 1 }
-      # - { unit: captureserver,  instance: 1 }
-      # - { unit: homerannouncer, instance: 1 }
+      - { unit: kamailio,       instance: 1 }
+      - { unit: kamailio,       instance: 2 }
+      - { unit: keepalived,     instance: 1 }
+      - { unit: keepalived,     instance: 2 }
+      - { unit: dispatcher,     instance: 1 }
+      - { unit: dispatcher,     instance: 2 }
+      - { unit: asterisk,       instance: 1 }
+      - { unit: asterisk,       instance: 2 }
+      - { unit: announcer,      instance: 1 }
+      - { unit: announcer,      instance: 2 }
+      - { unit: mysql,          instance: 1 }
+      - { unit: captureserver,  instance: 1 }
+      - { unit: homerannouncer, instance: 1 }
       - { unit: homerweb,       instance: 1 }
-      # - { unit: captagent,      instance: 1 }
-      # - { unit: captagent,      instance: 2 }
+      - { unit: captagent,      instance: 1 }
+      - { unit: captagent,      instance: 2 }
 
   sudo: true
   tasks:

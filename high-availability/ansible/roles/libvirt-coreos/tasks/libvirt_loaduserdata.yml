@@ -1,3 +1,6 @@
+  - name: Set initial facts
+    set_fact:
+      libvirt_name: "coreos{{ boxnumber }}"
 
   - name: Fail if box_role is not defined
     fail: msg="This role requires 'box_role' as a variable"

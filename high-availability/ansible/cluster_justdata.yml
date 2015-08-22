@@ -1,0 +1,35 @@
+- name: Reload cloud config on coreos machines
+  hosts: libvirthost
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  vars:
+    # All required variables.
+    # Location of your coreos image.
+    # image_source: /home/doug/Downloads/coreos_production_qemu_image.img
+    # public_ssh_keys: 
+    #     - "ssh-dss AAAAB3Nz...."
+    #     - "ssh-dss AAAAG4Nz...."
+    # libvirt_subnet: "192.168.122"
+    # Typically set below...
+    # coreos_discovery: https://discovery.etcd.io/a604a5c7af403bd62e03027237e86cf6
+  sudo: true
+  pre_tasks:
+
+    - name: Get new etcd discovery token
+      command: curl https://discovery.etcd.io/new
+      register: curl_result
+
+    - name: Set etcd token
+      set_fact: 
+        coreos_discovery: "{{ curl_result.stdout }}"
+
+  roles:
+    - { role: libvirt-coreos, mode: userdata, boxnumber: 0, box_role: kamailio }
+    - { role: libvirt-coreos, mode: userdata, boxnumber: 1, box_role: kamailio }
+    - { role: libvirt-coreos, mode: userdata, boxnumber: 2, box_role: asterisk }
+    - { role: libvirt-coreos, mode: userdata, boxnumber: 3, box_role: asterisk }
+    - { role: libvirt-coreos, mode: userdata, boxnumber: 4, box_role: homer }
+
+    # - { include: tasks/libvirt_spinup.yml, boxnumber: 0 }
+    # - { include: tasks/libvirt_spinup.yml, boxnumber: 1 }
+    # - { include: tasks/libvirt_spinup.yml, boxnumber: 2 }
