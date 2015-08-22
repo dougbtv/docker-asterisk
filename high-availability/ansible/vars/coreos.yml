@@ -10,3 +10,7 @@ public_ssh_keys:
     - "ssh-dss AAAAB3...."
     - "ssh-dss AAAAB3...."
     - "ssh-dss AAAAB3...."
+
+# extra options
+wait_reboot: 5
+wait_etcd_leader: 10

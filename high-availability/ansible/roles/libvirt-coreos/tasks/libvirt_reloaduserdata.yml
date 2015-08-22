@@ -17,5 +17,5 @@
   - name: Create user data
     include: libvirt_loaduserdata.yml
 
-  - name: Start 'er up!
-    virt: "name={{ libvirt_name }} state=running"
+  - name: Startup VM
+    include: libvirt_startup.yml

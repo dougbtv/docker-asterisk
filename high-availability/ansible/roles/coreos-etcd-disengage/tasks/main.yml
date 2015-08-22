@@ -1,0 +1,16 @@
+---
+# Wipe etcd's cache and shut down.
+
+  - name: Shutdown etcd
+    service: "name=etcd state=stopped"
+#    command: "pgrep etcd | xargs kill -9"
+
+  - name: Delete etcd cache 
+    file: "path=/var/lib/etcd/{{item}} state=absent"
+    with_items:
+      - log
+      - conf
+
+  - name: Shutdown machine 
+    command: "/sbin/shutdown now"
+    ignore_errors: yes
