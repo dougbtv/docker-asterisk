@@ -7,18 +7,17 @@ ssh_authorized_keys:
 
 hostname: {{ libvirt_name }}
 coreos:
-  etcd:
-    # name: {{ libvirt_name }}
-    # generate a new token for each unique cluster from https://discovery.etcd.io/new
+  etcd2:
+    advertise-client-urls: http://{{ libvirt_ip }}:2379
+    initial-advertise-peer-urls: http://{{ libvirt_ip }}:2380
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://0.0.0.0:2380
     discovery: {{ coreos_discovery }}
-    # use $public_ipv4 if your datacenter of choice does not support private networking
-    addr: {{ libvirt_ip }}:4001
-    peer-addr: {{ libvirt_ip }}:7001
   fleet:
     public-ip: {{ libvirt_ip }}   # used for fleetctl ssh command
     metadata: boxrole={{ box_role }}
   units:
-    - name: etcd.service
+    - name: etcd2.service
       command: start
     - name: fleet.service
       command: start
