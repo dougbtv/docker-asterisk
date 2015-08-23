@@ -204,6 +204,9 @@ class: center, middle, inverse
 layout:false
 .image_platformstack[![Platform Stack](/images/platform_stack_small.png)]
 ---
+layout:false
+.image_platformstack[![Network](/images/network.png)]
+---
 name: inverse
 layout: true
 class: center, middle, inverse
