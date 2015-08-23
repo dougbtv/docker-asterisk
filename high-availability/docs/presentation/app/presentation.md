@@ -14,6 +14,8 @@ layout: false
 
 - Develop Asterisk solutions every day.
 
+- A founding member of Burlington, Vermont's hackerspace [LaboratoryB.org](http://laboratoryb.org)
+
 - Love full-stack Javascript
 
 - Open soooource.
@@ -97,6 +99,26 @@ layout: false
   - portability
 
   - koolaid
+
+```bash
+FROM fedora:latest
+MAINTAINER Doug Smith <info@laboratoryb.org>
+RUN yum install -y cowsay 1> /dev/null
+RUN echo "Vermont is awesome" | cowsay -s > /var/cowsay.txt
+```
+
+So you could serve a file:
+
+```bash
+# ____________________ 
+#< Vermont is awesome >
+# -------------------- 
+#        \   ^__^
+#         \  (**)\_______
+#            (__)\       )\/\
+#             U  ||----w |
+#                ||     ||
+```
 ]
 ---
 layout: false
@@ -202,10 +224,10 @@ class: center, middle, inverse
 # System Architecture
 ---
 layout:false
-.image_platformstack[![Platform Stack](/images/platform_stack_small.png)]
+background-image: url(/images/platform_stack.png)
 ---
 layout:false
-.image_platformstack[![Network](/images/network.png)]
+background-image: url(/images/network.png)
 ---
 name: inverse
 layout: true
