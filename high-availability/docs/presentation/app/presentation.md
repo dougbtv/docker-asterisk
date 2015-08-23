@@ -83,6 +83,131 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
+# Intro to the technologies
+---
+layout: false
+.left-column[
+  ## Docker
+]
+.right-column[
+  Docker is cool, containers.
+
+  - advantages
+
+  - portability
+
+  - koolaid
+]
+---
+layout: false
+.left-column[
+  ## Docker
+  ## CoreOS
+]
+.right-column[
+  CoreOS is awesome, run your containers.
+
+  - Fork of ChromeOS
+
+  - Just a couple hundred megs.
+
+  - Your containers run your Linux flavor that you're used to.
+]
+---
+layout: false
+.left-column[
+  ## Docker
+  ## CoreOS
+  ## etcd
+]
+.right-column[
+  etcd is a discovery service.
+
+  - A distributed key-value pair database with a REST API
+
+  - Used by CoreOS itself for `fleet` a way to manage your "fleet" of CoreOS machines and the services that run on them.
+
+  - A way to dynamically store configurations, like the simplest one: "Hey I'm a service and I live here!"
+]
+---
+layout: false
+.left-column[
+  ## Docker
+  ## CoreOS
+  ## etcd
+  ## Kamailio
+]
+.right-column[
+  You probably know Kamailio.
+
+  - We'll use it for load balancing our cluster of Asterisk machines.
+
+]
+---
+layout: false
+.left-column[
+  ## Docker
+  ## CoreOS
+  ## etcd
+  ## Kamailio
+  ## Asterisk
+]
+.right-column[
+  ##Have you heard of it!?
+]
+---
+layout: false
+.left-column[
+  ## Docker
+  ## CoreOS
+  ## etcd
+  ## Kamailio
+  ## Asterisk
+  ## Homer
+]
+.right-column[
+  Homer is a SIP capture server
+
+  - Get some visibility of all the signalling whipping over your network.
+
+  - Runs on a (likely familiar) LAMP stack.
+
+  - We won't go deep into configuration, but, it's in github.
+
+]
+---
+layout: false
+.left-column[
+  ## Docker
+  ## CoreOS
+  ## etcd
+  ## Kamailio
+  ## Asterisk
+  ## Homer
+  ## Not covered
+]
+.right-column[
+  Somethings are just always too painful for a presentation.
+
+  - Dun dun dunnn! NAT.
+
+  - Logging (you'll want a centralized log server)
+
+]
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# System Architecture
+---
+layout:false
+.image_platformstack[![Platform Stack](/images/platform_stack_small.png)]
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
 #remark
 [ri-mahrk]
 .footnote[Go directly to [project site](https://github.com/gnab/remark)]
