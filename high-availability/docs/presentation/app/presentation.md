@@ -2,6 +2,87 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
+#Asterisk using Docker and CoreOS
+.footnote[By Douglas K. Smith, 800response]
+---
+layout: false
+.left-column[
+  ## Who am I?
+]
+.right-column[
+  I'm Doug and this is a stub. 
+
+- Develop Asterisk solutions every day.
+
+- Love full-stack Javascript
+
+- Open soooource.
+
+- Live in Vermont.
+
+- Into trout fishing, backcountry skiing, ... 
+
+]
+---
+layout: false
+.left-column[
+  ## 800response
+]
+.right-column[
+  800response is a company, stub.
+
+- Telephony, cool stuff, technology.
+
+- We like customers.
+
+- VoIP
+]
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+#10,000' view
+---
+layout: false
+.left-column[
+  ## This is documented online
+]
+.right-column[
+  #You can find this online @ [url.stub.com](url.stub.com)
+
+  - Whole presentation is in markdown.
+
+  - Github
+
+  - Twitter [@dougbtv](https://twitter.com/dougbtv)
+]
+---
+layout: false
+.left-column[
+  ## This is documented online
+  ## Why Docker & CoreOS
+]
+.right-column[
+  Docker & CoreOS are great because they give a few advantages that keep us clean, give us consistent environments, and tools that help with scale. 
+
+  * Docker is great for component re-use, sharing & team development, rapid deployment, and simplified maintenance by reducing the risk of problems with application dependencies.
+
+  * CoreOS is a *very light* Linux that allows us to run our containers, and comes chock full of simple tools to help us maintain a cluster of machines, using tools like `etcd` and `fleet` 
+
+  * ...You might not have to buy a hypervisor anymore. (But you can still use one.)
+
+  * They're not the only options.
+
+  * For containers: [RKT](https://coreos.com/rkt/docs/) (said, "rocket")
+
+  * For OS: [Project Atomic](http://www.projectatomic.io/download/), a Fedora for running containers, and uses Kubernetes for management.
+]
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
 #remark
 [ri-mahrk]
 .footnote[Go directly to [project site](https://github.com/gnab/remark)]
