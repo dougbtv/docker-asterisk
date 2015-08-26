@@ -123,6 +123,10 @@ Firstly, you'll want to spin down your CoreOS cluster, this allows you to flush 
 
 ## Service Discovery
 ## Using kamailio-etcd-dispatcher
+
+Load balancing percentage, for use with a [Canary Release](http://martinfowler.com/bliki/CanaryRelease.html)
+
+
 ## Managing the cluster
 
 ### Using Fleet
