@@ -134,6 +134,8 @@ layout: false
   - Just a couple hundred megs.
 
   - Your containers run your Linux flavor that you're used to.
+
+  - Run it where you want: In the closet, in a public/private cloud.
 ]
 ---
 layout: false
@@ -157,34 +159,59 @@ layout: false
   ## Docker
   ## CoreOS
   ## etcd
+  ## Fleet
+]
+
+.right-column[
+- Like `systemctl` at a cluster level
+- Controlled at the command line
+- Rather low level
+- Runs Docker containers in systemd-style units
+- Allows you to create dependencies
+
+### Other choices in this realm 
+- [Kubernetes](http://kubernetes.io/) by Google
+- [Mesos](http://mesos.apache.org/) by Apache
+]
+???
+
+Kubernetes uses an API, and has a number of features such as being an advanced scheduler. It also implements "quotas"
+which allow you to specify CPU usage and other metrics at a cluster level and allocate resources more intelligently.
+
+Fleet is a little more manageable for a smaller cluster.
+---
+layout: false
+.left-column[
+  ## Docker
+  ## CoreOS
+  ## etcd
+  ## Fleet
   ## Kamailio
 ]
 .right-column[
-  You probably know Kamailio.
+  You probably know Kamailio!
 
+  - As we know, Asterisk is a B2BUA not a proxy.
   - We'll use it for load balancing our cluster of Asterisk machines.
+  - Use it in concert with `keepalived` which will provide us with a VIP for an HA load balancer
 
 ]
+???
+
+At 11:40 you can hear Kyle Marks talk about "Fronting your Asterisk cluster with, Asterisk"
+
+I'll tell you if I like his idea, I will implement it. The bottom line is that I feel like I have such higher confidence in diagnosing issues on my Asterisk boxen, over Kamailio.
+
+By the same token, Kamailio hasn't failed me.
+
 ---
 layout: false
 .left-column[
   ## Docker
   ## CoreOS
   ## etcd
+  ## Fleet
   ## Kamailio
-  ## Asterisk
-]
-.right-column[
-  ##Have you heard of it!?
-]
----
-layout: false
-.left-column[
-  ## Docker
-  ## CoreOS
-  ## etcd
-  ## Kamailio
-  ## Asterisk
   ## Homer
 ]
 .right-column[
@@ -198,13 +225,12 @@ layout: false
 
 ]
 ---
-layout: false
 .left-column[
   ## Docker
   ## CoreOS
   ## etcd
+  ## Fleet
   ## Kamailio
-  ## Asterisk
   ## Homer
   ## Not covered
 ]
@@ -213,9 +239,25 @@ layout: false
 
   - Dun dun dunnn! NAT.
 
+  - Configuration Management, and you need it.
+
   - Logging (you'll want a centralized log server)
 
 ]
+???
+
+Config management choices:
+- salt
+- ansible
+- puppet
+- terraform (multiple clouds)
+---
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+# . . . Oh yeah! 
+# Asterisk, too.
 ---
 name: inverse
 layout: true

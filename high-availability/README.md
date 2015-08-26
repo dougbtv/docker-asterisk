@@ -134,3 +134,6 @@ Load balancing percentage, for use with a [Canary Release](http://martinfowler.c
 
 ## Learning more
 
+### Kubernetes
+
+Kubernetes may be a choice as you scale up, and you're looking at dynamic scaling and scheduling. However, we tend to have some heavier networking requirements for VoIP, which provides a challenge.
