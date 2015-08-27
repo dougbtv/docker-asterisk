@@ -194,6 +194,8 @@ layout: false
   - As we know, Asterisk is a B2BUA not a proxy.
   - We'll use it for load balancing our cluster of Asterisk machines.
   - Use it in concert with `keepalived` which will provide us with a VIP for an HA load balancer
+  - We use a custom application `kamailio-etcd-dispatcher` which rebuilds nodes
+  - We can make a "canary release" easily by automatically rebalancing our cluster using `kamailio-etcd-dispatcher`
 
 ]
 ???
