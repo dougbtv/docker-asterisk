@@ -101,7 +101,19 @@ coreos0 ~ #
 
 Note that we use the use "core" and we can use sudo from there. The remainder of the playbooks use this construct, you can see that we set this paradigm between seeing the `ansible_ssh_user=core` in the inventory and then use `sudo: true` in the playbooks.
 
+First thing you should do once your cluster is up is enable Ansible on it, we'll use an ansible galaxy role to get it setup for ansible.
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos bootstrap_ansible_coreos.yml 
+```
+
 Ooops! You messed something up with the cluster? You can run the rediscover playbook. It'll re-load the cloud config user data, and set the proper tokens for service discovery if the cluster is borked.
+
+Firstly, you'll want to spin down your CoreOS cluster, this allows you to flush out 
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_spindown.yml
+```
 
 ```bash
 [doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_rediscover.yml
@@ -111,6 +123,10 @@ Ooops! You messed something up with the cluster? You can run the rediscover play
 
 ## Service Discovery
 ## Using kamailio-etcd-dispatcher
+
+Load balancing percentage, for use with a [Canary Release](http://martinfowler.com/bliki/CanaryRelease.html)
+
+
 ## Managing the cluster
 
 ### Using Fleet
@@ -118,3 +134,6 @@ Ooops! You messed something up with the cluster? You can run the rediscover play
 
 ## Learning more
 
+### Kubernetes
+
+Kubernetes may be a choice as you scale up, and you're looking at dynamic scaling and scheduling. However, we tend to have some heavier networking requirements for VoIP, which provides a challenge.

@@ -24,7 +24,7 @@
     - debug: "msg={{ curl_result.stdout }}"
 
   roles:
-    - { role: libvirt-coreos, mode: rediscover, boxnumber: 0, box_role: "kamailio" }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 0, box_role: "kamailio", etcd_leader: true }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 1, box_role: "kamailio" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 2, box_role: "asterisk" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 3, box_role: "asterisk" }

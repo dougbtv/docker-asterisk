@@ -1,2 +1,5 @@
 node_modules/
 private.yml
+bower_components/
+__presentation/
+_presentation/

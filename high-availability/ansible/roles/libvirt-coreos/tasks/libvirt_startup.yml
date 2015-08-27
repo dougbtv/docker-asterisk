@@ -1,0 +1,7 @@
+  - name: Start 'er up!
+    virt: "name={{ libvirt_name }} state=running"
+    when: do_not_restart is not defined
+
+  - name: Sleep to let leader start etcd...
+    pause: "seconds={{ wait_etcd_leader }}"
+    when: etcd_leader is defined

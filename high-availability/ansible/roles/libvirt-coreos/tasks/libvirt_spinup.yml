@@ -36,9 +36,8 @@
         command: define
         xml: "{{ lookup('template', 'coreos_xml.j2') }}"
 
-  - name: Start 'er up!
-    virt: "name={{ libvirt_name }} state=running"
-    when: do_not_restart is not defined
+  - name: Startup VM
+    include: libvirt_startup.yml
 
   # - name: Enable etcd
   #   service: name=etcd.service enabled=yes
