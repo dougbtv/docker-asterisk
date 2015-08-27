@@ -12,18 +12,10 @@
     # libvirt_subnet: "192.168.122"
   sudo: true
   pre_tasks:
-
-    - name: Get new etcd discovery token
-      command: curl https://discovery.etcd.io/new
-      register: curl_result
-
-    - name: Set etcd token
-      set_fact: 
-        coreos_discovery: "{{ curl_result.stdout }}"
-
-    - debug: "msg={{ curl_result.stdout }}"
-
+    # - Clear cache on a box?
+    # systemctl stop etcd2 && rm -f /var/lib/etcd2/proxy/cluster && reboot
   roles:
+    - { role: get-etcd-token }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 0, box_role: "kamailio", etcd_leader: true }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 1, box_role: "kamailio" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 2, box_role: "asterisk" }

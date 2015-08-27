@@ -7,6 +7,29 @@ ssh_authorized_keys:
 
 hostname: {{ libvirt_name }}
 coreos:
+  units:
+    - name: etcd2.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name:  systemd-networkd.service
+      command: restart
+    - name: flanneld.service
+      drop-ins:
+        - name: 50-network-config.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.1.0.0/16" }'
+      command: start
+    - name: 10-ens3.network
+      content: |
+          [Match]
+          MACAddress=52:54:00:fe:b3:c{{ boxnumber }}
+
+          [Network]
+          Address={{ libvirt_ip }}/24
+          Gateway={{ libvirt_gateway }}
+          DNS=8.8.8.8
   etcd2:
     advertise-client-urls: http://{{ libvirt_ip }}:2379
     initial-advertise-peer-urls: http://{{ libvirt_ip }}:2380
@@ -14,19 +37,4 @@ coreos:
     listen-peer-urls: http://0.0.0.0:2380
     discovery: {{ coreos_discovery }}
   fleet:
-    public-ip: {{ libvirt_ip }}   # used for fleetctl ssh command
-    metadata: boxrole={{ box_role }}
-  units:
-    - name: etcd2.service
-      command: start
-    - name: fleet.service
-      command: start
-    - name: 10-ens3.network
-      content: |
-        [Match]
-        MACAddress=52:54:00:fe:b3:c{{ boxnumber }}
-
-        [Network]
-        Address={{ libvirt_ip }}/24
-        Gateway={{ libvirt_gateway }}
-        DNS=8.8.8.8
+    public-ip: {{ libvirt_ip }}
