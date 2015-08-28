@@ -1,16 +1,18 @@
 # Great tute on configuring cloud-config with ansible:
 # http://www.tazj.in/en/1410951452
 coreos_discovery: https://discovery.etcd.io/a604a5c7af403bd62e03027237e86cf6
-image_source: /home/doug/Downloads/coreos_production_qemu_image.img
+image_source: /var/lib/libvirt/images/coreos/coreos_stable_qemu_image.img
+libvirt_basedir: /var/lib/libvirt/images/coreos/
 libvirt_subnet: "192.168.122"
 outbound_proxy: "192.168.122.200"
 floating_ip: "192.168.122.199"
 keepalived_password: fAKrTR0n
+coreos_ram: 1024
+coreos_cpus: 1
 public_ssh_keys: 
-    - "ssh-dss AAAAB3...."
-    - "ssh-dss AAAAB3...."
-    - "ssh-dss AAAAB3...."
+    - "ssh-dss AAAAB3NzaC..."
+    - "ssh-dss AAAAB3NzaC..."
 
 # extra options
 wait_reboot: 5
-wait_etcd_leader: 10
+wait_etcd_leader: 25

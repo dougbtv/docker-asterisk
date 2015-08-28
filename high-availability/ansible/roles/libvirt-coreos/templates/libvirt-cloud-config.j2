@@ -1,8 +1,7 @@
 #cloud-config
-
 ssh_authorized_keys:
  {% for key in public_ssh_keys %}
- - {{ key }}
+  - {{ key }}
  {% endfor %}
 
 hostname: {{ libvirt_name }}
@@ -21,15 +20,17 @@ coreos:
             [Service]
             ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{ "Network": "10.1.0.0/16" }'
       command: start
-    - name: 10-ens3.network
+    - name: 00-eth0.network
+      runtime: true
       content: |
-          [Match]
-          MACAddress=52:54:00:fe:b3:c{{ boxnumber }}
+        [Match]
+        Name=eth0
 
-          [Network]
-          Address={{ libvirt_ip }}/24
-          Gateway={{ libvirt_gateway }}
-          DNS=8.8.8.8
+        [Network]
+        DNS=8.8.8.8
+        Address={{ libvirt_ip }}/24
+        Gateway=192.168.122.1
+
   etcd2:
     advertise-client-urls: http://{{ libvirt_ip }}:2379
     initial-advertise-peer-urls: http://{{ libvirt_ip }}:2380
@@ -38,3 +39,4 @@ coreos:
     discovery: {{ coreos_discovery }}
   fleet:
     public-ip: {{ libvirt_ip }}
+    metadata: box_role={{ box_role }}

@@ -10,7 +10,7 @@
     set_fact:
       libvirt_ip: "{{ libvirt_subnet }}.20{{ boxnumber }}"
       libvirt_gateway: "{{ libvirt_subnet }}.1"
-      libvirt_userdatadir: "/var/lib/libvirt/images/coreos{{ boxnumber }}/configdrive/openstack/latest"
+      libvirt_userdatadir: "/var/lib/libvirt/images/coreos/coreos{{ boxnumber }}/openstack/latest"
 
   - name: Assure userdata dir exists.
     file:
