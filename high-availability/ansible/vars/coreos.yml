@@ -13,4 +13,4 @@ public_ssh_keys:
 
 # extra options
 wait_reboot: 5
-wait_etcd_leader: 25
+wait_etcd_leader: 10
