@@ -5,15 +5,67 @@
   vars_files:
     - ["vars/private.yml", "vars/coreos.yml"]
   vars:
-    # 
+    sickly: ""
   sudo: true
   pre_tasks:
     # 
-  roles:
-    - { role: coreos-etcd-health }
-    - { role: coreos-rejoin }
+  tasks: 
 
-- name: Loaf a bot
-  hosts: leader
-  roles:
-    - {role: coreos-etcd-health}
+    # - name: set foo fact to an array
+    #   set_fact: foo="[ 'one', 'two', 'three' ]"
+    # - debug: var=foo
+    # - name: add items to foo array fact
+    #   set_fact: foo="{{foo}} + [ 'four' ]"
+    # - debug: var=foo
+
+    - name: Assume good health
+      set_fact:
+        sickly: "healthy"
+
+    - name: Determine health
+      command: fleetctl list-machines
+      register: fleet_status
+      ignore_errors: yes
+
+    - name: Determine sick hosts
+      set_fact:
+        sickly: "sickly"
+      when: fleet_status.rc > 0
+
+    - name: Group hosts by health state
+      group_by: "key={{sickly}}"
+
+  # roles:
+  #   - { role: coreos-etcd-health }
+
+- name: Make a group of the first host that's healthy
+  hosts: healthy
+  tasks:
+    - name: Make that group of one
+      add_host: "name={{inventory_hostname}} groups=healthy_leader"
+
+- name: Run against healthy host
+  hosts: healthy_leader
+  tasks:
+    
+    - debug: var=groups.sickly
+
+    - name: Add member to etcd cluster
+      command: "echo {{ item }} -- {{ hostvars[item].ansible_ssh_host }}"
+      # command: "echo foo"
+      register: echo_result
+      with_items: groups.sickly
+
+    # - debug: var=echo_result.results
+
+- name: Run against sick hosts
+  hosts: sickly
+  tasks: 
+    - name: Debug it
+      debug: msg={{ item.stdout }}
+      when: item.item == inventory_hostname
+      with_items: hostvars[groups['healthy_leader'][0]]['echo_result']['results']
+# - name: Loaf a bot
+#   hosts: leader
+#   roles:
+#     - {role: coreos-etcd-health}
