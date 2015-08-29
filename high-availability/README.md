@@ -137,3 +137,27 @@ Load balancing percentage, for use with a [Canary Release](http://martinfowler.c
 ### Kubernetes
 
 Kubernetes may be a choice as you scale up, and you're looking at dynamic scaling and scheduling. However, we tend to have some heavier networking requirements for VoIP, which provides a challenge.
+
+## Troubleshooting
+
+Having a node go down and rejoin an exiting cluster can be a pain. You can't just use discovery. So, what to do? I started off with [this guy having the same issue](https://github.com/coreos/etcd/issues/2807).
+
+But what I was really having trouble finding was [the documentation for runtime configuration](https://github.com/coreos/etcd/blob/master/Documentation/runtime-configuration.md)
+
+And I really want [add a new member to the cluster](https://github.com/coreos/etcd/blob/master/Documentation/runtime-configuration.md#add-a-new-member)
+
+Here's an example of adding one by hand:
+
+```
+etcdctl member add coreos4 http://192.168.122.204:2380
+
+export ETCD_DATA_DIR=/var/lib/etcd2
+export ETCD_NAME="coreos4"
+export ETCD_INITIAL_CLUSTER="682a6dccdb58a44ba63e54404a9dfb3f=http://192.168.122.201:2380,b738ee88b95aba4ba8cdaf52b7646f6e=http://192.168.122.202:2380,coreos4=http://192.168.122.204:2380,abdd20d5cf1e414888e84042dd800a83=http://192.168.122.200:2380"
+export ETCD_INITIAL_CLUSTER_STATE="existing"
+
+export ETCD_DISCOVERY=""
+
+etcd2 -listen-client-urls http://0.0.0.0:2379 -advertise-client-urls http://192.168.122.204:2379  -listen-peer-urls http://0.0.0.0:2380 -initial-advertise-peer-urls http://192.168.122.204:2380
+```
+
