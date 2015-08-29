@@ -1,0 +1,2 @@
+- name: Execute add members on single host
+  command: echo foo

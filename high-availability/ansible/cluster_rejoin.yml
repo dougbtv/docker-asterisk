@@ -1,0 +1,19 @@
+---
+# Bring up busted nodes
+- name: Rediscover a cluster of CoreOS boxen.
+  hosts: coreos
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  vars:
+    # 
+  sudo: true
+  pre_tasks:
+    # 
+  roles:
+    - { role: coreos-etcd-health }
+    - { role: coreos-rejoin }
+
+- name: Loaf a bot
+  hosts: leader
+  roles:
+    - {role: coreos-etcd-health}
