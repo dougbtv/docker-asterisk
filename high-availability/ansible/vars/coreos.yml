@@ -4,6 +4,9 @@ coreos_discovery: https://discovery.etcd.io/a604a5c7af403bd62e03027237e86cf6
 image_source: /var/lib/libvirt/images/coreos/coreos_stable_qemu_image.img
 libvirt_basedir: /var/lib/libvirt/images/coreos/
 libvirt_subnet: "192.168.122"
+libvirt_gateway: "192.168.122.1"
+libvirt_network: "--network=default,model=virtio"
+coreos_ethernet_device: eth0
 outbound_proxy: "192.168.122.200"
 floating_ip: "192.168.122.199"
 keepalived_password: fAKrTR0n

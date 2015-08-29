@@ -161,3 +161,4 @@ export ETCD_DISCOVERY=""
 etcd2 -listen-client-urls http://0.0.0.0:2379 -advertise-client-urls http://192.168.122.204:2379  -listen-peer-urls http://0.0.0.0:2380 -initial-advertise-peer-urls http://192.168.122.204:2380
 ```
 
+You might want etcd's [configuration environment variables, too](https://github.com/coreos/etcd/blob/master/Documentation/configuration.md)

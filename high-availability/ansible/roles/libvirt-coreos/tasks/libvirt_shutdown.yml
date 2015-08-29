@@ -50,8 +50,8 @@
     when: machine_exists and machine_status.status == 'running'
 
   # name: Pause for 2 seconds after shutdown
-  - pause: "seconds={{ wait_reboot }}"
-    when: did_shutdown
+  # - pause: "seconds={{ wait_reboot }}"
+  #   when: did_shutdown
 
   - name: Undefine namespace
     include: libvirt_destroy.yml

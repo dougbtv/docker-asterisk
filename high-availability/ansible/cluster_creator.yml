@@ -9,7 +9,7 @@
     # I role-ized it.
   roles:
     - { role: get-etcd-token }
-    - { role: libvirt-coreos, mode: create, boxnumber: 0, box_role: kamailio, etcd_leader: true }
+    - { role: libvirt-coreos, mode: create, boxnumber: 0, box_role: kamailio }
     - { role: libvirt-coreos, mode: create, boxnumber: 1, box_role: kamailio }
     - { role: libvirt-coreos, mode: create, boxnumber: 2, box_role: asterisk }
     - { role: libvirt-coreos, mode: create, boxnumber: 3, box_role: asterisk }

@@ -36,7 +36,7 @@
       --name {{ libvirt_name }} 
       --ram {{ coreos_ram }} 
       --vcpus {{ coreos_cpus }} 
-      --network=default,model=virtio 
+      {{ libvirt_network }} 
       --os-type=linux 
       --disk path={{ libvirt_basedir }}{{ libvirt_name }}.qcow2,format=qcow2,bus=virtio 
       --filesystem {{ libvirt_dir }},config-2,type=mount,mode=squash 

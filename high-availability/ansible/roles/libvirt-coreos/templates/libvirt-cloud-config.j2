@@ -9,6 +9,11 @@ coreos:
   units:
     - name: etcd2.service
       command: start
+      # drop-ins:
+      #   - name: 01-wipe-cache.conf
+      #     content: |
+      #       [Service]
+      #       ExecStartPre=/bin/rm -Rf /var/lib/etcd2/*
     - name: fleet.service
       command: start
     - name:  systemd-networkd.service
@@ -29,7 +34,7 @@ coreos:
         [Network]
         DNS=8.8.8.8
         Address={{ libvirt_ip }}/24
-        Gateway=192.168.122.1
+        Gateway={{ libvirt_gateway }}
 
   etcd2:
     advertise-client-urls: http://{{ libvirt_ip }}:2379
