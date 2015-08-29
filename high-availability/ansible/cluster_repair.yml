@@ -38,7 +38,7 @@
   hosts: healthy_leader
   sudo: true
   tasks:
-    
+
     # - debug: var=groups.sickly
 
     - name: Add member to etcd cluster

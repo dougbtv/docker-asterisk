@@ -1,9 +1,0 @@
----
-# Let's politely spin down a coreos machine.
-- name: Rediscover a cluster of CoreOS boxen.
-  hosts: coreos
-  sudo: true
-  vars_files:
-    - ["vars/private.yml", "vars/coreos.yml"]
-  roles:
-    - { role: coreos-etcd-disengage }

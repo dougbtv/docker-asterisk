@@ -3,10 +3,8 @@
   fail: msg="This task requires 'boxnumber' variable"
   when: boxnumber is not defined
 
-- name: Set vm_name if need be
-  set_fact:
-      vm_name: "coreos{{ boxnumber }}"
-  when: vm_name is not defined
-
 - name: Undefine namespace
   virt: "name={{ vm_name }} command=undefine"
+
+- name: Remove the QCOW file
+  file: "path={{libvirt_basedir}}{{ vm_name }}.qcow2 state=absent"

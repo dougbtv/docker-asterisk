@@ -35,6 +35,7 @@
     virt: "name={{ vm_name }} command=status"
     register: machine_status
     when: machine_exists
+    ignore_errors: yes
 
   - name: Assume no shutdown
     set_fact:

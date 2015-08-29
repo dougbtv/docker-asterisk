@@ -107,17 +107,20 @@ First thing you should do once your cluster is up is enable Ansible on it, we'll
 [doug@talos ansible]$ ansible-playbook -i inventory/coreos bootstrap_ansible_coreos.yml 
 ```
 
-Ooops! You messed something up with the cluster? You can run the rediscover playbook. It'll re-load the cloud config user data, and set the proper tokens for service discovery if the cluster is borked.
+So you've loaded up the cluster, but, need to boot it fresh -- you can run the bootup playbook. It'll re-load the cloud config user data, and set the proper tokens for service discovery if the cluster is borked.
 
-Firstly, you'll want to spin down your CoreOS cluster, this allows you to flush out 
-
-```bash
-[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_spindown.yml
-```
 
 ```bash
-[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_rediscover.yml
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_bootup.yml
 ```
+
+Buuuut, sometimes nodes just don't want to join the cluster. If you're creating a dynamic sized cluster, it can be painful. So we have a playbook which adds nodes which didn't make it into the cluster.
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_repair.yml
+```
+
+Sometimes, you wanna 
 
 
 
