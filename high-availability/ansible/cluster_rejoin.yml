@@ -1,6 +1,6 @@
 ---
 # Bring up busted nodes
-- name: Rediscover a cluster of CoreOS boxen.
+- name: Rejoin failed nodes back into an etcd cluster of CoreOS boxen.
   hosts: coreos
   vars_files:
     - ["vars/private.yml", "vars/coreos.yml"]
@@ -10,13 +10,6 @@
   pre_tasks:
     # 
   tasks: 
-
-    # - name: set foo fact to an array
-    #   set_fact: foo="[ 'one', 'two', 'three' ]"
-    # - debug: var=foo
-    # - name: add items to foo array fact
-    #   set_fact: foo="{{foo}} + [ 'four' ]"
-    # - debug: var=foo
 
     - name: Assume good health
       set_fact:
@@ -35,9 +28,6 @@
     - name: Group hosts by health state
       group_by: "key={{sickly}}"
 
-  # roles:
-  #   - { role: coreos-etcd-health }
-
 - name: Make a group of the first host that's healthy
   hosts: healthy
   tasks:
@@ -46,25 +36,41 @@
 
 - name: Run against healthy host
   hosts: healthy_leader
+  sudo: true
   tasks:
     
-    - debug: var=groups.sickly
+    # - debug: var=groups.sickly
 
     - name: Add member to etcd cluster
-      command: "echo {{ item }} -- {{ hostvars[item].ansible_ssh_host }}"
-      # command: "echo foo"
-      register: echo_result
+      # command: "echo {{ item }} -- {{ hostvars[item].ansible_ssh_host }}"
+      shell: |
+        etcdctl member add {{ item }} http://{{ hostvars[item].ansible_ssh_host }}:2380 | tail -n 3 | sed -e 's/"//g' | sed -e 's/^/Environment="/g' | sed -e 's/$/"/g' 
+      register: etcd_add_member
       with_items: groups.sickly
 
-    # - debug: var=echo_result.results
+    # - debug: var=etcd_add_member.results
 
 - name: Run against sick hosts
   hosts: sickly
+  sudo: true
   tasks: 
-    - name: Debug it
-      debug: msg={{ item.stdout }}
+    - name: Pick up etcd config per host
+      set_fact:
+        etcd_config: "{{item.stdout}}"
       when: item.item == inventory_hostname
-      with_items: hostvars[groups['healthy_leader'][0]]['echo_result']['results']
+      with_items: hostvars[groups['healthy_leader'][0]]['etcd_add_member']['results']
+
+    # - debug: var=etcd_config
+
+    - name: Template new etcd service
+      template: src=templates/etcd-cloudinit.conf.j2 dest=/run/systemd/system/etcd2.service.d/20-cloudinit.conf
+
+    - name: Reload systemctl daemon
+      command: "systemctl daemon-reload"
+
+    - name: Restart etcd2
+      command: "systemctl restart etcd2"
+
 # - name: Loaf a bot
 #   hosts: leader
 #   roles:

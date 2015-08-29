@@ -7,7 +7,7 @@
 
 ------------- working
 
-etcdctl member add coreos4 http://192.168.122.204:2380
+etcdctl member add coreos4 http://192.168.2.204:2380
 
 export ETCD_DATA_DIR=/var/lib/etcd2
 export ETCD_NAME="coreos4"
