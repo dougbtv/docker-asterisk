@@ -9,6 +9,10 @@
       fail: msg="This role requires 'boxnumber' as a variable"
       when: boxnumber is not defined
 
+    - name: Set vm_name every time
+      set_fact:
+          vm_name: "coreos{{ boxnumber }}"
+
     - name: Fail if libvirt_subnet is not defined
       fail: msg="This role requires 'libvirt_subnet' as a variable"
       when: libvirt_subnet is not defined
@@ -16,11 +20,6 @@
     - name: Fail if coreos_discovery is not defined
       fail: msg="This role requires 'coreos_discovery' as a variable"
       when: coreos_discovery is not defined
-
-    - name: Set vm_name if need be
-      set_fact:
-          vm_name: "coreos{{ boxnumber }}"
-      when: vm_name is not defined
 
     - name: Destroy in destroy mode
       set_fact:

@@ -3,10 +3,6 @@
 # takes two variables:
 # vm_name
 
-  - name: Fail if vm_name is not defined
-    fail: msg="This task requires 'vm_name' variable"
-    when: vm_name is not defined
-
   - name: Default to not destructing
     set_fact:
       destroy: false
@@ -45,6 +41,7 @@
     set_fact:
           did_shutdown: true
     when: machine_exists and machine_status.status == 'running'
+    ignore_errors: yes
 
   - name: Shutdown namespace (when exists and running)
     virt: "name={{ vm_name }} command=shutdown"
