@@ -1,6 +1,11 @@
 ---
-
 - name: Sync kamailio configs
+  hosts: kamailio
+  sudo: true
+  roles:
+    - { role: kamailio-config }
+
+- name: Restart kamailio
   hosts: kamailio
   vars:
     each_kamailio:
