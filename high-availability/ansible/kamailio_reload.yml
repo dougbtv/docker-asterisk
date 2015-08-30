@@ -8,12 +8,6 @@
   sudo: true
   tasks:
 
-    - name: Ensure /etc/kamailio exists
-      file: path=/etc/kamailio state=directory
-
-    - name: Copy config
-      copy: src=config/kamailio.cfg dest=/etc/kamailio/kamailio.cfg
-
     - name: Stop kamailio
       command: "fleetctl stop kamailio@{{ item }}"
       with_items: each_kamailio

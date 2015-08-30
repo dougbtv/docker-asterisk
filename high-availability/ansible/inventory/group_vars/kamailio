@@ -1,0 +1,5 @@
+docker_images:
+  - dougbtv/kamailio
+  - dougbtv/keepalived
+  # - dougbtv/homer-captagent
+  - dougbtv/kamailio-etcd-dispatcher

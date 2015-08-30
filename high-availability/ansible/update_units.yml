@@ -1,6 +1,22 @@
 ---
 # Update fleet units on a coreos cluster.
 
+- name: Configure Kamailio
+  hosts: kamailio
+  sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  roles:
+    - { role: kamailio-config }
+
+- name: Configure Asterisk
+  hosts: asterisk
+  sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  roles:
+    - { role: asterisk-config }
+
 - name: Update fleet unit files in cluster
   hosts: coreos
   sudo: true
@@ -41,7 +57,7 @@
       - { unit: captagent,      instance: 1 }
       - { unit: captagent,      instance: 2 }
 
-  sudo: true
+  # sudo: true
   tasks:
 
     - name: Destroy existing base unit files
