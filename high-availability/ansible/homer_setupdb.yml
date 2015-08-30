@@ -1,0 +1,29 @@
+---
+
+- name: Setup the db properly for homer, this is a one-time deal.
+  hosts: homer
+  sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  tasks:
+
+    - name: See if we finished this play before
+      stat: path=/etc/homer_data_loaded
+      register: loaded_flag
+
+    - name: Startup homer loaddata container
+      command: >
+        /usr/bin/docker run 
+        --name loader 
+        --link mysql:mysql 
+        -it dougbtv/homer-loaddata 
+        /bin/bash -c "sed -i -e 's/sqlpassword=secret/sqlpassword={{mysql_secret}}/' load_data.sh; ./load_data.sh"
+      when: loaded_flag.stat.exists == False
+
+    - name: Remove the loader container
+      command: "/usr/bin/docker rm loader"
+      when: loaded_flag.stat.exists == False
+
+    - name: Touch our loaded flag
+      file: path=/etc/homer_data_loaded state=touch
+      when: loaded_flag.stat.exists == False

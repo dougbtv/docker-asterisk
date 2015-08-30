@@ -20,10 +20,20 @@
 - name: Update fleet unit files in cluster
   hosts: coreos
   sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
   tasks:
 
+    - name: Make sure dir for unit files is there
+      file: path=/home/core/units state=directory
+
     - name: Copy unit files
-      copy: src=units/ dest=/home/core/units
+      # copy: src=units/ dest=/home/core/units
+      # looks good: {{ item | basename | regex_replace('\.j2','') }}
+      template: src={{ item }} dest=/home/core/units/{{ item | basename }}
+      # debug: msg="{{ item }} -- {{item | basename}}"
+      with_fileglob:
+        - ./units/*
 
 - name: Update fleet units in cluster
   hosts: leader

@@ -151,6 +151,19 @@ Then when we ssh to a host, we need to use the -A flag, e.g.
 ssh -A core@coreos0
 ```
 
+Now that you've got everything pulled, let's go ahead and load up all of our fleet units -- these are the description of the process we want to run, in what container, and it's dependancies. We'll get into the detail of fleet units later on.
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos update_units.yml 
+```
+
+At this point, you should have mostly everything up and running, but, not homer yet. It doesn't have the right configs in the database, so let's load that.
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos homer_setupdb.yml 
+```
+
+And I'd recommend you update units at this point again with the `update_units.yml` playbook.
 
 
 ## Service Discovery

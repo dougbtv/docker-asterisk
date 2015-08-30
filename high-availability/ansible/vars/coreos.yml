@@ -2,6 +2,7 @@
 # http://www.tazj.in/en/1410951452
 coreos_discovery: https://discovery.etcd.io/a604a5c7af403bd62e03027237e86cf6
 image_source: /var/lib/libvirt/images/coreos/coreos_stable_qemu_image.img
+mysql_secret: changethisIMMEDIATELYplease
 libvirt_basedir: /var/lib/libvirt/images/coreos/
 libvirt_subnet: "192.168.122"
 libvirt_gateway: "192.168.122.1"
