@@ -54,7 +54,7 @@ Docker isn't the only container option.
 
 
 ## Docker & CoreOS Review
-## Spinning up a cluster
+## Bootstrapping your cluster
 
 You can spin up a cluster a number of ways, with physical machines, with cloud services like EC2 (CoreOS makes it easy for you with a quick 'deploy button' to spin up a new ec2 instance), or in this case, we'll use LibVirt & QEMU -- which if you're doing development on a linux workstation, makes it really easy to give it a go.
 
@@ -120,7 +120,36 @@ Buuuut, sometimes nodes just don't want to join the cluster. If you're creating 
 [doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_repair.yml
 ```
 
-Sometimes, you wanna 
+Sometimes, you wanna just start from scratch, so you can destroy the whole she-bang, so you can run the destroy playbook. Warning: This *will* delete the VM disks.
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_destroy.yml
+```
+
+### Firing up our processes
+
+First you'll want to pull in all the docker images, which, if you're pulling in from the public (which this whole document is based on) can take a while. In theory, you'll later want to have a local registry, try [Bowline](http://bowline.io) for an in-house registry and build server.
+
+So run the playbook to pull 'em all in.
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_big_pull.yml 
+```
+
+Now that you've got 'em all pulled, let's load up our fleet unit files, and start the processes.
+
+But wait, THERE'S MORE. You're going to need for forward your ssh keys, via ssh-agent -- [here's the documentation for the fleet client](https://github.com/coreos/fleet/blob/master/Documentation/using-the-client.md#remote-fleet-access). So to do this, let's use the example from the [DigitalOcean trouble shooting guide](https://www.digitalocean.com/community/tutorials/how-to-troubleshoot-common-issues-with-your-coreos-servers).
+
+```bash
+eval $(ssh-agent)
+ssh-add
+```
+
+Then when we ssh to a host, we need to use the -A flag, e.g.
+
+```bash
+ssh -A core@coreos0
+```
 
 
 
@@ -133,6 +162,9 @@ Load balancing percentage, for use with a [Canary Release](http://martinfowler.c
 ## Managing the cluster
 
 ### Using Fleet
+
+Fleet is a scheduler used to tell the cluster about the processes we'll spin up.
+
 ### Using Homer
 
 ## Learning more
