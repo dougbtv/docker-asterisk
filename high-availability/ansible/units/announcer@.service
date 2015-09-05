@@ -8,12 +8,17 @@ TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill announcer
 ExecStartPre=-/usr/bin/docker rm announcer
 ExecStartPre=/usr/bin/docker pull dougbtv/kamailio-etcd-dispatcher:latest
+
+# ...was getting ip via:
+# --announceip $(ifconfig | grep -A1 eth0 | grep -v eth0 | awk '{print $2}') \
+# ...eventually decided to template that IP.
+
 ExecStart=/bin/sh -c "/usr/bin/docker run \
     --name announcer \
     -t dougbtv/kamailio-etcd-dispatcher \
     --announce \
-    --announceip $(ifconfig | grep -A1 eth0 | grep -v eth0 | awk '{print $2}') \
-    --etcdhost 172.17.42.1 \
+    --announceip {{ ansible_ssh_host }} \
+    --etcdhost {{ ansible_ssh_host }} \
     --announcename $(cat /etc/hostname)"
 ExecStop=/usr/bin/docker stop announcer
 
