@@ -16,7 +16,8 @@
     # systemctl stop etcd2 && rm -f /var/lib/etcd2/proxy/cluster && reboot
   roles:
     - { role: get-etcd-token }
-    - { role: libvirt-coreos, mode: rediscover, boxnumber: 0, box_role: "kamailio", etcd_leader: true }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 5, box_role: "controller", etcd_leader: true }
+    - { role: libvirt-coreos, mode: rediscover, boxnumber: 0, box_role: "kamailio" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 1, box_role: "kamailio" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 2, box_role: "asterisk" }
     - { role: libvirt-coreos, mode: rediscover, boxnumber: 3, box_role: "asterisk" }

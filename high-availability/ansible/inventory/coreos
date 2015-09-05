@@ -5,6 +5,7 @@ coreos1 ansible_ssh_host=192.168.2.201
 coreos2 ansible_ssh_host=192.168.2.202
 coreos3 ansible_ssh_host=192.168.2.203
 coreos4 ansible_ssh_host=192.168.2.204
+coreos5 ansible_ssh_host=192.168.2.205
 libvirtmachine ansible_ssh_host=192.168.2.55
 
 # ------------------------ Keep alive d.
@@ -34,6 +35,7 @@ coreos1
 coreos2
 coreos3
 coreos4
+coreos5
 
 [coreos:vars]
 ansible_ssh_user=core
@@ -41,7 +43,7 @@ ansible_python_interpreter="PATH=/home/core/bin:$PATH python"
 
 # - The host you send fleetctl commands to.
 [leader]
-coreos0
+coreos5
 
 # ------------------------ Kamailio boxes
 

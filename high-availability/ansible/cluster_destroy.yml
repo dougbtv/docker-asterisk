@@ -12,3 +12,4 @@
     - { role: libvirt-coreos, mode: destroy, boxnumber: 2 }
     - { role: libvirt-coreos, mode: destroy, boxnumber: 3 }
     - { role: libvirt-coreos, mode: destroy, boxnumber: 4 }
+    - { role: libvirt-coreos, mode: destroy, boxnumber: 5 }
