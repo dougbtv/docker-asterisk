@@ -17,8 +17,8 @@ ExecStart=/bin/sh -c "/usr/bin/docker run \
     --name announcer \
     -t dougbtv/kamailio-etcd-dispatcher \
     --announce \
-    --announceip {{ ansible_ssh_host }} \
-    --etcdhost {{ ansible_ssh_host }} \
+    --announceip $(etcdctl get /ips/$(cat /etc/hostname)) \
+    --etcdhost $(etcdctl get /ips/$(cat /etc/hostname)) \
     --announcename $(cat /etc/hostname)"
 ExecStop=/usr/bin/docker stop announcer
 

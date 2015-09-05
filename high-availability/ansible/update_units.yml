@@ -37,6 +37,8 @@
 
 - name: Update fleet units in cluster
   hosts: leader
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
   vars:
     units:
       - dispatcher@.service
@@ -69,6 +71,12 @@
 
   # sudo: true
   tasks:
+
+    - name: Set etcd configuration values
+      command: "etcdctl set /ips/coreos{{ item }} 192.168.2.20{{ item }}"
+      with_sequence: 
+        start=0 
+        end="{{ cluster_size }}"
 
     - name: Destroy existing base unit files
       command: "fleetctl destroy {{ item }}"
