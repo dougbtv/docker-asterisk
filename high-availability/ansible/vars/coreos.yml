@@ -2,21 +2,32 @@
 # http://www.tazj.in/en/1410951452
 coreos_discovery: https://discovery.etcd.io/a604a5c7af403bd62e03027237e86cf6
 image_source: /var/lib/libvirt/images/coreos/coreos_stable_qemu_image.img
-mysql_secret: changethisIMMEDIATELYplease
+mysql_secret: changeTHISONEFORsureORELSE.
 libvirt_basedir: /var/lib/libvirt/images/coreos/
+
+# ---------------- Another config.
+# outbound_proxy: "192.168.2.199"
+# floating_ip:    "192.168.2.199"
+# libvirt_subnet: "192.168.2"
+# libvirt_gateway: "192.168.2.1"
+# libvirt_network: "--network=bridge:br0,model=virtio"
+# coreos_ethernet_device: ens4
+
+# ----------------- One config
+outbound_proxy: "192.168.122.200"
+floating_ip:    "192.168.122.199"
 libvirt_subnet: "192.168.122"
 libvirt_gateway: "192.168.122.1"
 libvirt_network: "--network=default,model=virtio"
 coreos_ethernet_device: eth0
-outbound_proxy: "192.168.122.200"
-floating_ip: "192.168.122.199"
+
 keepalived_password: fAKrTR0n
 coreos_ram: 1024
 coreos_cpus: 1
 public_ssh_keys: 
-    - "ssh-dss AAAAB3NzaC..."
-    - "ssh-dss AAAAB3NzaC..."
+    - "ssh-dss AAAAB3Nz..."
+    - "ssh-dss AAAAB3Nz..."
 
 # extra options
 wait_reboot: 5
-wait_etcd_leader: 25
+wait_etcd_leader: 5
