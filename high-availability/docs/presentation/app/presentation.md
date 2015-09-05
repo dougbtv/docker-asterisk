@@ -103,13 +103,13 @@ layout: false
 ```bash
 FROM fedora:latest
 MAINTAINER Doug Smith <info@laboratoryb.org>
-RUN yum install -y cowsay 1> /dev/null
-RUN echo "Vermont is awesome" | cowsay -s > /var/cowsay.txt
+RUN yum install -y cowsay
 ```
 
 So you could serve a file:
 
 ```bash
+docker run -it dougbtv/cowsay /usr/bin/cowsay "Vermont Is Awesome"
 # ____________________ 
 #< Vermont is awesome >
 # -------------------- 

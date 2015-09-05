@@ -70,6 +70,8 @@ If you need some intro and tips on how to use ansible checkout: `[STUB]`
 
 Now let's browse to the `high-availability/ansible` directory in the clone, we're going to edit the vars file in question. Let's edit `vars/coreos.yml`, and mainly we'll set the location of the CoreOS image, and we'll add our private keys into the file.
 
+N.B. If you're like me and you're going to version it but you don't want to expose credentials to your git repo, you can copy `vars/coreos.yml` to `vars/private.yml` and take advantage of the `.gitignore` in this project, and the fact that the playbooks account for this private file to override the defaults.
+
 You also could set the proper IP addresses to use, too. I like to create entries in `/etc/hosts` to later ssh to the CoreOS machines to inspect them.
 
 ```yml
@@ -92,7 +94,7 @@ Then we'll run the playbook a la:
 Now you should be able to access the boxen via ssh, a la:
 
 ```bash
-[doug@talos ansible]$ ssh core@coreos0
+[doug@talos ansible]$ ssh -A core@coreos0
 Last login: Sat Aug 22 13:25:21 2015 from 192.168.122.1
 CoreOS stable (723.3.0)
 core@coreos0 ~ $ sudo su -
@@ -171,12 +173,66 @@ And I'd recommend you update units at this point again with the `update_units.ym
 
 Load balancing percentage, for use with a [Canary Release](http://martinfowler.com/bliki/CanaryRelease.html)
 
-
 ## Managing the cluster
+
+Fleet is a scheduler used to tell the cluster about the processes we'll spin up.
 
 ### Using Fleet
 
-Fleet is a scheduler used to tell the cluster about the processes we'll spin up.
+Let's look at the machines available in the cluster
+
+```bash
+core@coreos0 ~ $ fleetctl list-machines
+MACHINE		IP		METADATA
+3873cea9...	192.168.2.200	boxrole=kamailio
+4b8e25a8...	192.168.2.202	boxrole=asterisk
+7f7a88e4...	192.168.2.203	boxrole=asterisk
+b13da368...	192.168.2.204	boxrole=homer
+ddb16be2...	192.168.2.201	boxrole=kamailio
+```
+
+If you've followed all the steps for "Bootstrapping Your Cluster" above, you should have a few instances of Asterisk/Kamailio/Homer/etc running.
+
+```bash
+core@coreos0 ~ $ fleetctl list-units
+UNIT						MACHINE						ACTIVE		SUB
+announcer@1.service			7f7a88e4.../192.168.2.203	inactive	dead
+announcer@2.service			4b8e25a8.../192.168.2.202	inactive	dead
+asterisk@1.service			7f7a88e4.../192.168.2.203	active		running
+asterisk@2.service			4b8e25a8.../192.168.2.202	active		running
+captagent@1.service			7f7a88e4.../192.168.2.203	active		running
+captagent@2.service			4b8e25a8.../192.168.2.202	active		running
+captureserver@1.service		b13da368.../192.168.2.204	active		running
+dispatcher@1.service		3873cea9.../192.168.2.200	active		running
+dispatcher@2.service		ddb16be2.../192.168.2.201	active		running
+homerannouncer@1.service	b13da368.../192.168.2.204	active		running
+homerweb@1.service			b13da368.../192.168.2.204	active		running
+kamailio@1.service			3873cea9.../192.168.2.200	active		running
+kamailio@2.service			ddb16be2.../192.168.2.201	active		running
+keepalived@1.service		3873cea9.../192.168.2.200	active		running
+keepalived@2.service		ddb16be2.../192.168.2.201	active		running
+mysql@1.service				b13da368.../192.168.2.204	active		running
+````
+
+Let's say that you want hit up the asterisk terminal on the first asterisk instance. You could issue:
+
+```bash
+core@coreos0 ~ $ fleetctl ssh asterisk@1 docker exec -it asterisk asterisk -rvvv
+[...]
+coreos3*CLI>
+```
+
+Or let's pick up the dispatcher config for Kamailio to check out what our load balacing looks like:
+
+
+
+You can also get the logs for any instance in the cluster, too.
+
+```bash
+core@coreos0 ~ $ fleetctl journal -f asterisk@1 
+-- Logs begin at Sun 2015-08-30 13:17:14 UTC, end at Sat 2015-09-05 12:46:42 UTC. --
+Sep 05 12:10:01 coreos3 docker[1143]: [Sep  5 13:10:01] NOTICE[1]: config.c:2425 ast_config_engine_register: Registered Config Engine sqlite3
+```
 
 ### Using Homer
 
