@@ -244,6 +244,42 @@ core@coreos0 ~ $ fleetctl journal -f asterisk@1
 -- Logs begin at Sun 2015-08-30 13:17:14 UTC, end at Sat 2015-09-05 12:46:42 UTC. --
 Sep 05 12:10:01 coreos3 docker[1143]: [Sep  5 13:10:01] NOTICE[1]: config.c:2425 ast_config_engine_register: Registered Config Engine sqlite3
 ```
+### Kamailio setup
+
+The high-availability is front by a VIP that we'll share between Kamailio boxen using keepalived.
+
+Here, we use a container that has "priviledged networking" -- This container can change the networking configuration of the host it's running on.
+
+If you'd like [another reference about Kamailio using keepalived, I highly recommend this article](http://blog.unicsolution.com/2015/01/kamailio-high-availability-with.html?m=1).
+
+To be a truely active-active cluster -- we need one thing that's not covered right now is replicated dialogue state. In order to achieve it, typically one also wants to back the Kamailio cluster with a redundant database. Database redundancy is a whole 'nother beast on it's own, and isn't necessarily appropriate in this demonstration, where we're looking to focus primarily on VoIP connections. This setup should give you a framework on which to build this additional components. 
+
+A couple things to look at:
+
+* [The Kamailio Dialogue module](http://kamailio.org/docs/modules/devel/modules/dialog.html#idp15368320)
+  * "[use] the dialog module in db-only mode (db_mode = 1)" [see this post](https://www.mail-archive.com/sr-users@lists.sip-router.org/msg22121.html)
+* [A nice sr-users post about active-active Kamailio](https://www.mail-archive.com/sr-users@lists.sip-router.org/msg22111.html) 
+* [You might consider the Kamailio db_cluster module](http://kamailio.org/docs/modules/4.1.x/modules/db_cluster.html)
+* Another aproach (or better, in conjunction) is to use DNS SRV records, [Olle E. Johansson's SIP & DNS Presentation](http://www.slideshare.net/oej/sip-and-dns)
+* [What the heck is `t_replicate`](http://www.kamailio.org/docs/modules/4.3.x/modules/tm.html#tm.f.t_replicate), it only gave me trouble.
+
+
+With the currently given setup, you'll still be up and running and you'll be sending calls reliably to the Asterisk boxes. However, calls in an intermediate state might wind up in another intermediate-intermedia state, that is...
+
+In the case of a Kamailio failure, we have --
+
+On the upside:
+* Calls that are up, will stay up
+* Calls that are on their way in, will still stay in.
+
+On the downside:
+* If a call is between `INVITE` and sending media, the call might never make it in.
+* If a call is sending media, there's a chance neither side hears the `BYE`.
+
+You can prevent those downsides with either (or both)
+
+1. Replicating dialogue state
+2. Using DNS-SRV records
 
 ### Using Homer
 

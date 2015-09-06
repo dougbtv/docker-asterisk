@@ -194,6 +194,7 @@ layout: false
   - As we know, Asterisk is a B2BUA not a proxy.
   - We'll use it for load balancing our cluster of Asterisk machines.
   - Use it in concert with `keepalived` which will provide us with a VIP for an HA load balancer
+    - If you use AWS you probably want to use [Elastic IPs and an API](https://aws.amazon.com/articles/2127188135977316)
   - We use a custom application `kamailio-etcd-dispatcher` which rebuilds nodes
   - We can make a "canary release" easily by automatically rebalancing our cluster using `kamailio-etcd-dispatcher`
 
@@ -205,6 +206,10 @@ At 11:40 you can hear Kyle Marks talk about "Fronting your Asterisk cluster with
 I'll tell you if I like his idea, I will implement it. The bottom line is that I feel like I have such higher confidence in diagnosing issues on my Asterisk boxen, over Kamailio.
 
 By the same token, Kamailio hasn't failed me.
+
+More is still needed here, especially in terms of replicated dialogue state. Which with Kamailio, will require some database redundancy which is a big chunk to chew off in conjunction with what we're covering right here.
+
+Don't use keepalived in AWS. Since they don't like multicast traffic, it's not worth it. It's honestly cleaner to use an API and fail over on your own monitoring conditions.
 
 ---
 layout: false
