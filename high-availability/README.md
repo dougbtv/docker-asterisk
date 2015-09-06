@@ -122,6 +122,12 @@ Buuuut, sometimes nodes just don't want to join the cluster. If you're creating 
 [doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_repair.yml
 ```
 
+And sometimes, a sniper rifle isn't enough. You need to shoot it with an RPG and blow away the etcd2 cache. Here we do it, and shutdown all the boxes to try to bring up etcd2 from a fresh cluster reboot
+
+```bash
+[doug@talos ansible]$ ansible-playbook -i inventory/coreos cluster_etcd2_reset.yml 
+```
+
 Sometimes, you wanna just start from scratch, so you can destroy the whole she-bang, so you can run the destroy playbook. Warning: This *will* delete the VM disks.
 
 ```bash
