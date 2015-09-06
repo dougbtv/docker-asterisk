@@ -24,7 +24,6 @@ coreos_ethernet_device: eth0
 # Kamailio replication
 kamailio_replication:
   coreos0: "192.168.122.201"
-  coreos1: "192.168.122.200"
 
 # Set this a little bigger than you need.
 cluster_size: 8

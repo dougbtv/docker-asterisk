@@ -149,8 +149,11 @@ modparam("dispatcher", "ds_ping_reply_codes", "class=2;class=3;class=4")
 route {
 
 	# doug: replicate to our replication partner.
-	# t_replicate("sip:{{ kamailio_replication.get(inventory_hostname) }}:5060;transport=udp");
-	t_replicate_to("udp","{{ kamailio_replication.get(inventory_hostname) }}:5060");
+	# here's a tip! don't replicate both ways... or
+	# dun dun DUNNNN -- infinite loop.
+	{% if kamailio_replication[inventory_hostname] is defined %}
+	t_replicate_to("udp","{{ kamailio_replication[inventory_hostname] }}:5060");
+	{% endif %}
 
 	# per request initial checks
 	route(REQINIT);
