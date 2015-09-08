@@ -23,13 +23,17 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
     
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/remark/out/remark.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
     <!-- - - - - - - - - - - - begin remark -->
-    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js"></script>
     <script>
       var hljs = remark.highlighter.engine;
-    </script>
-    <script src="http://gnab.github.io/remark/remark.language.js"></script>
-    <script>
       var slideshow = remark.create({
           sourceUrl: 'presentation.md',
           highlightStyle: 'monokai',
@@ -38,13 +42,6 @@
     </script>
 
     <!-- - - - - - - - - - - - end remark -->
-
-    <!-- build:js(.) scripts/vendor.js -->
-    <!-- bower:js -->
-    <script src="/bower_components/jquery/dist/jquery.js"></script>
-    <!-- endbower -->
-    <!-- endbuild -->
-
     
 
     <!-- build:js scripts/main.js -->
