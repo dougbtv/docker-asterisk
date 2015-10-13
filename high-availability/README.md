@@ -1,6 +1,6 @@
-# Scaleable High-Availbility Asterisk using Docker and CoreOS
+# A DIY Workshop -- Scaleable High-Availbility Asterisk using Docker and CoreOS
 
-[For 2015 Astricon Conference](http://www.asterisk.org/community/astricon-user-conference/sessions/scaleable-high-availbility-asterisk-using-docker-and) as given by [Doug Smith](http://www.asterisk.org/community/astricon-user-conference/speakers/douglas-smith):
+[For 2015 Astricon Conference](http://www.asterisk.org/community/astricon-user-conference/sessions/scaleable-high-availbility-asterisk-using-docker-and) as given by [Doug Smith](http://www.asterisk.org/community/astricon-user-conference/speakers/douglas-smith) (twitter: [@dougbtv](https://twitter.com/dougbtv)):
 
 *Reboot your infrastructure and deploy Asterisk in a highly-available and scalable fashion using Docker and CoreOS. You'll learn how to use the latest tools in containerization in order to use service discovery to spin up new Asterisk boxes in a snap. Using containerization stream-lines the process for developers, makes deployment a breeze for systems administrators, and service discovery makes "the good problems" like scaling up your business feel like "the easy problems".*
 
@@ -22,9 +22,7 @@ I spent a lot of timing re-doing the same steps over and over again with each in
 
 But when I started adding more and more machines to a cluster, it always seemed more out of hand. And it was hard to document and memorialize the massive numbers of changes to get the cluster just right.
 
-I work in telepony, and {stub} about employment.
-
-This entire presentation is available in markdown format.
+I manage a lot of Asterisk boxen every day for my day job, and I also am very interested in devops and I am the maintainer of the [Docker build server Bowline](http://bowline.io)
 
 ## Components
 
@@ -34,17 +32,11 @@ Docker is a way to "containerize" your applications. Generally, it's a layer ont
 
 When you create the image for a container, you're creating a way to memorialize your changes to an environment. It gives you flexibility and portability in where you run these containers -- in dev on your laptop, in the cloud, in the closet, name it. And it's consistent.
 
-Here's a sample dockerfile for building Asterisk, it gives you all the steps to compile Asterisk, and then you "cook it into an image" (`docker build`)
-
-```
-stub for dockerfile
-```
+Here's a couple examples of building Asterisk with Docker, firstly [this project -- docker-asterisk](https://github.com/dougbtv/docker-asterisk). But you should also take a look at what Leif Madsen and Avoxi have done @ [AVOXI/certified-asterisk](https://github.com/AVOXI/certified-asterisk). 
 
 ### CoreOS
 
-CoreOS is a mimimal Linux that you use to run your containers. It
-
-Docker isn't the only container option.
+[CoreOS is a mimimal Linux](https://coreos.com/using-coreos/) that you use to run your containers. It's strapped with a bunch of great tools that we'll use to manage a cluster of machines, specifically [etcd](https://coreos.com/etcd/) & [fleet](https://coreos.com/using-coreos/clustering/).
 
 ### Things we won't cover.
 
