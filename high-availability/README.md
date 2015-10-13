@@ -26,27 +26,87 @@ I manage a lot of Asterisk boxen every day for my day job, and I also am very in
 
 ## Components
 
+### Getting your development environment going
+
+So, if you want to follow along and get this setup going, let's install the components you need. This tutorial assumes that you're running a Fedora workstation. But, that shouldn't matter a lot. You should be able to use whatever environment you want with a few quick changes, and in all likelihood if you're going to take this further -- you'll probably be running it in a much different environment.
+
+But, the gist here is that we'll use `libvirt` and `virt-manager` to setup a set of 5 boxes to run the cluster on. 
+
+So go ahead and install the components we require:
+
+```bash
+yum install -y libvirt virt-manage ansible git
+```
+
+Now, clone this project with:
+
+```bash
+git clone https://github.com/dougbtv/docker-asterisk.git
+```
+
+Now that you've got the clone, move into the `high-availability/` folder in the clone. That's where the meat is. The root is interesting too, it's got the Dockerfile for both Asterisk 11 certified and also Asterisk 13. But, for now hang out in the `high-availability/` dir
+
+### What's in the clone?
+
+Inside that `high-availability/` dir you'll find these subdirectories interesting...
+
+```
+├── ansible
+│   └── Our configuration management playbooks.
+├── homer
+│   └── Homer Dockerfiles
+├── itsp
+│   └── A Dockerfile and configuration for a pretend telco
+├── kamailio
+│   └── Kamailio Dockerfile
+├── kamailio-etcd-dispatcher
+│   └── Our service discovery dispatcher Dockerfile
+└── keepalived
+    └── A keepalived dockerfile
+
+```
+
 ### Docker
 
-Docker is a way to "containerize" your applications. Generally, it's a layer ontop of LXC -- which has been around since 2008.
+Docker is a way to "containerize" your applications. Generally, it's a layer ontop of LXC (linux containers) -- which has been around since 2008. What Docker really does well is improve the UX of using LXC. And I think Docker is great, however, there is some debate, so you should check out the other top dog, which is [RKT by the CoreOS people](https://github.com/coreos/rkt).
 
-When you create the image for a container, you're creating a way to memorialize your changes to an environment. It gives you flexibility and portability in where you run these containers -- in dev on your laptop, in the cloud, in the closet, name it. And it's consistent.
+When you create the image for a container, you're creating a way to memorialize your changes to an environment. It gives you flexibility and portability in where you run these containers -- in dev on your laptop, in the cloud, in the closet, name it. And it's consistent. And you can easily spin up the processes that are containerized on boxes anywhere any time, dynamically -- using CoreOS (more on that in a minute)
 
 Here's a couple examples of building Asterisk with Docker, firstly [this project -- docker-asterisk](https://github.com/dougbtv/docker-asterisk). But you should also take a look at what Leif Madsen and Avoxi have done @ [AVOXI/certified-asterisk](https://github.com/AVOXI/certified-asterisk). 
 
+In this tutorial, the images are pulled from dockerhub. Specifically we'll be using these images:
+
+* [dougbtv/asterisk](https://hub.docker.com/r/dougbtv/asterisk/) -- Asterisk 11 certified
+* [dougbtv/kamailio](https://hub.docker.com/r/dougbtv/kamailio/) -- Kamailio 4.1.8
+* [dougbtv/kamailio-etcd-dispatcher](https://hub.docker.com/r/dougbtv/kamailio-etcd-dispatcher/) -- kamailio-etcd-dispatcher 0.2.3
+* [dougbtv/keepalived](https://hub.docker.com/r/dougbtv/keepalived/)
+
+And then we also have kind of a slew for Homer, I'm not going to list them, but if you're interested in how I build it move into the `high-availability/homer` directory. 
+
+I recommend for the tutorial to go ahead and pull the images from Dockerhub (you don't have to do anything now, the following steps will tell you how). But, when you're going into production -- you're going to want to build your own. Naturally, I trust my own images and I think you should trust my images (heck, they're the ones I built). However, for best practices -- you should know exactly what's going into your images. 
+
 ### CoreOS
 
-[CoreOS is a mimimal Linux](https://coreos.com/using-coreos/) that you use to run your containers. It's strapped with a bunch of great tools that we'll use to manage a cluster of machines, specifically [etcd](https://coreos.com/etcd/) & [fleet](https://coreos.com/using-coreos/clustering/).
+[CoreOS is a minimal Linux](https://coreos.com/using-coreos/) that you use to run your containers. It's strapped with a bunch of great tools that we'll use to manage a cluster of machines, specifically [etcd](https://coreos.com/etcd/) & [fleet](https://coreos.com/using-coreos/clustering/).
+
+For now, we're installing it on into VM's that can be used with libvirt/virt-manager, but, [there's a number of other ways to install CoreOS](https://coreos.com/os/docs/latest/#running-coreos). Which will likely be more appropriate to where and how you're running your platform.
+
+### Ansible
+
+This tutorial uses Ansible to automate a number of things. But, I want to emphasize that you don't need to be an Ansible expert. Mostly it's all right here, and you can just run the playbooks that I provide. In the future, you might want to reference them to create configuration management for the tool of your choice.
+
+We'll walk you through the few things you'll need to change (mostly just in a YAML config file), but, feel free to dig through the `high-availability/ansible/` directory to see how all the gears turn.
 
 ### Things we won't cover.
 
-* NAT
-* Logging (you'll want centralized logging)
-* Alerting
-
+* NAT (we make it all convenient, with an ITSP on the same subnet, in "real life" you can have fun with your typical NAT woes)
+* Application Logging (you'll want centralized logging)
+* Alerting (you'll probably monitor a real platform, right? right!?)
 
 ## Docker & CoreOS Review
 ## Bootstrapping your cluster
+
+Now we can get into the thick of it!
 
 You can spin up a cluster a number of ways, with physical machines, with cloud services like EC2 (CoreOS makes it easy for you with a quick 'deploy button' to spin up a new ec2 instance), or in this case, we'll use LibVirt & QEMU -- which if you're doing development on a linux workstation, makes it really easy to give it a go.
 
@@ -244,7 +304,7 @@ Here, we use a container that has "priviledged networking" -- This container can
 
 If you'd like [another reference about Kamailio using keepalived, I highly recommend this article](http://blog.unicsolution.com/2015/01/kamailio-high-availability-with.html?m=1).
 
-To be a truely active-active cluster -- we need one thing that's not covered right now is replicated dialogue state. In order to achieve it, typically one also wants to back the Kamailio cluster with a redundant database. Database redundancy is a whole 'nother beast on it's own, and isn't necessarily appropriate in this demonstration, where we're looking to focus primarily on VoIP connections. This setup should give you a framework on which to build this additional components. 
+To be a truely active-active cluster -- we need one thing that's not covered right now is replicated dialogue state. In order to achieve it, typically one also wants to back the Kamailio cluster with a redundant database. Database redundancy is a whole 'nother beast on it's own, and isn't necessarily appropriate in this demonstration, where we're looking to focus primarily on a platform for HA Asterisk, but, as usual, there's always more. Database redundancy isn't rocket science, but, it is indeed bigger than a breadbox. This setup should give you a framework on which to build this additional components. 
 
 A couple things to look at:
 
@@ -275,11 +335,13 @@ You can prevent those downsides with either (or both)
 
 ### Using Homer
 
+It's easy, but, you should go and get your feet wet. 
+
 ## Learning more
 
 ### Kubernetes
 
-Kubernetes may be a choice as you scale up, and you're looking at dynamic scaling and scheduling. However, we tend to have some heavier networking requirements for VoIP, which provides a challenge.
+Kubernetes may be a choice as you scale up, and you're looking at dynamic scaling and scheduling. I think it's worthwhile to get a handle on if you're serious about a containerized cluster. Herein, fleet is appropriate, we can use it to get some lower level networking.
 
 ## Troubleshooting
 
