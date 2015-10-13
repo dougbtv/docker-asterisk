@@ -8,10 +8,10 @@ RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 lib
 # Get pj project
 RUN yum install -y bzip2
 RUN mkdir /tmp/pjproject
-RUN curl -sf -o /tmp/pjproject.tar.bz2 -L http://www.pjsip.org/release/2.3/pjproject-2.3.tar.bz2
+RUN curl -sf -o /tmp/pjproject.tar.bz2 -L http://www.pjsip.org/release/2.4.5/pjproject-2.4.5.tar.bz2
 RUN tar -xjvf /tmp/pjproject.tar.bz2 -C /tmp/pjproject --strip-components=1
 WORKDIR /tmp/pjproject
-RUN ./configure --prefix=/usr --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr 1> /dev/null
+RUN ./configure --prefix=/usr --libdir=/usr/lib64 --enable-shared --disable-sound --disable-resample --disable-video --disable-opencore-amr 1> /dev/null
 RUN make dep 1> /dev/null
 RUN make 1> /dev/null
 RUN make install
