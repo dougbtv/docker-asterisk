@@ -35,7 +35,7 @@ But, the gist here is that we'll use `libvirt` and `virt-manager` to setup a set
 So go ahead and install the components we require:
 
 ```bash
-yum install -y libvirt virt-manage ansible git
+yum install -y libvirt virt-manage ansible git docker-io
 ```
 
 Now, clone this project with:
@@ -335,7 +335,45 @@ You can prevent those downsides with either (or both)
 
 ### Using Homer
 
-It's easy, but, you should go and get your feet wet. 
+It's easy, but, you should go and get your feet wet. If everything else has worked up to this point (hopefully you weren't mired somewhere!) you should just be able to point at the `homerweb` instance, look for it in `fleetctl list-units`
+
+```bash
+core@coreos0 ~ $ fleetctl list-units
+UNIT						MACHINE						ACTIVE		SUB
+[...]
+homerweb@1.service			b13da368.../192.168.2.204	active		running
+````
+And browse around.
+
+### So you actually want to put a call over this bad jackson, huh? 
+
+We'll just run a docker container on our workstation in order to do this. Then we're going to run a "pretend ITSP" (internet telephony service provider) Firstly pull my primary Asterisk image with:
+
+```
+docker pull dougbtv/asterisk
+```
+
+Then move into the `high-availability/itsp` directory. We have to configure one thing by hand here, it's the VIP for Kamailio. Edit the `sip.conf` here and change this line:
+
+```
+host=192.168.2.199
+````
+
+Change it to the Kamailio VIP, which we had set earlier in the Ansible variables when we built out the cluster. (It's in the `high-availbility/ansible/vars/coreos.yml` file)
+
+And we'll get it running with this shell script:
+
+```
+./run.sh
+```
+
+Which starts up our pretend ITSP with that custom `sip.conf` file -- it runs it interactively/ Now that it's up and running, go ahead and run this cheesey autodialer with this command (inside the container):
+
+```
+./autocaller.sh
+```
+
+It basically just creates a new asterisk call file every 30 seconds. Go ahead and edit that shell script if you'd like to test it differently, or be brave and run [sipp](http://sipp.sourceforge.net/) against it, or whatever scripts you'd usually use to load up some boxen.
 
 ## Learning more
 
