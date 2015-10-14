@@ -1,18 +1,20 @@
 ---
-
 - name: Sync kamailio configs
   hosts: kamailio
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  sudo: true
+  roles:
+    - { role: kamailio-config }
+
+- name: Restart kamailio
+  hosts: leader
   vars:
     each_kamailio:
       - 1
+      - 2
   sudo: true
   tasks:
-
-    - name: Ensure /etc/kamailio exists
-      file: path=/etc/kamailio state=directory
-
-    - name: Copy config
-      copy: src=config/kamailio.cfg dest=/etc/kamailio/kamailio.cfg
 
     - name: Stop kamailio
       command: "fleetctl stop kamailio@{{ item }}"
@@ -22,13 +24,13 @@
       command: "fleetctl stop dispatcher@{{ item }}"
       with_items: each_kamailio
 
-    - name: Tear down kamailio
-      command: "fleetctl destroy kamailio@{{ item }}"
-      with_items: each_kamailio
+    # - name: Tear down kamailio
+    #   command: "fleetctl destroy kamailio@{{ item }}"
+    #   with_items: each_kamailio
 
-    - name: Tear down dispatcher
-      command: "fleetctl destroy dispatcher@{{ item }}"
-      with_items: each_kamailio
+    # - name: Tear down dispatcher
+    #   command: "fleetctl destroy dispatcher@{{ item }}"
+    #   with_items: each_kamailio
 
     - name: Spin up kamailio
       command: "fleetctl start kamailio@{{ item }}"

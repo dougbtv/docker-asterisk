@@ -5,14 +5,15 @@ Requires=docker.service
 
 [Service]
 TimeoutStartSec=0
+ExecStartPre=-/bin/mkdir -p /var/mysql
 ExecStartPre=-/usr/bin/docker kill mysql
 ExecStartPre=-/usr/bin/docker rm mysql
 ExecStartPre=/usr/bin/docker pull mysql:5.6
 ExecStart=/usr/bin/docker run \
     --name mysql \
-    -v /tmp/mysql:/var/lib/mysql \
+    -v /var/mysql:/var/lib/mysql \
     -v /etc/localtime:/etc/localtime \
-    -e MYSQL_ROOT_PASSWORD=secret \
+    -e MYSQL_ROOT_PASSWORD={{mysql_secret}} \
     -p 3306:3306 \
     -t mysql:5.6
 ExecStop=/usr/bin/docker stop mysql

@@ -1,0 +1,60 @@
+#!/bin/bash -e
+
+usage() {
+        echo "Usage: $0 %number_of_coreos_nodes%"
+}
+
+if [ "$1" == "" ]; then
+        echo "Cluster size is empty"
+        usage
+        exit 1
+fi
+
+if ! [[ $1 =~ ^[0-9]+$ ]]; then
+        echo "'$1' is not a number"
+        usage
+        exit 1
+fi
+
+LIBVIRT_PATH=/var/lib/libvirt/images/coreos
+USER_DATA_TEMPLATE=$LIBVIRT_PATH/user_data
+ETCD_DISCOVERY=$(curl -s "https://discovery.etcd.io/new?size=$1")
+CHANNEL=stable
+RAM=1024
+CPUs=1
+
+# copy the local user_data up
+
+if [ ! -d $LIBVIRT_PATH ]; then
+        mkdir -p $LIBVIRT_PATH || (echo "Can not create $LIBVIRT_PATH directory" && exit 1)
+fi
+
+if [ ! -f $USER_DATA_TEMPLATE ]; then
+        echo "$USER_DATA_TEMPLATE template doesn't exist"
+        exit 1
+fi
+
+for SEQ in $(seq 1 $1); do
+        COREOS_HOSTNAME="coreos$SEQ"
+        USE_IP="192.168.122.20$SEQ"
+
+        if [ ! -d $LIBVIRT_PATH/$COREOS_HOSTNAME/openstack/latest ]; then
+                mkdir -p $LIBVIRT_PATH/$COREOS_HOSTNAME/openstack/latest || (echo "Can not create $LIBVIRT_PATH/$COREOS_HOSTNAME/openstack/latest directory" && exit 1)
+        fi
+
+        if [ ! -f $LIBVIRT_PATH/coreos_${CHANNEL}_qemu_image.img ]; then
+                wget http://${CHANNEL}.release.core-os.net/amd64-usr/current/coreos_production_qemu_image.img.bz2 -O - | bzcat > $LIBVIRT_PATH/coreos_${CHANNEL}_qemu_image.img
+        fi
+
+        if [ ! -f $LIBVIRT_PATH/$COREOS_HOSTNAME.qcow2 ]; then
+                qemu-img create -f qcow2 -b $LIBVIRT_PATH/coreos_${CHANNEL}_qemu_image.img $LIBVIRT_PATH/$COREOS_HOSTNAME.qcow2
+        fi
+
+        sed "s#%HOSTNAME%#$COREOS_HOSTNAME#g;s#%DISCOVERY%#$ETCD_DISCOVERY#g;s#%STATIC_IP%#192.168.122.20$SEQ#g;s#%SEQ%#$SEQ#g" \
+          $USER_DATA_TEMPLATE > $LIBVIRT_PATH/$COREOS_HOSTNAME/openstack/latest/user_data
+
+        # DS removed: --os-variant=virtio26 
+        virt-install --connect qemu:///system --import --name $COREOS_HOSTNAME --ram $RAM --vcpus $CPUs --network=default,model=virtio --os-type=linux --disk path=$LIBVIRT_PATH/$COREOS_HOSTNAME.qcow2,format=qcow2,bus=virtio --filesystem $LIBVIRT_PATH/$COREOS_HOSTNAME/,config-2,type=mount,mode=squash --vnc --noautoconsole
+
+        sleep 5
+done

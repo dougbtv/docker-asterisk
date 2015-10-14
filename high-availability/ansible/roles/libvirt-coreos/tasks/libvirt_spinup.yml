@@ -8,36 +8,46 @@
   - name: Set initial facts
     set_fact:
       libvirt_name: "coreos{{ boxnumber }}"
-      libvirt_dir: "/var/lib/libvirt/images/coreos{{ boxnumber }}/"
+      libvirt_dir: "{{ libvirt_basedir }}coreos{{ boxnumber }}/"
       force_destroy: false
 
-  - name: Shutdown And Destroy VM
-    include: libvirt_shutdown.yml
-    vars:
-      vm_name: "{{ libvirt_name }}"
-      destroy: true
+  # - name: Shutdown And Destroy VM
+  #   include: libvirt_shutdown.yml
+  #   vars:
+  #     vm_name: "{{ libvirt_name }}"
+  #     destroy: true
 
-  - name: Assure image dir exists.
+  - name: "Assure image dir exists"
     file:
       path: "{{ libvirt_dir }}"
       state: directory
 
-  - name: Copy image into place
-    shell: "rsync -ci {{ image_source }} {{ libvirt_dir }}"
-    register: rsync_result
-    changed_when: "rsync_result.stdout != ''"
+  - name: Make a qcow image -- moooooo
+    command: qemu-img create -f qcow2 -b {{ image_source }} {{ libvirt_basedir }}{{ libvirt_name }}.qcow2
 
   - name: Create user data
     include: libvirt_loaduserdata.yml
 
-  - name: Define libvirt VM
-    virt:
-        name: "{{ libvirt_name }}"
-        command: define
-        xml: "{{ lookup('template', 'coreos_xml.j2') }}"
+  - name: Define it using virt install (XML sux0rs)
+    command: >
+      virt-install 
+      --connect qemu:///system 
+      --import 
+      --name {{ libvirt_name }} 
+      --ram {{ coreos_ram }} 
+      --vcpus {{ coreos_cpus }} 
+      {{ libvirt_network }} 
+      --os-type=linux 
+      --disk path={{ libvirt_basedir }}{{ libvirt_name }}.qcow2,format=qcow2,bus=virtio 
+      --filesystem {{ libvirt_dir }},config-2,type=mount,mode=squash 
+      --vnc 
+      --noautoconsole
 
-  - name: Start 'er up!
-    virt: "name={{ libvirt_name }} state=running"
+  - name: Shorty pause, for good luck
+    pause: seconds=5
+
+  # - name: Startup VM
+  #   include: libvirt_startup.yml
 
   # - name: Enable etcd
   #   service: name=etcd.service enabled=yes

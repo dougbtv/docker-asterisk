@@ -1,0 +1,10 @@
+---
+
+- name: Ensure /etc/asterisk exists
+  file: path=/etc/asterisk state=directory
+
+- name: Template sip.conf
+  template: src=sip.conf.j2 dest=/etc/asterisk/sip.conf
+
+- name: Template dialplan
+  template: src=extensions.conf.j2 dest=/etc/asterisk/extensions.conf

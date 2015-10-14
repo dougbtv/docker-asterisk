@@ -1,0 +1,71 @@
+---
+# Bring up busted nodes
+- name: Rejoin failed nodes back into an etcd cluster of CoreOS boxen.
+  hosts: coreos
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  vars:
+    sickly: ""
+  sudo: true
+  pre_tasks:
+    # 
+  tasks: 
+
+    - name: Assume good health
+      set_fact:
+        sickly: "healthy"
+
+    - name: Determine health
+      command: fleetctl list-machines
+      register: fleet_status
+      ignore_errors: yes
+
+    - name: Determine sick hosts
+      set_fact:
+        sickly: "sickly"
+      when: fleet_status.rc > 0
+
+    - name: Group hosts by health state
+      group_by: "key={{sickly}}"
+
+- name: Make a group of the first host that's healthy
+  hosts: healthy
+  tasks:
+    - name: Make that group of one
+      add_host: "name={{inventory_hostname}} groups=healthy_leader"
+
+- name: Run against healthy host
+  hosts: healthy_leader
+  sudo: true
+  tasks:
+
+    # - debug: var=groups.sickly
+
+    - name: Add member to etcd cluster
+      shell: |
+        etcdctl member add {{ item }} http://{{ hostvars[item].ansible_ssh_host }}:2380 | tail -n 3 | sed -e 's/"//g' | sed -e 's/^/Environment="/g' | sed -e 's/$/"/g' 
+      register: etcd_add_member
+      with_items: groups.sickly
+
+    # - debug: var=etcd_add_member.results
+
+- name: Run against sick hosts
+  hosts: sickly
+  sudo: true
+  tasks: 
+    - name: Pick up etcd config per host
+      set_fact:
+        etcd_config: "{{item.stdout}}"
+      when: item.item == inventory_hostname
+      with_items: hostvars[groups['healthy_leader'][0]]['etcd_add_member']['results']
+
+    # - debug: var=etcd_config
+
+    - name: Template new etcd service
+      template: src=templates/etcd-cloudinit.conf.j2 dest=/run/systemd/system/etcd2.service.d/20-cloudinit.conf
+
+    - name: Reload systemctl daemon
+      command: "systemctl daemon-reload"
+
+    - name: Restart etcd2
+      command: "systemctl restart etcd2"

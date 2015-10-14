@@ -3,27 +3,13 @@
   vars_files:
     - ["vars/private.yml", "vars/coreos.yml"]
   vars:
-    # All required variables.
-    # Location of your coreos image.
-    # image_source: /home/doug/Downloads/coreos_production_qemu_image.img
-    # public_ssh_keys: 
-    #     - "ssh-dss AAAAB3Nz...."
-    #     - "ssh-dss AAAAG4Nz...."
-    # libvirt_subnet: "192.168.122"
-    # Typically set below...
-    # coreos_discovery: https://discovery.etcd.io/a604a5c7af403bd62e03027237e86cf6
+    # now in files!
   sudo: true
   pre_tasks:
-
-    - name: Get new etcd discovery token
-      command: curl https://discovery.etcd.io/new
-      register: curl_result
-
-    - name: Set etcd token
-      set_fact: 
-        coreos_discovery: "{{ curl_result.stdout }}"
-
+    # I role-ized it.
   roles:
+    - { role: get-etcd-token }
+    - { role: libvirt-coreos, mode: create, boxnumber: 5, box_role: controller }
     - { role: libvirt-coreos, mode: create, boxnumber: 0, box_role: kamailio }
     - { role: libvirt-coreos, mode: create, boxnumber: 1, box_role: kamailio }
     - { role: libvirt-coreos, mode: create, boxnumber: 2, box_role: asterisk }

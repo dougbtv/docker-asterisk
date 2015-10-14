@@ -1,3 +1,6 @@
+  - name: Set initial facts
+    set_fact:
+      libvirt_name: "coreos{{ boxnumber }}"
 
   - name: Fail if box_role is not defined
     fail: msg="This role requires 'box_role' as a variable"
@@ -7,7 +10,7 @@
     set_fact:
       libvirt_ip: "{{ libvirt_subnet }}.20{{ boxnumber }}"
       libvirt_gateway: "{{ libvirt_subnet }}.1"
-      libvirt_userdatadir: "/var/lib/libvirt/images/coreos{{ boxnumber }}/configdrive/openstack/latest"
+      libvirt_userdatadir: "/var/lib/libvirt/images/coreos/coreos{{ boxnumber }}/openstack/latest"
 
   - name: Assure userdata dir exists.
     file:

@@ -1,0 +1,69 @@
+/usr/bin/etcd2 -name coreos4 -initial-advertise-peer-urls http://192.168.122.204:2380 \
+  -listen-peer-urls https://192.168.122.204:2380 \
+  -listen-client-urls http://192.168.122.204:2379,http://127.0.0.1:2379 \
+  -advertise-client-urls http://192.168.122.204:2379 \
+  -initial-cluster coreos0=http://192.168.122.200:2380 \
+  -initial-cluster-state new
+
+------------- working
+
+etcdctl member add coreos4 http://192.168.2.204:2380
+
+export ETCD_DATA_DIR=/var/lib/etcd2
+export ETCD_NAME="coreos4"
+export ETCD_INITIAL_CLUSTER="682a6dccdb58a44ba63e54404a9dfb3f=http://192.168.122.201:2380,b738ee88b95aba4ba8cdaf52b7646f6e=http://192.168.122.202:2380,coreos4=http://192.168.122.204:2380,abdd20d5cf1e414888e84042dd800a83=http://192.168.122.200:2380"
+export ETCD_INITIAL_CLUSTER_STATE="existing"
+
+export ETCD_DISCOVERY=""
+
+etcd2 -listen-client-urls http://0.0.0.0:2379 -advertise-client-urls http://192.168.122.204:2379  -listen-peer-urls http://0.0.0.0:2380 -initial-advertise-peer-urls http://192.168.122.204:2380
+
+--------------------------------------------
+
+
+#!/bin/bash
+ETCD_DISCOVERY
+ETCD_DATA_DIR=/var/lib/etcd2
+ETCD_NAME=coreos4
+ETCD_INITIAL_CLUSTER_STATE=existing
+ETCD_ADVERTISE_CLIENT_URLS=http://192.168.122.204:2379;        
+ETCD_INITIAL_ADVERTISE_PEER_URLS=http://192.168.122.204:2380;  
+ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379;           
+ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380;
+echo "trace a";
+systemctl start etcd2 && sleep 2;                                  
+echo "trace a1";
+details=$(etcdctl member add $ETCD_NAME http://192.168.122.204:2380);
+#  eval export `echo "$details" | tail -n-3`; 
+echo "trace a2";
+echo "$details" | tail -n-3; 
+echo "trace b";
+systemctl stop etcd2;                      
+rm -rf /var/lib/etcd2/proxy;               
+echo "trace c";
+systemctl stop etcd2;                      
+#  /usr/bin/etcd2
+
+
+[Service]
+User=etcd
+Environment=ETCD_DATA_DIR=/var/lib/etcd2
+Environment=ETCD_NAME=%m
+Environment=ETCD_INITIAL_CLUSTER_STATE=existing
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+ExecStart=/usr/bin/bash -c "                                          \
+  export ETCD_ADVERTISE_CLIENT_URLS=http://$private_ipv4:2379;        \
+  export ETCD_INITIAL_ADVERTISE_PEER_URLS=http://$private_ipv4:2380;  \
+  export ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379;                 \
+  export ETCD_LISTEN_PEER_URLS=http://$private_ipv4:2380;             \
+  systemctl start etcd2 && sleep 2;                                   \
+                                                                      \
+  details=$(etcdctl member add $ETCD_NAME http://$private_ipv4:2380); \
+  eval export `echo "$details" | tail -n-3`;                          \
+                                                                      \
+  systemctl stop etcd2;                                               \
+  rm -rf /var/lib/etcd2/proxy;                                        \
+  /usr/bin/etcd2

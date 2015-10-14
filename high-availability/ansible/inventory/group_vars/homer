@@ -1,0 +1,5 @@
+docker_images:
+  - dougbtv/homer-webapp
+  - "mysql:5.6"
+  - dougbtv/homer-captureserver
+  - dougbtv/homer-loaddata

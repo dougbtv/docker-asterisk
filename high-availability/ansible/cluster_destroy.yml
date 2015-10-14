@@ -1,0 +1,15 @@
+---
+# Let's politely spin down a coreos machine.
+# NOTE: Mostly bugged!? Have to still run through.
+- name: Permanently destroy a cluster of CoreOS boxen.
+  hosts: libvirthost
+  sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  roles:
+    - { role: libvirt-coreos, mode: destroy, boxnumber: 0 }
+    - { role: libvirt-coreos, mode: destroy, boxnumber: 1 }
+    - { role: libvirt-coreos, mode: destroy, boxnumber: 2 }
+    - { role: libvirt-coreos, mode: destroy, boxnumber: 3 }
+    - { role: libvirt-coreos, mode: destroy, boxnumber: 4 }
+    - { role: libvirt-coreos, mode: destroy, boxnumber: 5 }

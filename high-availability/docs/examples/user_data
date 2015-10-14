@@ -1,19 +1,12 @@
 #cloud-config
 ssh_authorized_keys:
- {% for key in public_ssh_keys %}
-  - {{ key }}
- {% endfor %}
-
-hostname: {{ libvirt_name }}
+  - ssh-dss AAAAAAAb32342...
+  - ssh-dss AAAAAAAb32342...
+hostname: %HOSTNAME%
 coreos:
   units:
     - name: etcd2.service
       command: start
-      # drop-ins:
-      #   - name: 01-wipe-cache.conf
-      #     content: |
-      #       [Service]
-      #       ExecStartPre=/bin/rm -Rf /var/lib/etcd2/*
     - name: fleet.service
       command: start
     - name:  systemd-networkd.service
@@ -33,15 +26,15 @@ coreos:
 
         [Network]
         DNS=8.8.8.8
-        Address={{ libvirt_ip }}/24
-        Gateway={{ libvirt_gateway }}
+        Address=%STATIC_IP%/24
+        Gateway=192.168.122.1
 
   etcd2:
-    advertise-client-urls: http://{{ libvirt_ip }}:2379
-    initial-advertise-peer-urls: http://{{ libvirt_ip }}:2380
+    advertise-client-urls: http://%STATIC_IP%:2379
+    initial-advertise-peer-urls: http://%STATIC_IP%:2380
     listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
     listen-peer-urls: http://0.0.0.0:2380
-    discovery: {{ coreos_discovery }}
+    discovery: %DISCOVERY%
   fleet:
-    public-ip: {{ libvirt_ip }}
-    metadata: boxrole={{ box_role }}
+    public-ip: %STATIC_IP%
+

@@ -8,11 +8,11 @@ TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill dispatcher
 ExecStartPre=-/usr/bin/docker rm dispatcher
 ExecStartPre=/usr/bin/docker pull dougbtv/kamailio-etcd-dispatcher:latest
-ExecStart=/usr/bin/docker run \
+ExecStart=/bin/sh -c "/usr/bin/docker run \
     --name dispatcher \
     --volumes-from kamailio \
     -t dougbtv/kamailio-etcd-dispatcher \
-    --etcdhost 172.17.42.1
+    --etcdhost $(etcdctl get /ips/$(cat /etc/hostname))"
 ExecStop=/usr/bin/docker stop dispatcher
 
 [X-Fleet]

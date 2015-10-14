@@ -1,0 +1,6 @@
+[Service]
+Environment="ETCD_ADVERTISE_CLIENT_URLS=http://{{ansible_ssh_host}}:2379"
+Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=http://{{ansible_ssh_host}}:2380"
+Environment="ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379,http://0.0.0.0:4001"
+Environment="ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380"
+{{etcd_config}}

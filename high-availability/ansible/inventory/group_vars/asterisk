@@ -1,0 +1,4 @@
+docker_images:
+  - dougbtv/asterisk
+  - dougbtv/homer-captagent
+  - dougbtv/kamailio-etcd-dispatcher

@@ -3,10 +3,6 @@
 # takes two variables:
 # vm_name
 
-  - name: Fail if vm_name is not defined
-    fail: msg="This task requires 'vm_name' variable"
-    when: vm_name is not defined
-
   - name: Default to not destructing
     set_fact:
       destroy: false
@@ -35,6 +31,7 @@
     virt: "name={{ vm_name }} command=status"
     register: machine_status
     when: machine_exists
+    ignore_errors: yes
 
   - name: Assume no shutdown
     set_fact:
@@ -44,14 +41,15 @@
     set_fact:
           did_shutdown: true
     when: machine_exists and machine_status.status == 'running'
+    ignore_errors: yes
 
   - name: Shutdown namespace (when exists and running)
     virt: "name={{ vm_name }} command=shutdown"
     when: machine_exists and machine_status.status == 'running'
 
   # name: Pause for 2 seconds after shutdown
-  - pause: seconds=10
-    when: did_shutdown
+  # - pause: "seconds={{ wait_reboot }}"
+  #   when: did_shutdown
 
   - name: Undefine namespace
     include: libvirt_destroy.yml

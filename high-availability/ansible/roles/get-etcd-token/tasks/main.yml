@@ -1,0 +1,12 @@
+    - name: Get new etcd discovery token
+      command: curl https://discovery.etcd.io/new
+      register: curl_result
+
+    - name: Set etcd token
+      set_fact: 
+        coreos_discovery: "{{ curl_result.stdout }}"
+
+    - debug: "msg={{ curl_result.stdout }}"
+
+    - fail: Require a valid-ish discovery url
+      when: coreos_discovery.find('https://discovery.etcd.io') == -1

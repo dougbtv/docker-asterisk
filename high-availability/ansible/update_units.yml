@@ -1,48 +1,82 @@
 ---
 # Update fleet units on a coreos cluster.
 
+- name: Configure Kamailio
+  hosts: kamailio
+  sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  roles:
+    - { role: kamailio-config }
+
+- name: Configure Asterisk
+  hosts: asterisk
+  sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  roles:
+    - { role: asterisk-config }
+
 - name: Update fleet unit files in cluster
   hosts: coreos
   sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
   tasks:
 
+    - name: Make sure dir for unit files is there
+      file: path=/home/core/units state=directory
+
     - name: Copy unit files
-      copy: src=units/ dest=/home/core/units
+      # copy: src=units/ dest=/home/core/units
+      # looks good: {{ item | basename | regex_replace('\.j2','') }}
+      template: src={{ item }} dest=/home/core/units/{{ item | basename }}
+      # debug: msg="{{ item }} -- {{item | basename}}"
+      with_fileglob:
+        - ./units/*
 
 - name: Update fleet units in cluster
   hosts: leader
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
   vars:
     units:
-      # - dispatcher@.service
-      # - kamailio@.service
-      # - asterisk@.service
-      # - announcer@.service
-      # - keepalived@.service
-      # - mysql@.service
-      # - captureserver@.service
-      # - homerannouncer@.service
-      # - captagent@.service
+      - dispatcher@.service
+      - kamailio@.service
+      - asterisk@.service
+      - announcer@.service
+      - keepalived@.service
+      - mysql@.service
+      - captureserver@.service
+      - homerannouncer@.service
+      - captagent@.service
       - homerweb@.service
     instances:
-      # - { unit: kamailio,       instance: 1 }
-      # - { unit: kamailio,       instance: 2 }
-      # - { unit: keepalived,     instance: 1 }
-      # - { unit: keepalived,     instance: 2 }
-      # - { unit: dispatcher,     instance: 1 }
-      # - { unit: dispatcher,     instance: 2 }
-      # - { unit: asterisk,       instance: 1 }
-      # - { unit: asterisk,       instance: 2 }
-      # - { unit: announcer,      instance: 1 }
-      # - { unit: announcer,      instance: 2 }
-      # - { unit: mysql,          instance: 1 }
-      # - { unit: captureserver,  instance: 1 }
-      # - { unit: homerannouncer, instance: 1 }
+      - { unit: kamailio,       instance: 1 }
+      - { unit: kamailio,       instance: 2 }
+      - { unit: keepalived,     instance: 1 }
+      - { unit: keepalived,     instance: 2 }
+      - { unit: dispatcher,     instance: 1 }
+      - { unit: dispatcher,     instance: 2 }
+      - { unit: asterisk,       instance: 1 }
+      - { unit: asterisk,       instance: 2 }
+      - { unit: announcer,      instance: 1 }
+      - { unit: announcer,      instance: 2 }
+      - { unit: mysql,          instance: 1 }
+      - { unit: captureserver,  instance: 1 }
+      - { unit: homerannouncer, instance: 1 }
       - { unit: homerweb,       instance: 1 }
-      # - { unit: captagent,      instance: 1 }
-      # - { unit: captagent,      instance: 2 }
+      - { unit: captagent,      instance: 1 }
+      - { unit: captagent,      instance: 2 }
 
-  sudo: true
+  # sudo: true
   tasks:
+
+    - name: Set etcd configuration values
+      command: "etcdctl set /ips/coreos{{ item }} 192.168.2.20{{ item }}"
+      with_sequence: 
+        start=0 
+        end="{{ cluster_size }}"
 
     - name: Destroy existing base unit files
       command: "fleetctl destroy {{ item }}"

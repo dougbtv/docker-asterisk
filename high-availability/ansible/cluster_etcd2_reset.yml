@@ -1,0 +1,20 @@
+---
+
+- name: Reset the etcd2 cache, and shutdown machines
+  hosts: coreos
+  sudo: true
+  vars_files:
+    - ["vars/private.yml", "vars/coreos.yml"]
+  tasks:
+
+    - name: Shutdown etcd2
+      service: name=etcd2 state=stopped
+
+    - name: Remove cache dir.
+      file: path=/var/lib/etcd2/ state=absent
+
+    - name: Stub cache dir.
+      file: path=/var/lib/etcd2/ state=directory
+
+    - name: Shut 'em down (in a minute, usually)
+      command: /usr/sbin/shutdown

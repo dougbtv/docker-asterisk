@@ -1,0 +1,27 @@
+- name: Kamailio - Pull the necessary docker images
+  hosts: kamailio
+  sudo: true
+  tasks:
+
+    - name: Pull 'em
+      command: "docker pull {{ item }}"
+      with_items: docker_images
+
+- name: Asterisk - Pull the necessary docker images
+  hosts: asterisk
+  sudo: true
+  tasks:
+
+    - name: Pull 'em
+      command: "docker pull {{ item }}"
+      with_items: docker_images
+
+- name: Homer Pull the necessary docker images
+  hosts: homer
+  sudo: true
+  tasks:
+
+    - name: Pull 'em
+      command: "docker pull {{ item }}"
+      with_items: docker_images
+
