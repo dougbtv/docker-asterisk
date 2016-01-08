@@ -32,7 +32,7 @@ WORKDIR /
 # Update max number of open files.
 RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk
 # Set tty
-RUN sed -i 's/TTY=9/TTY=/g'
+RUN sed -i 's/TTY=9/TTY=/g' /usr/sbin/safe_asterisk
 # Create and configure asterisk for running asterisk user.
 RUN useradd -m asterisk -s /sbin/nologin
 RUN chown asterisk:asterisk /var/run/asterisk
