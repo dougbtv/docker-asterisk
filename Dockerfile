@@ -31,10 +31,19 @@ WORKDIR /
 
 # Update max number of open files.
 RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk
+# Set tty
+RUN sed -i 's/TTY=9/TTY=/g'
+# Create and configure asterisk for running asterisk user.
+RUN useradd -m asterisk -s /sbin/nologin
+RUN chown asterisk:asterisk /var/run/asterisk
+RUN chown -R asterisk:asterisk /etc/asterisk/
+RUN chown -R asterisk:asterisk /var/{lib,log,spool}/asterisk
+RUN chown -R asterisk:asterisk /usr/lib64/asterisk/
 
 RUN mkdir -p /etc/asterisk
 # ADD modules.conf /etc/asterisk/
 ADD iax.conf /etc/asterisk/
 ADD extensions.conf /etc/asterisk/
 
-CMD asterisk -f
+# Running asterisk with safe_asterisk and user asterisk.
+CMD /bin/sh /usr/sbin/safe_asterisk -f -U asterisk -G asterisk
