@@ -45,5 +45,5 @@ RUN mkdir -p /etc/asterisk
 ADD iax.conf /etc/asterisk/
 ADD extensions.conf /etc/asterisk/
 
-# Running asterisk with safe_asterisk and user asterisk.
-CMD /bin/sh /usr/sbin/safe_asterisk -f -U asterisk -G asterisk
+# Running asterisk with user asterisk.
+CMD /usr/sbin/asterisk -f -U asterisk -G asterisk -vvvg -c
