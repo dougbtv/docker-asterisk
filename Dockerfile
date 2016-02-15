@@ -1,6 +1,6 @@
 FROM centos:centos6
 MAINTAINER Doug Smith <info@laboratoryb.org>
-ENV build_date 2015-08-21
+ENV build_date 2016-02-15
 
 RUN yum update -y
 RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar -y
@@ -9,7 +9,7 @@ ENV AUTOBUILD_UNIXTIME 1418234402
 
 # Download asterisk.
 # Currently Certified Asterisk 11.6 cert 6.
-RUN curl -sf -o /tmp/asterisk.tar.gz -L http://downloads.asterisk.org/pub/telephony/certified-asterisk/certified-asterisk-11.6-current.tar.gz
+RUN curl -sf -o /tmp/asterisk.tar.gz -L http://downloads.asterisk.org/pub/telephony/certified-asterisk/asterisk-certified-11.6-current.tar.gz
 
 # gunzip asterisk
 RUN mkdir /tmp/asterisk
