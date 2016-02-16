@@ -31,6 +31,7 @@ script:
   - docker exec -it asterisk1 asterisk -rx 'module show'
   - docker exec -it asterisk1 asterisk -rx 'sip show peers'
   - docker exec -it asterisk2 asterisk -rx 'sip show peers'
+  - sleep 5
   - docker exec -it asterisk1 asterisk -rx 'sip show registry'
   - docker exec -it asterisk2 asterisk -rx 'sip show registry'
   - docker exec -it asterisk1 asterisk -rx 'cdr show status'
@@ -39,3 +40,5 @@ script:
   - docker exec -it asterisk2 find /var/log/asterisk/.
   - docker exec -it asterisk1 asterisk -rx 'core show channels'
   - docker exec -it asterisk2 asterisk -rx 'core show channels'
+  - docker logs asterisk1
+  - docker logs asterisk2
