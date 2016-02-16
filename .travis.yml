@@ -3,5 +3,25 @@ sudo: required
 services:
   - docker
 
+before_install:
+  - docker pull svendowideit/ambassador
+
 script:
-- docker build --tag="dougbtv/asterisk"  .
+  - docker build --tag="dougbtv/asterisk"  .
+  - > 
+    docker run
+    --name asterisk1
+    -p 5061:5060
+    -p 10001:10001
+    -v $(pwd)/test/asterisk1.sip.conf:/etc/asterisk/sip.conf
+    -v $(pwd)/test/asterisk1.rtp.conf:/etc/asterisk/rtp.conf
+    -d -t dougbtv/asterisk
+  - >
+    docker run
+    --name asterisk2
+    -p 5062:5060
+    -p 10002:10002
+    -v $(pwd)/test/asterisk2.sip.conf:/etc/asterisk/sip.conf
+    -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
+    -d -t dougbtv/asterisk
+  - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
