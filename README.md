@@ -1,5 +1,7 @@
 # docker-asterisk
 
+[![Build Status](https://travis-ci.org/dougbtv/docker-asterisk.svg?branch=master)](https://travis-ci.org/dougbtv/docker-asterisk)
+
 A set of Dockerfiles for running asterisk (and a FastAGI, one for PHP as it stands)
 
 Also checkout my blog article @ [dougbtv.com](http://dougbtv.com/2014/10/02/docker-and-asterisk/).
@@ -22,6 +24,10 @@ Dockerfile in the root directory is:
 * Latest current available version of Asterisk 11, certified branch
   * ...More branches to come in the future.
 * Available with `docker pull dougbtv/asterisk`
+
+## Now with a Travis CI build
+
+Check out the info on the latest build @ [Travis-CI](https://travis-ci.org/dougbtv/docker-asterisk), it should give you a little confidence that the latest Dockerfile is building properly, and give you a little information about the build (for example, you can check out what modules are compiled in, a la `module show`).
 
 ## Check out the latest build!
 
