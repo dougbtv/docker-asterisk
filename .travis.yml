@@ -15,6 +15,7 @@ script:
     -p 10001:10001
     -v $(pwd)/test/asterisk1.sip.conf:/etc/asterisk/sip.conf
     -v $(pwd)/test/asterisk1.rtp.conf:/etc/asterisk/rtp.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
     -d -t dougbtv/asterisk
   - >
     docker run
@@ -23,6 +24,13 @@ script:
     -p 10002:10002
     -v $(pwd)/test/asterisk2.sip.conf:/etc/asterisk/sip.conf
     -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
     -d -t dougbtv/asterisk
   - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
   - docker exec -it asterisk1 ifconfig
+  - docker exec -it asterisk1 asterisk -rx 'sip show peers'
+  - docker exec -it asterisk2 asterisk -rx 'sip show peers'
+  - docker exec -it asterisk1 asterisk -rx 'module show'
+  - docker exec -it asterisk1 asterisk -rx 'cdr show status'
+  - docker exec -it asterisk2 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
+  - docker exec -it asterisk1 cat /var/log/asterisk/cdr-csv/Master.csv
