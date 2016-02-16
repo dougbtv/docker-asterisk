@@ -23,6 +23,8 @@ RUN ./configure --libdir=/usr/lib64 1> /dev/null
 # Remove the native build option
 RUN make menuselect.makeopts
 RUN sed -i "s/BUILD_NATIVE//" menuselect.makeopts
+RUN sed -i -e 's/cdr_csv//' menuselect.makeopts
+
 # Continue with a standard make.
 RUN make 1> /dev/null
 RUN make install 1> /dev/null
