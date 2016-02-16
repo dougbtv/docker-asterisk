@@ -25,3 +25,4 @@ script:
     -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
     -d -t dougbtv/asterisk
   - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
+  - docker exec -it asterisk1 ifconfig
