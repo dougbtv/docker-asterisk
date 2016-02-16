@@ -8,37 +8,36 @@ before_install:
 
 script:
   - docker build --tag="dougbtv/asterisk"  .
-  - > 
+  - >
     docker run
     --name asterisk1
-    -p 5061:5060
-    -p 10001:10001
-    -v $(pwd)/test/asterisk1.sip.conf:/etc/asterisk/sip.conf
+    -h asterisk1
+    -p 5061:5060/udp
+    -p 10001:10001/udp
+    -v $(pwd)/test/asterisk.sip.conf:/etc/asterisk/sip.conf
     -v $(pwd)/test/asterisk1.rtp.conf:/etc/asterisk/rtp.conf
     -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
     -d -t dougbtv/asterisk
   - >
     docker run
     --name asterisk2
-    -p 5062:5060
-    -p 10002:10002
-    -v $(pwd)/test/asterisk2.sip.conf:/etc/asterisk/sip.conf
+    -h asterisk2
+    -p 5062:5060/udp
+    -p 10002:10002/udp
+    -v $(pwd)/test/asterisk.sip.conf:/etc/asterisk/sip.conf
     -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
     -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
     -d -t dougbtv/asterisk
   - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
   - docker exec -it asterisk1 ifconfig
   - docker exec -it asterisk1 asterisk -rx 'module show'
-  - docker exec -it asterisk1 asterisk -rx 'sip show peers'
-  - docker exec -it asterisk2 asterisk -rx 'sip show peers'
-  - sleep 5
-  - docker exec -it asterisk1 asterisk -rx 'sip show registry'
-  - docker exec -it asterisk2 asterisk -rx 'sip show registry'
   - docker exec -it asterisk1 asterisk -rx 'cdr show status'
   - docker exec -it asterisk2 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
+  - sleep 6
   - docker exec -it asterisk1 find /var/log/asterisk/.
   - docker exec -it asterisk2 find /var/log/asterisk/.
   - docker exec -it asterisk1 asterisk -rx 'core show channels'
   - docker exec -it asterisk2 asterisk -rx 'core show channels'
-  - docker logs asterisk1
-  - docker logs asterisk2
+  - docker logs --tail=250 asterisk1
+  - docker logs --tail=250 asterisk2
+  - docker exec -it asterisk2 cat /var/log/asterisk/cdr-csv/Master.csv
