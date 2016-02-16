@@ -28,9 +28,14 @@ script:
     -d -t dougbtv/asterisk
   - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
   - docker exec -it asterisk1 ifconfig
+  - docker exec -it asterisk1 asterisk -rx 'module show'
   - docker exec -it asterisk1 asterisk -rx 'sip show peers'
   - docker exec -it asterisk2 asterisk -rx 'sip show peers'
-  - docker exec -it asterisk1 asterisk -rx 'module show'
+  - docker exec -it asterisk1 asterisk -rx 'sip show registry'
+  - docker exec -it asterisk2 asterisk -rx 'sip show registry'
   - docker exec -it asterisk1 asterisk -rx 'cdr show status'
   - docker exec -it asterisk2 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
-  - docker exec -it asterisk1 cat /var/log/asterisk/cdr-csv/Master.csv
+  - docker exec -it asterisk1 find /var/log/asterisk/.
+  - docker exec -it asterisk2 find /var/log/asterisk/.
+  - docker exec -it asterisk1 asterisk -rx 'core show channels'
+  - docker exec -it asterisk2 asterisk -rx 'core show channels'
