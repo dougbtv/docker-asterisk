@@ -25,9 +25,9 @@ Dockerfile in the root directory is:
   * ...More branches to come in the future.
 * Available with `docker pull dougbtv/asterisk`
 
-## Now with a Travis CI build
+## Now with a Travis CI tests
 
-Check out the info on the latest build @ [Travis-CI](https://travis-ci.org/dougbtv/docker-asterisk), it should give you a little confidence that the latest Dockerfile is building properly, and give you a little information about the build (for example, you can check out what modules are compiled in, a la `module show`).
+Check out the info on the latest build @ [Travis-CI](https://travis-ci.org/dougbtv/docker-asterisk), it should give you a little confidence that the latest Dockerfile is building properly, and give you a little information about the build (for example, you can check out what modules are compiled in, a la `module show`). In short the Travis build tests that two instances of this Docker image can make a call between the two.
 
 ## Check out the latest build!
 
