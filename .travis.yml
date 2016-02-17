@@ -36,6 +36,8 @@ script:
   - ./test/wait_for_asterisk.sh asterisk2
   - docker exec -it asterisk1 asterisk -rx 'module show'
   - docker exec -it asterisk1 asterisk -rx 'cdr show status'
+  - docker exec -it asterisk1 asterisk -rx 'sip set debug on'
+  - docker exec -it asterisk2 asterisk -rx 'sip set debug on'
   - docker exec -it asterisk1 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
   - sleep 6
   - docker exec -it asterisk1 find /var/log/asterisk/.
