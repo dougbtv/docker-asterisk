@@ -35,14 +35,9 @@ script:
   - ./test/wait_for_asterisk.sh asterisk2
   - docker exec -it asterisk1 asterisk -rx 'module show'
   - docker exec -it asterisk1 asterisk -rx 'cdr show status'
-  - docker exec -it asterisk1 asterisk -rx 'sip set debug on'
-  - docker exec -it asterisk2 asterisk -rx 'sip set debug on'
   - docker exec -it asterisk1 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
   - sleep 6
-  - docker exec -it asterisk1 find /var/log/asterisk/.
-  - docker exec -it asterisk2 find /var/log/asterisk/.
   - docker exec -it asterisk1 asterisk -rx 'core show channels'
   - docker exec -it asterisk2 asterisk -rx 'core show channels'
-  - docker logs --tail=250 asterisk1
-  - docker logs --tail=250 asterisk2
   - docker exec -it asterisk2 cat /var/log/asterisk/cdr-csv/Master.csv
+  - docker exec -it asterisk2 grep -Pi "333.+inbound.+ANSWERED" /var/log/asterisk/cdr-csv/Master.csv
