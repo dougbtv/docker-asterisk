@@ -32,6 +32,8 @@ before_script:
 script:
   - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
   - docker exec -it asterisk1 ifconfig
+  - ./test/wait_for_asterisk.sh asterisk1
+  - ./test/wait_for_asterisk.sh asterisk2
   - docker exec -it asterisk1 asterisk -rx 'module show'
   - docker exec -it asterisk1 asterisk -rx 'cdr show status'
   - docker exec -it asterisk1 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
