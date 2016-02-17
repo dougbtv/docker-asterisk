@@ -6,7 +6,7 @@ services:
 before_script:
   - docker build --tag="dougbtv/asterisk"  .
   - >
-    docker0ip=`ifconfig | grep -i -A1 docker0 | grep -i inet | awk '{print $2}'`
+    docker0ip=`ifconfig | grep -i -A1 docker0 | grep -i inet | awk '{print $2}' | sed -e "s/addr\://"`
   - sed -i -e "s/DOCKER0_IP_ADDRESS/$docker0ip/g" test/asterisk.sip.conf 
   - >
     docker run
