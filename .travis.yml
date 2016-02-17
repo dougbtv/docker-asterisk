@@ -3,11 +3,11 @@ sudo: required
 services:
   - docker
 
-before_install:
-  - docker pull svendowideit/ambassador
-
 before_script:
   - docker build --tag="dougbtv/asterisk"  .
+  - >
+    docker0ip=`ifconfig | grep -i -A1 docker0 | grep -i inet | awk '{print $2}'`
+  - sed -i -e "s/DOCKER0_IP_ADDRESS/$docker0ip/g" test/asterisk.sip.conf 
   - >
     docker run
     --name asterisk1
