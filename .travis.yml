@@ -30,6 +30,7 @@ before_script:
     -d -t dougbtv/asterisk
 
 script:
+  - ifconfig
   - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
   - docker exec -it asterisk1 ifconfig
   - ./test/wait_for_asterisk.sh asterisk1
