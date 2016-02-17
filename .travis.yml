@@ -1,0 +1,43 @@
+sudo: required
+
+services:
+  - docker
+
+before_script:
+  - docker build --tag="dougbtv/asterisk"  .
+  - >
+    docker0ip=`ifconfig | grep -i -A1 docker0 | grep -i inet | awk '{print $2}' | sed -e "s/addr\://"`
+  - sed -i -e "s/DOCKER0_IP_ADDRESS/$docker0ip/g" test/asterisk.sip.conf 
+  - >
+    docker run
+    --name asterisk1
+    -h asterisk1
+    -p 5061:5060/udp
+    -p 10001:10001/udp
+    -v $(pwd)/test/asterisk.sip.conf:/etc/asterisk/sip.conf
+    -v $(pwd)/test/asterisk1.rtp.conf:/etc/asterisk/rtp.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
+    -d -t dougbtv/asterisk
+  - >
+    docker run
+    --name asterisk2
+    -h asterisk2
+    -p 5062:5060/udp
+    -p 10002:10002/udp
+    -v $(pwd)/test/asterisk.sip.conf:/etc/asterisk/sip.conf
+    -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
+    -d -t dougbtv/asterisk
+
+script:
+  - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
+  - ./test/wait_for_asterisk.sh asterisk1
+  - ./test/wait_for_asterisk.sh asterisk2
+  - docker exec -it asterisk1 asterisk -rx 'module show'
+  - docker exec -it asterisk1 asterisk -rx 'cdr show status'
+  - docker exec -it asterisk1 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
+  - sleep 6
+  - docker exec -it asterisk1 asterisk -rx 'core show channels'
+  - docker exec -it asterisk2 asterisk -rx 'core show channels'
+  - docker exec -it asterisk2 cat /var/log/asterisk/cdr-csv/Master.csv
+  - docker exec -it asterisk2 grep -Pi "333.+inbound.+ANSWERED" /var/log/asterisk/cdr-csv/Master.csv
