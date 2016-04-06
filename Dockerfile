@@ -10,6 +10,9 @@ ENV AUTOBUILD_UNIXTIME 1418234402
 # Download asterisk.
 # Currently Certified Asterisk 11.6 cert 6.
 RUN curl -sf -o /tmp/asterisk.tar.gz -L http://downloads.asterisk.org/pub/telephony/certified-asterisk/asterisk-certified-11.6-current.tar.gz
+# Also download the md5 hash for it.
+RUN curl -sf -o /tmp/asterisk.md5 -L http://downloads.asterisk.org/pub/telephony/certified-asterisk/asterisk-certified-11.6-current.md5
+RUN md5sum /tmp/asterisk.tar.gz | grep $(cat /tmp/asterisk.md5 | awk '{print $1}')
 
 # gunzip asterisk
 RUN mkdir /tmp/asterisk
