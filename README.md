@@ -64,6 +64,17 @@ docker run \
     -d -t dougbtv/asterisk
 ```
 
+However, this will run without any configuration what-so-ever, so you'll want to mount a volume with your configurations, a sample configuration is provided in this clone. So if your current working directory is this clone, you could mount the example configurations in `/etc/asterisk` however, I recommend you create your own configurations.
+
+```
+docker run \
+    --name $NAME_ASTERISK \
+    --net=host \
+    -v $(pwd)/test/example/:/etc/asterisk/ \
+    -d -t dougbtv/asterisk
+```
+
+
 ## Building it.
 
 Just issue, with your current-working-dir as the clone:
