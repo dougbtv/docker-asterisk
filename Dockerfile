@@ -1,6 +1,6 @@
 FROM centos:centos6
 MAINTAINER Doug Smith <info@laboratoryb.org>
-ENV build_date 2016-02-15
+ENV build_date 2016-04-06
 
 RUN yum update -y
 RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar -y
@@ -41,11 +41,6 @@ RUN chown asterisk:asterisk /var/run/asterisk
 RUN chown -R asterisk:asterisk /etc/asterisk/
 RUN chown -R asterisk:asterisk /var/{lib,log,spool}/asterisk
 RUN chown -R asterisk:asterisk /usr/lib64/asterisk/
-
-RUN mkdir -p /etc/asterisk
-# ADD modules.conf /etc/asterisk/
-ADD iax.conf /etc/asterisk/
-ADD extensions.conf /etc/asterisk/
 
 # Running asterisk with user asterisk.
 CMD /usr/sbin/asterisk -f -U asterisk -G asterisk -vvvg -c
