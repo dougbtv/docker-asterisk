@@ -58,9 +58,4 @@ WORKDIR /
 # Update max number of open files.
 RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk
 
-RUN mkdir -p /etc/asterisk
-# ADD modules.conf /etc/asterisk/
-ADD iax.conf /etc/asterisk/
-ADD extensions.conf /etc/asterisk/
-
 CMD asterisk -f
