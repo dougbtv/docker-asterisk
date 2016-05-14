@@ -8,5 +8,5 @@
 
     - debug: "msg={{ curl_result.stdout }}"
 
-    - fail: Require a valid-ish discovery url
-      when: coreos_discovery.find('https://discovery.etcd.io') == -1
+    # - fail: "Require a valid-ish discovery url"
+    #   when: "coreos_discovery.find('https://discovery.etcd.io') == -1"
