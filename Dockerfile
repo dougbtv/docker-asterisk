@@ -28,6 +28,8 @@ RUN make menuselect.makeopts
 RUN sed -i "s/BUILD_NATIVE//" menuselect.makeopts
 RUN sed -i -e 's/cdr_csv//' menuselect.makeopts
 RUN sed -i -e 's/chan_sip//' menuselect.makeopts
+RUN sed -i -e 's/res_snmp//' menuselect.makeopts
+RUN sed -i -e 's/res_http_websocket//' menuselect.makeopts
 
 # Continue with a standard make.
 RUN make 1> /dev/null
