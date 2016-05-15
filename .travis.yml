@@ -71,10 +71,11 @@ script:
   - docker exec -it asterisk1 cat /etc/asterisk/sip.conf
   - ./test/wait_for_asterisk.sh asterisk1
   - ./test/wait_for_asterisk.sh asterisk2
+  - sleep 10
   - docker exec -it asterisk1 asterisk -rx 'module show'
   - docker exec -it asterisk1 asterisk -rx 'cdr show status'
   - docker exec -it asterisk1 asterisk -rx 'channel originate SIP/asterisk2/333 application wait 5'
-  - sleep 6
+  - sleep 10
   - docker exec -it asterisk1 asterisk -rx 'core show channels'
   - docker exec -it asterisk2 asterisk -rx 'core show channels'
   - docker exec -it asterisk2 cat /var/log/asterisk/cdr-csv/Master.csv
