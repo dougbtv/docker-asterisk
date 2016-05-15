@@ -27,6 +27,7 @@ RUN ./configure --libdir=/usr/lib64 1> /dev/null
 RUN make menuselect.makeopts
 RUN sed -i "s/BUILD_NATIVE//" menuselect.makeopts
 RUN sed -i -e 's/cdr_csv//' menuselect.makeopts
+RUN sed -i -e 's/chan_sip//' menuselect.makeopts
 
 # Continue with a standard make.
 RUN make 1> /dev/null
