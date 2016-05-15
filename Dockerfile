@@ -3,7 +3,7 @@ MAINTAINER Doug Smith <info@laboratoryb.org>
 ENV build_date 2016-05-14
 
 RUN yum update -y
-RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make -y 
+RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make git -y 
 
 ENV AUTOBUILD_UNIXTIME 1418234402
 
