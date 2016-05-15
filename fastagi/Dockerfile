@@ -1,4 +1,4 @@
-FROM centos:centos6
+FROM centos:centos7
 MAINTAINER Doug Smith <info@laboratoryb.org>
 ENV build_date 2015-03-20
 
