@@ -1,9 +1,9 @@
-FROM centos:centos6
+FROM centos:centos7
 MAINTAINER Doug Smith <info@laboratoryb.org>
-ENV build_date 2016-04-06
+ENV build_date 2016-05-14
 
 RUN yum update -y
-RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar -y
+RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make -y 
 
 ENV AUTOBUILD_UNIXTIME 1418234402
 
@@ -27,6 +27,9 @@ RUN ./configure --libdir=/usr/lib64 1> /dev/null
 RUN make menuselect.makeopts
 RUN sed -i "s/BUILD_NATIVE//" menuselect.makeopts
 RUN sed -i -e 's/cdr_csv//' menuselect.makeopts
+RUN sed -i -e 's/chan_sip//' menuselect.makeopts
+RUN sed -i -e 's/res_snmp//' menuselect.makeopts
+RUN sed -i -e 's/res_http_websocket//' menuselect.makeopts
 
 # Continue with a standard make.
 RUN make 1> /dev/null

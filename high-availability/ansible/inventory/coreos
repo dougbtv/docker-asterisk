@@ -6,7 +6,7 @@ coreos2 ansible_ssh_host=192.168.2.202
 coreos3 ansible_ssh_host=192.168.2.203
 coreos4 ansible_ssh_host=192.168.2.204
 coreos5 ansible_ssh_host=192.168.2.205
-libvirtmachine ansible_ssh_host=192.168.2.55
+libvirtmachine ansible_ssh_host=localhost
 
 # ------------------------ Keep alive d.
 
