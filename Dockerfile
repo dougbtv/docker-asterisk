@@ -3,33 +3,22 @@ MAINTAINER Doug Smith <info@laboratoryb.org>
 ENV build_date 2016-05-14
 
 RUN yum update -y
-RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make -y 
+RUN yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make git -y 
 
 ENV AUTOBUILD_UNIXTIME 1418234402
 
 # Download asterisk.
-# Currently Certified Asterisk 11.6 cert 6.
-RUN curl -sf -o /tmp/asterisk.tar.gz -L http://downloads.asterisk.org/pub/telephony/certified-asterisk/asterisk-certified-11.6-current.tar.gz
-# Also download the md5 hash for it.
-RUN curl -sf -o /tmp/asterisk.md5 -L http://downloads.asterisk.org/pub/telephony/certified-asterisk/asterisk-certified-11.6-current.md5
-RUN md5sum /tmp/asterisk.tar.gz | grep $(cat /tmp/asterisk.md5 | awk '{print $1}')
-
-# gunzip asterisk
-RUN mkdir /tmp/asterisk
-RUN tar -xzf /tmp/asterisk.tar.gz -C /tmp/asterisk --strip-components=1
+WORKDIR /tmp/
+RUN git clone -b certified/11.6 --depth 1 https://gerrit.asterisk.org/asterisk
 WORKDIR /tmp/asterisk
 
 # make asterisk.
-ENV rebuild_date 2014-10-07
+ENV rebuild_date 2015-05-15
 # Configure
 RUN ./configure --libdir=/usr/lib64 1> /dev/null
 # Remove the native build option
 RUN make menuselect.makeopts
-RUN sed -i "s/BUILD_NATIVE//" menuselect.makeopts
-RUN sed -i -e 's/cdr_csv//' menuselect.makeopts
-RUN sed -i -e 's/chan_sip//' menuselect.makeopts
-RUN sed -i -e 's/res_snmp//' menuselect.makeopts
-RUN sed -i -e 's/res_http_websocket//' menuselect.makeopts
+RUN sed -i -r -e 's/BUILD_NATIVE|cdr_csv|chan_sip|res_snmp|res_http_websocket//g' menuselect.makeopts
 
 # Continue with a standard make.
 RUN make 1> /dev/null

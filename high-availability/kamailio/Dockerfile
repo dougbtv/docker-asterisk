@@ -1,4 +1,4 @@
-FROM centos:centos6
+FROM centos:centos7
 MAINTAINER Doug Smith <info@laboratoryb.org>
 ENV build_date 2014-12-05 001
 
@@ -6,7 +6,7 @@ ENV build_date 2014-12-05 001
 RUN yum update -y
 RUN yum install -y epel-release
 RUN yum install -y nano wget inotify-tools rsyslog
-RUN wget -O /etc/yum.repos.d/kamailio.repo http://download.opensuse.org/repositories/home:/kamailio:/telephony/CentOS_CentOS-6/home:kamailio:telephony.repo
+RUN wget -O /etc/yum.repos.d/kamailio.repo http://download.opensuse.org/repositories/home:/kamailio:/v4.4.x-rpms/CentOS_7/home:kamailio:v4.4.x-rpms.repo
 RUN yum install -y kamailio
 
 # -------------------- Kamailio configs
