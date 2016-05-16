@@ -11,6 +11,7 @@ RUN yum install -y make
 
 ENV captagent_version 0x00001
 RUN git clone https://github.com/sipcapture/captagent.git
+RUN git reset --hard 2f12fbe63887b827bea831e2ab5739929ac4904a
 WORKDIR /captagent/captagent
 
 RUN ./build.sh
