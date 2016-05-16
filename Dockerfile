@@ -18,7 +18,13 @@ ENV rebuild_date 2015-05-15
 RUN ./configure --libdir=/usr/lib64 1> /dev/null
 # Remove the native build option
 RUN make menuselect.makeopts
-RUN sed -i -r -e 's/BUILD_NATIVE|cdr_csv|chan_sip|res_snmp|res_http_websocket//g' menuselect.makeopts
+RUN menuselect/menuselect \
+  --disable BUILD_NATIVE \
+  --enable cdr_csv \
+  --enable chan_sip \
+  --enable res_snmp \
+  --enable res_http_websocket \
+  menuselect.makeopts
 
 # Continue with a standard make.
 RUN make 1> /dev/null
