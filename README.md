@@ -10,32 +10,37 @@ You can [pull the image from dockerhub](https://registry.hub.docker.com/u/dougbt
 
 Which is as simple as running:
 
-    docker pull dougbtv/asterisk
+    # Asterisk 11
+    docker pull dougbtv/asterisk 
+
+    # Asterisk 13
+    docker pull dougbtv/asterisk13
 
 ## What is it based on?
 
-Asterisk 13 has been released!
+Generally this is based on:
+* Centos 7 base images
+* Latest current available version of Asterisk certified branch
+
+Dockerfile in the root directory is Asterisk 11 and available with `docker pull dougbtv/asterisk`
+
+Looking for Asterisk 13?
 
 * The Dockerfile is in `asterisk/13/Dockerfile` & available with `docker pull dougbtv/asterisk13`
-
-Dockerfile in the root directory is:
-
-* Based on Centos 6.5 base image
-* Latest current available version of Asterisk 11, certified branch
-  * ...More branches to come in the future.
-* Available with `docker pull dougbtv/asterisk`
-
-## Now with Travis CI tests
-
-Check out the info on the latest build @ [Travis-CI](https://travis-ci.org/dougbtv/docker-asterisk), it should give you a little confidence that the latest Dockerfile is building properly, and give you a little information about the build (for example, you can check out what modules are compiled in, a la `module show`). In short the Travis build has tests that ensure two instances of this Docker image can make a call between the two.
 
 ## Check out the latest build!
 
 The image is backed by [bowline](https://github.com/dougbtv/bowline) (a Docker build server, which I wrote) which watches for the latest tarball from downloads.asterisk.org, builds it into this docker image and then automatically pushes it to dockerhub.
 
-Whenever a new build is created, the bot creates a pull request here, you can check out the latest merged pull requests, and you'll find a link to the results of the build posted on a paste bin. Here's [an example automatically generated pull request](https://github.com/dougbtv/docker-asterisk/pull/16), and here's [an example log](http://www.pasteall.org/54631/text). 
+Whenever a new build of Asterisk is created, the bot creates a pull request here, you can check out the latest merged pull requests. You'll see the results and logs of the image builds that are available via `docker pull` @ [bowline.io](https://bowline.io/#/knots?details=54479686d47e7986907852ce)
 
 Bowline is under-work, but, was inspired by my Asterisk dockerfiles, seeing, it takes a while to compile Asterisk. (which is why it's nice to have an up-to-date image available)
+
+## Verified with CI using Travis
+
+Check out the info on the latest build @ [Travis-CI](https://travis-ci.org/dougbtv/docker-asterisk), it should give you a little confidence that the latest Dockerfile is building properly, and give you a little information about the build (for example, you can check out what modules are compiled in, a la `module show`). In short the Travis build has tests that ensure two instances of this Docker image can make a call between the two. 
+
+Don't be shy! Check out the `.travis.yml` file in the root and learn how to do it for yourself (it's not rocket science!)
 
 ## Running it.
 
