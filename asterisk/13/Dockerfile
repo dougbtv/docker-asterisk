@@ -58,5 +58,10 @@ RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk && \
     chown -R asterisk:asterisk /var/{lib,log,spool}/asterisk && \
     chown -R asterisk:asterisk /usr/lib64/asterisk/
 
+# support arbitrary user ids for openshift
+RUN chgrp -R 0 /var/run/asterisk && \
+    chmod -R g+rw /var/run/asterisk && \
+    find /var/run/asterisk -type d -exec chmod g+x {} +
+
 USER asterisk
 CMD asterisk -f
