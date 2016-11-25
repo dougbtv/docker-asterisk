@@ -33,21 +33,24 @@ RUN make samples 1> /dev/null
 WORKDIR /
 
 # Update max number of open files.
+ENV ASTERISK_DIRS /var/run/asterisk /etc/asterisk/ /var/lib/asterisk/ /var/log/asterisk/ /var/spool/asterisk/ /usr/lib64/asterisk/
 RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk && \
     # Set tty
     sed -i 's/TTY=9/TTY=/g' /usr/sbin/safe_asterisk && \
     # Create and configure asterisk for running asterisk user.
     useradd -m asterisk -s /sbin/nologin && \
-    chown asterisk:asterisk /var/run/asterisk && \
-    chown -R asterisk:asterisk /etc/asterisk/ && \
-    chown -R asterisk:asterisk /var/{lib,log,spool}/asterisk && \
-    chown -R asterisk:asterisk /usr/lib64/asterisk/
+    chown -R asterisk:asterisk $ASTERISK_DIRS && \
+    # support arbitrary user ids for openshift
+    chgrp -R 0 $ASTERISK_DIRS && \
+    chmod -R g+rw $ASTERISK_DIRS && \
+    find $ASTERISK_DIRS -type d -exec chmod g+x {} +
 
-# support arbitrary user ids for openshift
-RUN chgrp -R 0 /var/run/asterisk && \
-    chmod -R g+rw /var/run/asterisk && \
-    find /var/run/asterisk -type d -exec chmod g+x {} +
+# 
+RUN yum install -y epel-release
+RUN yum install -y nss_wrapper gettext
+ADD passwd.template /tmp/passwd.template
+ADD init.sh /init.sh
 
 # Running asterisk with user asterisk.
-CMD /usr/sbin/asterisk -f -U asterisk -G asterisk -vvvg -c
+CMD /init.sh
 USER asterisk
