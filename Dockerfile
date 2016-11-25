@@ -3,7 +3,8 @@ MAINTAINER Doug Smith <info@laboratoryb.org>
 ENV build_date 2016-11-23
 
 RUN yum update -y && \
-    yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make git -y 
+    yum install -y epel-release && \
+    yum install kernel-headers gcc gcc-c++ cpp ncurses ncurses-devel libxml2 libxml2-devel sqlite sqlite-devel openssl-devel newt-devel kernel-devel libuuid-devel net-snmp-devel xinetd tar make git nss_wrapper gettext -y 
 
 ENV AUTOBUILD_UNIXTIME 1418234402
 
@@ -45,10 +46,9 @@ RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk && \
     chmod -R g+rw $ASTERISK_DIRS && \
     find $ASTERISK_DIRS -type d -exec chmod g+x {} +
 
-# 
-RUN yum install -y epel-release
-RUN yum install -y nss_wrapper gettext
+# Template the passwds file, Asterisk needs to know it's ID, and this is OpenShift compatible (and it uses arbitrary user ids)
 ADD passwd.template /tmp/passwd.template
+# And this is where we issue our command to run asterisk, and set our user params 
 ADD init.sh /init.sh
 
 # Running asterisk with user asterisk.
