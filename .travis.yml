@@ -6,9 +6,11 @@ services:
 before_script:
   - docker build --tag="dougbtv/asterisk"  .
   - docker build --tag="dougbtv/asterisk13"  ./asterisk/13/.
+  - docker build --tag="dougbtv/asterisk14"  ./asterisk/14/.
   - >
     docker0ip=`ifconfig | grep -i -A1 docker0 | grep -i inet | awk '{print $2}' | sed -e "s/addr\://"`
   - sed -i -e "s/DOCKER0_IP_ADDRESS/$docker0ip/g" test/asterisk.sip.conf 
+  - sed -i -e "s/DOCKER0_IP_ADDRESS/$docker0ip/g" test/pjsip.conf 
 
 script:
   # Asterisk 11 certified.
@@ -79,4 +81,33 @@ script:
   - docker exec -it asterisk1 asterisk -rx 'core show channels'
   - docker exec -it asterisk2 asterisk -rx 'core show channels'
   - docker exec -it asterisk2 cat /var/log/asterisk/cdr-csv/Master.csv
+  - docker exec -it asterisk2 grep -Pi "333.+inbound.+ANSWERED" /var/log/asterisk/cdr-csv/Master.csv
+  - docker stop asterisk1 asterisk2
+  - docker rm asterisk1 asterisk2
+  - echo "Asterisk 14 =================================================================== "
+  - > 
+    docker run
+    --name asterisk1
+    -h asterisk1
+    -p 5061:5060/udp
+    -p 10001:10001/udp
+    -v $(pwd)/test/pjsip.conf:/etc/asterisk/pjsip.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
+    -v $(pwd)/test/asterisk1.rtp.conf:/etc/asterisk/rtp.conf
+    -d -t dougbtv/asterisk14
+  - >
+    docker run
+    --name asterisk2
+    -h asterisk2
+    -p 5062:5060/udp
+    -p 10002:10002/udp
+    -v $(pwd)/test/pjsip.conf:/etc/asterisk/pjsip.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
+    -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
+    -d -t dougbtv/asterisk14
+  - ./test/wait_for_asterisk.sh asterisk1
+  - ./test/wait_for_asterisk.sh asterisk2
+  - sleep 5
+  - docker exec -it asterisk1 asterisk -rx 'channel originate PJSIP/333@asterisk2 application wait 5'
+  - sleep 10
   - docker exec -it asterisk2 grep -Pi "333.+inbound.+ANSWERED" /var/log/asterisk/cdr-csv/Master.csv
