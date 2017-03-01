@@ -10,23 +10,26 @@ You can [pull the image from dockerhub](https://registry.hub.docker.com/u/dougbt
 
 Which is as simple as running:
 
-    # Asterisk 11
-    docker pull dougbtv/asterisk 
+    # Asterisk 14
+    docker pull dougbtv/asterisk14
 
     # Asterisk 13
     docker pull dougbtv/asterisk13
+
+    # Asterisk 11
+    docker pull dougbtv/asterisk 
 
 ## What is it based on?
 
 Generally this is based on:
 * Centos 7 base images
-* Latest current available version of Asterisk certified branch
+* Latest current available version of Asterisk certified branch (for LTS releases)
 
 Dockerfile in the root directory is Asterisk 11 and available with `docker pull dougbtv/asterisk`
 
-Looking for Asterisk 13?
+Looking for Asterisk 13 or 14?
 
-* The Dockerfile is in `asterisk/13/Dockerfile` & available with `docker pull dougbtv/asterisk13`
+* The Dockerfile is in `asterisk/13/` or `asterisk/14/`
 
 ## Check out the latest build!
 
