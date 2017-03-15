@@ -133,6 +133,9 @@ WORKDIR /
 # Update max number of open files.
 RUN sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk
 
+# Copy in default configs
+COPY http.conf /etc/asterisk/http.conf
+
 # This is weird huh? I'd shell into the container and get errors about en_US.UTF-8 file not found
 # found @ https://github.com/CentOS/sig-cloud-instance-images/issues/71
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
