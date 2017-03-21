@@ -62,7 +62,7 @@ NAME_FASTAGI=fastagi
 # Run the fastagi container.
 docker run \
     -p 4573:4573 \
-    --name $NAME_FASTAGI
+    --name $NAME_FASTAGI \
     -d -t dougbtv/fastagi
 
 # Run the main asterisk container.
