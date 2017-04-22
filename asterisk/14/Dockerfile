@@ -30,6 +30,7 @@ RUN yum update -y && \
         libsrtp-devel \
         gsm-devel \
         speex-devel \
+        wget \
         gettext \
         -y
 
