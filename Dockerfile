@@ -62,4 +62,4 @@ RUN yum update -y \
 
 # Running asterisk with user asterisk.
 USER asterisk
-CMD ['/usr/sbin/asterisk','-fvvvvv']
+CMD /usr/sbin/asterisk -fvvvvv
