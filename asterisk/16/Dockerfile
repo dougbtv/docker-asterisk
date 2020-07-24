@@ -10,6 +10,9 @@ RUN yum update -y \
             epel-release \
             git \
             kernel-headers \
+            patch \
+            libedit-devel \
+            file \
             gcc \
             gcc-c++ \
             cpp \
@@ -26,7 +29,7 @@ RUN yum update -y \
             net-snmp-devel \
             xinetd \
             tar \
-            jansson-devel \
+#            jansson-devel \
             make \
             bzip2 \
             pjproject-devel \
@@ -37,11 +40,12 @@ RUN yum update -y \
     && yum clean all \
     # Download asterisk.
     && cd /usr/src \
-    && git clone -b 14.3.0 --depth 1 https://github.com/asterisk/asterisk.git \
-    && cd asterisk \
+    && git clone -b certified/16.8 --depth 1 https://github.com/asterisk/asterisk.git \
+    && cd /usr/src/asterisk \
     # Configure
     && ./configure \
             --libdir=/usr/lib64 \
+            --with-jansson-bundled \
                         1> /dev/null \
     # Remove the native build option
     # from: https://wiki.asterisk.org/wiki/display/AST/Building+and+Installing+Asterisk
@@ -149,3 +153,6 @@ RUN yum update -y \
 # And run asterisk in the foreground.
 USER asterisk
 CMD /usr/sbin/asterisk -f
+
+## TODO: look what's wrong here: 'res_pjsip_registrar_expire' not found
+                                #'res_pjsip_transport_management' not found
