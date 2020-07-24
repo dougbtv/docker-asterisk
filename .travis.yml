@@ -116,25 +116,25 @@ script:
   # Asterisk 16 certified
   - echo "Asterisk 16 =================================================================== "
   - >
-  docker run
-  --name asterisk1
-  -h asterisk1
-  -p 5061:5060/udp
-  -p 10001:10001/udp
-  -v $(pwd)/test/pjsip.conf:/etc/asterisk/pjsip.conf
-  -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
-  -v $(pwd)/test/asterisk1.rtp.conf:/etc/asterisk/rtp.conf
-  -d -t dougbtv/asterisk16
+    docker run
+    --name asterisk1
+    -h asterisk1
+    -p 5061:5060/udp
+    -p 10001:10001/udp
+    -v $(pwd)/test/pjsip.conf:/etc/asterisk/pjsip.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
+    -v $(pwd)/test/asterisk1.rtp.conf:/etc/asterisk/rtp.conf
+    -d -t dougbtv/asterisk16
   - >
-  docker run
-  --name asterisk2
-  -h asterisk2
-  -p 5062:5060/udp
-  -p 10002:10002/udp
-  -v $(pwd)/test/pjsip.conf:/etc/asterisk/pjsip.conf
-  -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
-  -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
-  -d -t dougbtv/asterisk16
+    docker run
+    --name asterisk2
+    -h asterisk2
+    -p 5062:5060/udp
+    -p 10002:10002/udp
+    -v $(pwd)/test/pjsip.conf:/etc/asterisk/pjsip.conf
+    -v $(pwd)/test/extensions.conf:/etc/asterisk/extensions.conf
+    -v $(pwd)/test/asterisk2.rtp.conf:/etc/asterisk/rtp.conf
+    -d -t dougbtv/asterisk16
   - ./test/wait_for_asterisk.sh asterisk1
   - ./test/wait_for_asterisk.sh asterisk2
   - sleep 5
