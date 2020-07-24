@@ -109,10 +109,17 @@ script:
     -d -t dougbtv/asterisk14
   - ./test/wait_for_asterisk.sh asterisk1
   - ./test/wait_for_asterisk.sh asterisk2
-  - sleep 5
+  - sleep 10
+  - docker exec -it asterisk1 asterisk -rx 'module show'
+  - docker exec -it asterisk1 asterisk -rx 'cdr show status'
   - docker exec -it asterisk1 asterisk -rx 'channel originate PJSIP/333@asterisk2 application wait 5'
   - sleep 10
+  - docker exec -it asterisk1 asterisk -rx 'core show channels'
+  - docker exec -it asterisk2 asterisk -rx 'core show channels'
+  - docker exec -it asterisk2 cat /var/log/asterisk/cdr-csv/Master.csv
   - docker exec -it asterisk2 grep -Pi "333.+inbound.+ANSWERED" /var/log/asterisk/cdr-csv/Master.csv
+  - docker stop asterisk1 asterisk2
+  - docker rm asterisk1 asterisk2
   # Asterisk 16 certified
   - echo "Asterisk 16 =================================================================== "
   - >
@@ -137,7 +144,14 @@ script:
     -d -t dougbtv/asterisk16
   - ./test/wait_for_asterisk.sh asterisk1
   - ./test/wait_for_asterisk.sh asterisk2
-  - sleep 5
+  - sleep 10
+  - docker exec -it asterisk1 asterisk -rx 'module show'
+  - docker exec -it asterisk1 asterisk -rx 'cdr show status'
   - docker exec -it asterisk1 asterisk -rx 'channel originate PJSIP/333@asterisk2 application wait 5'
   - sleep 10
+  - docker exec -it asterisk1 asterisk -rx 'core show channels'
+  - docker exec -it asterisk2 asterisk -rx 'core show channels'
+  - docker exec -it asterisk2 cat /var/log/asterisk/cdr-csv/Master.csv
   - docker exec -it asterisk2 grep -Pi "333.+inbound.+ANSWERED" /var/log/asterisk/cdr-csv/Master.csv
+  - docker stop asterisk1 asterisk2
+  - docker rm asterisk1 asterisk2

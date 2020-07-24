@@ -153,3 +153,6 @@ RUN yum update -y \
 # And run asterisk in the foreground.
 USER asterisk
 CMD /usr/sbin/asterisk -f
+
+## TODO: look what's wrong here: 'res_pjsip_registrar_expire' not found
+                                #'res_pjsip_transport_management' not found
