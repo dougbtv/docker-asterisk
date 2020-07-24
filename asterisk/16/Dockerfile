@@ -53,7 +53,6 @@ RUN yum update -y \
     && menuselect/menuselect \
                   --disable BUILD_NATIVE \
                   --enable cdr_csv \
-                  # --enable chan_sip \
                   --enable res_snmp \
                   --enable res_http_websocket \
                   --enable res_hep_pjsip \
