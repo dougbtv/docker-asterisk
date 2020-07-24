@@ -6,7 +6,6 @@ services:
 before_script:
   - docker build --tag="dougbtv/asterisk"  .
   - docker build --tag="dougbtv/asterisk13"  ./asterisk/13/.
-  - docker build --tag="dougbtv/asterisk14"  ./asterisk/14/.
   - docker build --tag="dougbtv/asterisk16"  ./asterisk/16/.
   - >
     docker0ip=`ifconfig | grep -i -A1 docker0 | grep -i inet | awk '{print $2}' | sed -e "s/addr\://"`
