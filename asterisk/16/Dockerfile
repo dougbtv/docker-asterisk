@@ -10,6 +10,9 @@ RUN yum update -y \
             epel-release \
             git \
             kernel-headers \
+            patch \
+            libedit-devel \
+            file \
             gcc \
             gcc-c++ \
             cpp \
@@ -26,7 +29,7 @@ RUN yum update -y \
             net-snmp-devel \
             xinetd \
             tar \
-            jansson-devel \
+#            jansson-devel \
             make \
             bzip2 \
             pjproject-devel \
@@ -37,11 +40,12 @@ RUN yum update -y \
     && yum clean all \
     # Download asterisk.
     && cd /usr/src \
-    && git clone -b 14.3.0 --depth 1 https://github.com/asterisk/asterisk.git \
-    && cd asterisk \
+    && git clone -b certified/16.8 --depth 1 https://github.com/asterisk/asterisk.git \
+    && cd /usr/src/asterisk \
     # Configure
     && ./configure \
             --libdir=/usr/lib64 \
+            --with-jansson-bundled \
                         1> /dev/null \
     # Remove the native build option
     # from: https://wiki.asterisk.org/wiki/display/AST/Building+and+Installing+Asterisk
@@ -136,7 +140,7 @@ RUN yum update -y \
     && sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk \
     # This is weird huh? I'd shell into the container and get errors about en_US.UTF-8 file not found
     # found @ https://github.com/CentOS/sig-cloud-instance-images/issues/71
-    && localedef -i en_US -f UTF-8 en_US.UTF-8 \
+#    && localedef -i en_US -f UTF-8 en_US.UTF-8 \
     # Create and configure asterisk for running asterisk user.
     && useradd -m asterisk -s /sbin/nologin \
     && chown -R asterisk:asterisk /var/run/asterisk \

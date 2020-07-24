@@ -71,7 +71,7 @@ RUN yum update -y \
     # Continue with a standard make.
     && make -j$(nproc) 1> /dev/null \
     && make -j$(nproc) install 1> /dev/null \
-    && make samples 1> /dev/null \
+    && make -j$(nproc) samples 1> /dev/null \
     && make dist-clean \
     # Update max number of open files.
     && sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk \
