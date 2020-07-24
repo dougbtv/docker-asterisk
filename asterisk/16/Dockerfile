@@ -140,7 +140,7 @@ RUN yum update -y \
     && sed -i -e 's/# MAXFILES=/MAXFILES=/' /usr/sbin/safe_asterisk \
     # This is weird huh? I'd shell into the container and get errors about en_US.UTF-8 file not found
     # found @ https://github.com/CentOS/sig-cloud-instance-images/issues/71
-#    && localedef -i en_US -f UTF-8 en_US.UTF-8 \
+    && localedef -i en_US -f UTF-8 en_US.UTF-8 \
     # Create and configure asterisk for running asterisk user.
     && useradd -m asterisk -s /sbin/nologin \
     && chown -R asterisk:asterisk /var/run/asterisk \
