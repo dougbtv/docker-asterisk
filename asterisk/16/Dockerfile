@@ -29,7 +29,6 @@ RUN yum update -y \
             net-snmp-devel \
             xinetd \
             tar \
-#            jansson-devel \
             make \
             bzip2 \
             pjproject-devel \
@@ -147,7 +146,9 @@ RUN yum update -y \
                                   /var/lib/asterisk \
                                   /var/log/asterisk \
                                   /var/spool/asterisk \
-                                  /usr/lib64/asterisk/
+                                  /usr/lib64/asterisk/ \
+    && rm -rf /usr/src/* \
+    && rm -rf /tmp/*
 
 # And run asterisk in the foreground.
 USER asterisk
