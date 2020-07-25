@@ -7,7 +7,9 @@ ENV rebuild_date 2015-05-15
 RUN yum update -y \
     && yum install -y \
                 kernel-headers \
-                gcc gcc-c++ \
+                wget \
+                gcc \
+                gcc-c++ \
                 cpp \
                 ncurses \
                 ncurses-devel \

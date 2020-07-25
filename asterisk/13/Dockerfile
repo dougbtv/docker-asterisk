@@ -8,6 +8,7 @@ RUN yum update -y \
                 epel-release \
                 git \
                 kernel-headers \
+                wget \
                 gcc \
                 gcc-c++ \
                 cpp \

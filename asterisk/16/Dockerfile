@@ -13,6 +13,7 @@ RUN yum update -y \
             patch \
             libedit-devel \
             file \
+            wget \
             gcc \
             gcc-c++ \
             cpp \
